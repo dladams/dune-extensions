@@ -58,7 +58,8 @@ include(ArtDictionary)
 include(ArtMake)
 include(BuildPlugins)
 
-# source
+# sources
+add_subdirectory(DXUtil)
 add_subdirectory(DXGeometry)
 
 # tests
