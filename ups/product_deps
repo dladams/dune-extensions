@@ -1,0 +1,28 @@
+# The parent line must be the first non-comment line in the file
+# This line defines the product name and version
+parent	dune_extensions  v00_00_03
+defaultqual	e7
+#
+fcldir product_dir job
+#
+product         version
+dunetpc 	v04_20_00
+gcc		v4_9_2
+
+#cetbuildtools	v4_04_03	-	only_for_build
+cetbuildtools	v4_08_01	-	only_for_build
+end_product_list
+
+  
+# e6  - with gcc 4.9.1 and -std=c++1y
+qualifier	dunetpc 	gcc	notes
+e7:debug	e7:debug	-nq-
+e7:opt		e7:opt		-nq-
+e7:prof		e7:prof		-nq-
+end_qualifier_list
+
+# Preserve tabs and formatting in emacs and vi / vim:
+
+### Local Variables:
+### tab-width: 8
+### End:
