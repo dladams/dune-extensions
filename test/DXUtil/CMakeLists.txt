@@ -9,3 +9,11 @@ cet_test(test_reducedPDG SOURCES test_reducedPDG.cxx
   LIBRARIES DXUtil
 )
 
+cet_test(test_TpcTypes SOURCES test_TpcTypes.cxx
+  LIBRARIES DXUtil
+)
+
+cet_test(test_TpcSegment SOURCES test_TpcSegment.cxx
+  LIBRARIES DXUtil
+)
+
