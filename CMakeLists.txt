@@ -1,6 +1,12 @@
-# ======================================================================
-#  lbtupler main build file
+# DXUtil/CMakeLists.txt
 #
+# David Adams
+# September 2015
+#
+# CMake isntructions for the dune-extensions package.
+#
+# ======================================================================
+# Old build instructions:
 #  cd .../path/to/build/directory
 #  source .../path/to/lbtupler/ups/setup_for_development <-d|-p>
 #  cmake [-DCMAKE_INSTALL_PREFIX=/install/path]
@@ -11,7 +17,6 @@
 #  make install
 #  make package (builds distribution tarfile)
 # ======================================================================
-
 
 # use cmake 2.8 or later
 cmake_minimum_required (VERSION 2.8)
@@ -61,6 +66,7 @@ include(BuildPlugins)
 # sources
 add_subdirectory(DXUtil)
 add_subdirectory(DXGeometry)
+add_subdirectory(DXPerf)
 
 # tests
 add_subdirectory(test)
