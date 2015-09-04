@@ -100,10 +100,11 @@ GeoHelper::GeoHelper(std::string gname, bool useChannels, Status dbg)
     spar = "SortingParameters: {}  # to use default";
     fhicl::make_ParameterSet(spar, parset);
     shared_ptr<geo::ChannelMapAlg> pChannelMap;
-    if ( gname.find("dune") != string::npos ) {
-      pChannelMap.reset(new geo::ChannelMapAPAAlg(parset));
-    } else if ( gname.find("lbne") != string::npos ) {
+    if ( gname.find("dune35t") != string::npos ) {
+      // Valid for v3, v4 and v5 --see dune/Geometry/DUNEGeometryHelper_service
       pChannelMap.reset(new geo::ChannelMap35OptAlg(parset));
+    } else if ( gname.find("dune") != string::npos ) {
+      pChannelMap.reset(new geo::ChannelMapAPAAlg(parset));
     }
     if ( pChannelMap ) {
       pdetgeo->ApplyChannelMap(pChannelMap);

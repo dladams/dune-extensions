@@ -36,7 +36,7 @@ int main() {
 
   cout << myname << line << endl;
   cout << myname << "Local fill of signal map:" << endl;
-  GeoHelper gh("dune35t4apa_v4");
+  GeoHelper gh("dune35t4apa_v4", true);
   gh.print();
   assert(gh.geometry() != nullptr);
   TpcSignalMap sm1("sm1", &gh, false);

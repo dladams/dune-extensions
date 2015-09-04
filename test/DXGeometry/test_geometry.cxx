@@ -78,7 +78,7 @@ SurfaceY: 0
   fhicl::ParameterSet parset;
   fhicl::make_ParameterSet(spar, parset);
   // Create the LAr geometry.
-  GeoHelper gh(gname);
+  GeoHelper gh(gname, true);
   if ( dbg ) {
     gh.print();
     return 0;
