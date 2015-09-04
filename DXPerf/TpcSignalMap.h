@@ -91,6 +91,10 @@ public:
   // Dtor.
   virtual ~TpcSignalMap();
 
+  // Set/get the debug flag.
+  int setDbg(int dbg);
+  int dbg() const;
+  
   // Add a signal (energy deposit or ADC count) in a bin.
   // If itpc is valid, then the signal is assigned to that TPC if object is in the usetpc state.
   // Returns error (nonzero) if in usetpc state and itpc is not valid.
@@ -235,6 +239,7 @@ private:
   std::string m_name;             // Name.
   const GeoHelper* m_pgh;         // Geometry helper maps channels to ROPs.
   bool m_usetpc;                  // Are signals and hits indesced by TPC?
+  int m_dbg = 0;                  // Debug flag: nonzero to print messages.
   TpcTickChannelMap m_tpcticksig; // m_ticksig[itpc][chan][tick] is the signal for (itpc, chan, tick)
   TpcHitChannelMap m_tpchitsig;   // m_tpchitsig[chan][hit] is the hit for (chan, hit number)
   TickRange m_tickRange;          // Range of ticks covered by this signal map.

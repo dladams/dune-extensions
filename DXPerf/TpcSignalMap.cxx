@@ -33,14 +33,6 @@ typedef TpcSignalMap::IndexVector      IndexVector;
 typedef TpcSignalMap::IndexPairVector  IndexPairVector;
 
 //**********************************************************************
-// Local definitions.
-//**********************************************************************
-
-namespace {
-int dbg() { return 0; }
-}
-
-//**********************************************************************
 // Sub class methods.
 //**********************************************************************
 
@@ -103,38 +95,60 @@ TpcSignalMap::~TpcSignalMap() { }
 
 //**********************************************************************
 
+int TpcSignalMap::setDbg(int dbg) {
+  m_dbg = dbg;
+  return m_dbg;
+}
+
+//**********************************************************************
+
+int TpcSignalMap::dbg() const {
+  return m_dbg;
+}
+
+//**********************************************************************
+
 int TpcSignalMap::addSignal(Channel chan, Tick tick, Signal signal, Index itpcin) {
   const string myname = "TpcSignalMap::add: ";
   if ( dbg() ) std::cout << myname
-                         << "Channel " << chan << ", tick " << tick
-                         << " has signal " << signal << endl;
+                         << "Adding channel " << chan << ", tick " << tick
+                         << " with signal " << signal << endl;
   Index itpc = itpcin;
-  if ( usetpc() && itpc == badIndex() ) {
-    cout << myname << "ERROR: Ignoring request to add TPC signal with invalid TPC." << endl;
-    return 1;
+  if ( usetpc() ) {
+    if ( itpc == badIndex() ) {
+      cout << myname << "ERROR: Ignoring request to add TPC signal with invalid TPC." << endl;
+      return 1;
+    }
+    if ( dbg() ) std::cout << myname << "  Using TPC " << itpc << endl;
+  } else {
+    itpc = badIndex();
+    if ( dbg() ) std::cout << myname << "  Not using TPC " << endl;
   }
   // Ignore the TPC if object is not in the usetpc state.
-  if ( ! usetpc() ) itpc = badIndex();
   TickChannelMap& ticksigmap = m_tpcticksig[itpc];
   if ( ticksigmap.find(chan) == ticksigmap.end() ) ticksigmap[chan] = SignalTickMap();
   SignalTickMap& ticksig = ticksigmap[chan];
   if ( ticksig.find(tick) == ticksig.end() ) {
+    if ( dbg() ) std::cout << myname << "  Adding new tick" << endl;
     ticksig[tick] = signal;
     if ( m_pgh != nullptr ) {
       Index irop = m_pgh->channelRop(chan);
       if ( irop < m_ropnbin.size() ) {
         ++m_ropnbin[irop];
       } else {
-        cout << myname << "Channel " << chan << " does not have a ROP." << endl;
+        cout << myname << "  Channel " << chan << " does not have a ROP." << endl;
       }
     }
   } else {
+    if ( dbg() ) std::cout << myname << "  Updating existing tick" << endl;
     ticksig[tick] += signal;
   }
+  if ( dbg() ) std::cout << myname << "  Map entry count: " << ticksig.size() << endl;
   Tick& tick1 = m_tickRange.first();
   Tick& tick2 = m_tickRange.last();
   if ( tick < tick1 ) tick1 = tick;
   if ( tick > tick2 ) tick2 = tick;
+  if ( dbg() ) std::cout << myname << "  Tick range: " << "[" << tick1 << ", " << tick2 << "]" << endl;
   return 0;
 }
 

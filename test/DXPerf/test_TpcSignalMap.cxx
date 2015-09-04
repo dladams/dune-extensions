@@ -36,14 +36,17 @@ int main() {
 
   cout << myname << line << endl;
   cout << myname << "Local fill of signal map:" << endl;
-  GeoHelper gh("dune35t4apa_v4", true);
+  GeoHelper gh("dune35t4apa_v5", true);
   gh.print();
   assert(gh.geometry() != nullptr);
   TpcSignalMap sm1("sm1", &gh, false);
+  sm1.setDbg(1);
   assert(sm1.check() == 0);
-  assert( sm1.addSignal(11, 101, 41.0) == 0);
+  assert( sm1.addSignal(1500, 201, 41.0) == 0);
+  assert( sm1.addSignal(1500, 202, 81.0) == 0);
   sm1.print(cout, 3, myname);
   assert(sm1.channelCount() == 1);
+  cout << myname << "Tick count: " << sm1.tickCount() << endl;
   assert(sm1.tickCount() == 1);
   assert(sm1.binCount() == 1);
 
