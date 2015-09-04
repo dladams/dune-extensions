@@ -21,6 +21,7 @@ using std::string;
 using std::cout;
 using std::endl;
 using std::ostringstream;
+using std::istringstream;
 using std::vector;
 using std::shared_ptr;
 using geo::TPCID;
@@ -46,8 +47,9 @@ bool inrange(double x, double x1, double x2) {
 int main(int narg, char** argv) {
   //string geopath = "services.Geometry";
   const string myname = "test_geometry: ";
-  vector<string> gnames = {"lbne10kt", "lbne35t", "dune35t4apa_v4", "dune10kt_v1", "lbne35t4apa_v5"};
+  vector<string> gnames = {"lbne10kt", "lbne35t", "dune35t4apa_v4", "dune10kt_v1", "dune35t4apa_v5"};
   string gname = gnames[3];
+  bool useChan = true;
   if ( narg > 1 ) {
     gname = argv[1];
   }
@@ -55,8 +57,25 @@ int main(int narg, char** argv) {
     cout << "Usage: " << argv[0] << " [GEONAME]" << endl;
     return 0;
   }
+  if ( narg > 2 ) {
+    string sarg = argv[2];
+    useChan = sarg=="true" || sarg=="1";
+  }
+  int print = 0;
+  if ( narg > 3 ) {
+    istringstream ssarg(argv[3]);
+    ssarg >> print;
+  }
   int dbg = 0;
-  if ( narg > 2 ) dbg = 1;
+  if ( narg > 4 ) {
+    istringstream ssarg(argv[4]);
+    ssarg >> dbg;
+    cout << "XXX: " << argv[4] << " " << dbg << endl;
+  }
+  cout << myname << "Detector name: " << gname << endl;
+  cout << myname << " Use channels: " << useChan << endl;
+  cout << myname << "        Print: " << print << endl;
+  cout << myname << "        Debug: " << dbg << endl;
   // (xref,yref,zref) is a point inside a TPC
   vector<double> xref = {-500.0, 0.0, 0.0, -500.0, 0.0};
   vector<double> yref = {   0.0, 0.0, 0.0,    0.0, 0.0};
@@ -78,8 +97,8 @@ SurfaceY: 0
   fhicl::ParameterSet parset;
   fhicl::make_ParameterSet(spar, parset);
   // Create the LAr geometry.
-  GeoHelper gh(gname, true);
-  if ( dbg ) {
+  GeoHelper gh(gname, useChan, dbg);
+  if ( print ) {
     gh.print();
     return 0;
   }
@@ -113,6 +132,9 @@ SurfaceY: 0
   cout << myname << "   Reference cry: " << tid.Cryostat << endl;
   cout << myname << "   Reference TPC: " << tid.TPC << endl;
   cout << myname << "      # channels: " << nchan << endl;
+  cout << myname << "Displaying channel map info" << endl;
+  cout << myname << "           # ROP: " << gh.nrop() << endl;
+  cout << myname << "           # APA: " << gh.napa() << endl;
   cout << myname << "Checking basic geometry info" << endl;
   assert(detname==gname);
   assert(ncry==ncryExp[idet]);

@@ -48,23 +48,9 @@ Index GeoHelper::badIndex() {
 
 GeoHelper::GeoHelper(const geo::GeometryCore* pgeo, bool useChannels, Status dbg)
 : m_pgeo(pgeo), m_haveChannelMap(useChannels), m_dbg(dbg), m_ntpc(0), m_ntpp(0), m_napa(0), m_nrop(0) {
-  // Find the total # TPCs.
+  // Fill TPC info.
   ntpc();
-  // Fill the TPC info w/o ROP or APA.
-  unsigned int iglotpc = 0;
-  for ( Index icry=0; icry<ncryostat(); ++icry ) {
-    for ( Index icrytpc=0; icrytpc<m_pgeo->NTPC(icry); ++icrytpc ) {
-      m_ntpp += m_pgeo->Nplanes(icrytpc, icry);
-      m_tpccry.push_back(icry);
-      ostringstream ssname;
-      ssname << "TPC";
-      if ( m_ntpc > 99 && iglotpc < 100 ) ssname << "0";
-      if ( m_ntpc > 9 && iglotpc < 10 ) ssname << "0";
-      ssname << iglotpc;
-      m_tpcname.push_back(ssname.str());
-      ++iglotpc;
-    }
-  }
+  // Fill ROP and APA info.
   if ( useChannels) fillStandardApaMapping();
 }
 
@@ -97,7 +83,11 @@ GeoHelper::GeoHelper(std::string gname, bool useChannels, Status dbg)
   // Add the geometry channel map.
   if ( useChannels ) {
     cout << myname << "Adding channel map." << endl;
-    spar = "SortingParameters: {}  # to use default";
+    //spar = "SortingParameters: {}  # to use default";
+    // Taken from dunetpc/dune/Geometry/geometry_dune.fcl (v04_21_01)
+    //spar = "SortingParameters: { DetectorVersion: \"" + gname + "\"}";
+    spar = "DetectorVersion: \"" + gname + "\"";
+    cout << myname << "fcl: " << spar << endl;
     fhicl::make_ParameterSet(spar, parset);
     shared_ptr<geo::ChannelMapAlg> pChannelMap;
     if ( gname.find("dune35t") != string::npos ) {
@@ -109,6 +99,7 @@ GeoHelper::GeoHelper(std::string gname, bool useChannels, Status dbg)
     if ( pChannelMap ) {
       pdetgeo->ApplyChannelMap(pChannelMap);
       m_haveChannelMap = true;
+      fillStandardApaMapping();
     } else {
       cout << myname << "WARNING: Unknown geometry: " << gname
            << ". Channel map is not loaded." << endl;
@@ -149,8 +140,29 @@ unsigned int GeoHelper::ncryostat() const {
 unsigned int GeoHelper::ntpc() {
   if ( m_ntpc == 0 ) {
     m_ntpc = 0;
+    m_ntpp = 0;
+    // Get total TPC count.
+    int ntottpc = 0;
+    for ( Index icry=0; icry<ncryostat(); ++icry ) {
+      ntottpc += m_pgeo->NTPC(icry);
+    }
     if ( m_pgeo != nullptr ) {
-      for ( Index icry=0; icry<ncryostat(); ++icry ) m_ntpc += m_pgeo->NTPC(icry);
+      for ( Index icry=0; icry<ncryostat(); ++icry ) {
+        unsigned int ncrytpc = m_pgeo->NTPC(icry);
+        for ( unsigned int icrytpc=0; icrytpc<ncrytpc; ++icrytpc ) {
+          ostringstream ssname;
+          ssname << "TPC";
+          if ( ntottpc > 999 && m_ntpc < 1000 ) ssname << "0";
+          if ( ntottpc > 99 && m_ntpc < 100 ) ssname << "0";
+          if ( ntottpc > 9 && m_ntpc < 10 ) ssname << "0";
+          ssname << m_ntpc;
+          m_tpcname.push_back(ssname.str());
+          m_tpccry.push_back(icry);
+          m_tpcapa.push_back(badIndex());
+          m_ntpp += m_pgeo->Nplanes(icrytpc, icry);
+          ++m_ntpc;
+        }
+      }  // end loop over cryostats
     }
   }
   return m_ntpc;
@@ -496,7 +508,7 @@ Status GeoHelper::fillStandardApaMapping() {
         cout << myname << "WARNING: Cryostat " << icry << ", TPC " << icrytpc << " has no planes." << endl;
       }
       int itdcrop = 0;   // # readouts for this TDC
-      m_tpcapa.push_back(iapa);
+      m_tpcapa[itpc] = iapa;
       // Loop over planes in the TPC.
       for ( int ipla=0; ipla<nplane; ++ipla ) {
         if ( m_dbg > 1 ) cout << myname << "Begin TPC plane " << ipla << endl;
