@@ -1,0 +1,67 @@
+#!/bin/sh
+
+SAMPLES="prodsingle_dune35t prodsingle_dunefd"
+
+if [ -z "$1" -o "$1" = "-h" ]; then
+  echo Usage: $0 SAMPLE NEVT NSKIP DBG
+  echo "Known samples:"
+  for SAMPLE in $SAMPLES; do echo "  $SAMPLE"; done
+  echo "DBG = off (default), gdb or fcl"
+  exit 0
+fi
+
+SAMPLE=
+if [ -n "$1" ]; then SAMPLE=$1; fi
+NEVT=10
+if [ -n "$2" ]; then NEVT=$2; fi
+NSKIP=0
+if [ -n "$3" ]; then NSKIP=$3; fi
+DBG=off
+if [ -n "$4" ]; then DBG=$4; fi
+
+NEED_DATA=
+
+if [ -n "$NEED_DATA" ]; then
+  # Location for data files.
+  if [ -z "$DUNEDEV_DATADIR" ]; then
+    DUNEDEV_DATADIR=/lbne/app/users/dladams/data
+    if [ `hostname` = atlassw9.phy.bnl.gov ]; then
+      DUNEDEV_DATADIR=/home/dladams/dune/data
+    fi
+  fi
+  
+  if [ ! -w $DUNEDEV_DATADIR ]; then
+    echo Data directory is not writeable: $DUNEDEV_DATADIR
+    echo Fix it or set DUNEDEV_DATADIR
+    exit 1
+  fi
+fi
+
+FCLFILE=$SAMPLE.fcl
+INFILE=
+ARGS="-n $NEVT --nskip $NSKIP -c $FCLFILE $INFILE"
+echo "ARGS = $ARGS"
+
+unset ART_DEBUG_CONFIG
+if [ $DBG = gdb -o $DBG = d ]; then
+  EXE=`which lar`
+  echo $EXE --arg "$ARGS"
+  echo "gdb --arg lar $ARGS"
+  gdb --arg lar $ARGS
+else if [ $DBG = off ]; then
+  LOG=run_$SAMPLE.log
+  lar $ARGS | tee $LOG
+  echo Output is in $LOG
+else if [ $DBG = fcl -o $DBG = f ]; then
+  export ART_DEBUG_CONFIG=1
+  LOG=fcl_$SAMPLE.log
+  lar $ARGS 2>&1 | tee $LOG
+  unset ART_DEBUG_CONFIG
+  echo Output is in $LOG
+else
+  echo "Invalid final parameter: $DBG"
+  echo Allowed values:
+  echo "  off (default) - Run normally."
+  echo "  gdb, d - Run with gdb"
+  echo "  fcl, f - Display FCL parameters"
+fi; fi; fi
