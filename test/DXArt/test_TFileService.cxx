@@ -3,7 +3,7 @@
 // David Adams
 // September 2015
 //
-// This test deomonstrates how to configure and use the art TFileService
+// This test demonstrates how to configure and use the art TFileService
 // outside the art framework.
 
 #include "art/Framework/Services/Optional/TFileService.h"
@@ -53,7 +53,7 @@ int test_TFileService(string ofilename) {
   cout << line << endl;
   cout << "Configure TFile service." << endl;
   {
-    string scfg = "fileName: \"" + ofilename + "\" service_type: \"TFileService\"";
+    string scfg = "service_type: \"TFileService\" fileName: \"" + ofilename + "\"";
     string sscfg = "TFileService: { " + scfg + " }";
     cout << sscfg << endl;
     scfgServices += sscfg;
@@ -92,7 +92,7 @@ int test_TFileService(string ofilename) {
   cout << "Check TriggerNameService is accessible" << endl;
   sr.get<TriggerNamesService>();
   cout << "Check TFileService is accessible" << endl;
-  sr.get<TFileService>();   // This raise an exception!
+  sr.get<TFileService>();
 
   cout << line << endl;
   cout << "Get TFile service." << endl;

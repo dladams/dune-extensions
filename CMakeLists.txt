@@ -65,6 +65,7 @@ include(BuildPlugins)
 
 # sources
 add_subdirectory(DXUtil)
+add_subdirectory(DXArt)
 add_subdirectory(DXGeometry)
 add_subdirectory(DXPerf)
 

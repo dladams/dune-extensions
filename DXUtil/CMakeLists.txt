@@ -7,8 +7,8 @@
 # utility functions and classes.
 
 art_make(BASENAME_ONLY
-         MODULE_LIBRARIES
-           DXUtil
+  LIB_LIBRARIES
+    boost_system
 )
 
 install_headers()
