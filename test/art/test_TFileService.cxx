@@ -1,6 +1,11 @@
 // test_TFileService.cxx
 
-#include "art/Framework/Services/System/TriggerNamesService.h"
+// David Adams
+// September 2015
+//
+// This test deomonstrates how to configure and use the art TFileService
+// outside the art framework.
+
 #include "art/Framework/Services/Optional/TFileService.h"
 
 #include <string>
@@ -12,6 +17,7 @@
 #include "art/Framework/Services/Registry/ServiceRegistry.h"
 #include "art/Framework/EventProcessor/ServiceDirector.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
+#include "art/Framework/Services/System/TriggerNamesService.h"
 
 using std::string;
 using std::cout;
@@ -28,7 +34,7 @@ using art::TriggerNamesService;
 using art::TFileService;
 using art::TFileDirectory;
 
-int test_TFileService() {
+int test_TFileService(string ofilename) {
   const string myname = "test_TFileService: ";
   cout << myname << "Starting test" << endl;
 #ifdef NDEBUG
@@ -47,7 +53,7 @@ int test_TFileService() {
   cout << line << endl;
   cout << "Configure TFile service." << endl;
   {
-    string scfg = "fileName: \"test.root\" service_type: \"TFileService\"";
+    string scfg = "fileName: \"" + ofilename + "\" service_type: \"TFileService\"";
     string sscfg = "TFileService: { " + scfg + " }";
     cout << sscfg << endl;
     scfgServices += sscfg;
@@ -115,20 +121,17 @@ int test_TFileService() {
     if ( val < 10.0 ) ph1->Fill(val);
     else ph2->Fill(val);
   }
-
-  cout << line << endl;
-  cout << "Done." << endl;
-  cout << "Output file: " << pfs->file().GetName() << endl;
   return 0;
 }
 
 int main() {
   string line = "-----------------------------";
+  string ofilename = "test.root";
   system("rm -f test.root");
   system("ls -ls");
-  TFile* pf1 = TFile::Open("test.root", "READ");
+  TFile* pf1 = TFile::Open(ofilename.c_str(), "READ");
   assert( pf1 == nullptr );
-  int rstat = test_TFileService();
+  int rstat = test_TFileService("test.root");
   assert( rstat == 0 );
   system("ls -ls");
   cout << line << endl;
@@ -142,19 +145,24 @@ int main() {
   assert( po1 != nullptr );
   assert( ph1 != nullptr );
   assert( po2 == nullptr );
+  cout << line << endl;
   cout << "Changing to bad directory" << endl;
-  assert( ! pf2->cd("nodir") );
+  TDirectory* pd2 = pf2->GetDirectory("nodir");
+  assert( pd2 == nullptr );
   cout << line << endl;
   cout << "Changing file directory" << endl;
-  assert( pf2->cd("mydir") );
-  pf2->ls();
-  pf2->pwd();
-  po1 = pf2->Get("hist1");
-  po2 = pf2->Get("hist2");
+  pd2 = pf2->GetDirectory("mydir");
+  assert( pd2 != nullptr );
+  pd2->ls();
+  po1 = pd2->Get("hist1");
+  po2 = pd2->Get("hist2");
   TH1F* ph2 = dynamic_cast<TH1F*>(po2);
   assert( po2 != nullptr );
   assert( ph2 != nullptr );
   assert( po1 == nullptr );
+  cout << line << endl;
+  cout << "Done." << endl;
+  cout << "Output file: " << ofilename << endl;
   return rstat;
 }
 
