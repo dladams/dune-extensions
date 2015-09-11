@@ -9,19 +9,7 @@
 #include "art/Framework/Services/Registry/ServiceRegistry.h"
 #include "art/Framework/Services/Optional/RandomNumberGenerator.h"
 #include "art/Framework/Services/Optional/TFileService.h"
-
-#undef LOADHERE
-#ifdef LOADHERE
-#include "fhiclcpp/make_ParameterSet.h"
-#include "art/Framework/Services/Registry/ActivityRegistry.h"
-#include "art/Framework/EventProcessor/ServiceDirector.h"
-using fhicl::ParameterSet;
-using fhicl::make_ParameterSet;
-using art::ServiceToken;
-using art::ActivityRegistry;
-using art::ServiceDirector;
-#endif
-
+#include "art/Framework/Services/System/TriggerNamesService.h"
 
 using std::string;
 using std::cout;
@@ -70,18 +58,8 @@ int test_ArtServiceHelper() {
 
   cout << line << endl;
   cout << myname << "Load the services." << endl;
-#ifdef LOADHERE
-  ParameterSet cfgServices;
-  make_ParameterSet(ash.fullServiceConfiguration(), cfgServices);
-  ServiceToken serviceToken;
-  ActivityRegistry ar;
-  ServiceDirector director(cfgServices, ar, serviceToken);
-  // Make the services available
-  static ServiceRegistry::Operate operate(serviceToken);
-#else
   assert( ash.loadServices() == 1 );
   ash.print();
-#endif
 
   cout << line << endl;
   cout << "Fetch service registry." << endl;
@@ -97,14 +75,14 @@ int test_ArtServiceHelper() {
   assert(sr.isAvailable<art::TFileService>());
 
   cout << line << endl;
-  cout << "Check RandomNumberGenerator is acessible." << endl;
+  cout << "Check RandomNumberGenerator is accessible." << endl;
   sr.get<art::RandomNumberGenerator>();
-  //cout << line << endl;
-  //cout << "Check TriggerNameService is accessible" << endl;
-  //sr.get<TriggerNamesService>();
   cout << line << endl;
   cout << "Check TFileService is accessible" << endl;
   sr.get<art::TFileService>();   // This raise an exception!
+  cout << line << endl;
+  cout << "Check TriggerNameService is accessible" << endl;
+  sr.get<art::TriggerNamesService>();
 
   cout << line << endl;
   cout << myname << "Done." << endl;
