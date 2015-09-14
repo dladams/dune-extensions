@@ -11,4 +11,10 @@ cet_test(test_TFileService SOURCES test_TFileService.cxx
     art_Framework_Services_Optional_TFileService_service
 )
 
+cet_test(test_Geometry SOURCES test_Geometry.cxx
+  LIBRARIES
+    DXArt
+    Geometry
+)
+
 install_source()
