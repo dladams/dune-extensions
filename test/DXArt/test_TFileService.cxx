@@ -12,25 +12,14 @@
 #include <iostream>
 #include "TFile.h"
 #include "TH1F.h"
-#include "fhiclcpp/make_ParameterSet.h"
-#include "art/Framework/Services/Registry/ActivityRegistry.h"
-#include "art/Framework/Services/Registry/ServiceRegistry.h"
-#include "art/Framework/EventProcessor/ServiceDirector.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "art/Framework/Services/System/TriggerNamesService.h"
+#include "DXArt/ArtServiceHelper.h"
 
 using std::string;
 using std::cout;
 using std::endl;
 using std::vector;
 using std::unique_ptr;
-using fhicl::ParameterSet;
-using fhicl::make_ParameterSet;
-using art::ActivityRegistry;
-using art::ServiceRegistry;
-using art::ServiceDirector;
-using art::ServiceToken;
-using art::TriggerNamesService;
 using art::TFileService;
 using art::TFileDirectory;
 
@@ -44,60 +33,21 @@ int test_TFileService(string ofilename) {
   string line = "-----------------------------";
 
   cout << line << endl;
-  cout << "Create activity registry." << endl;
-  ActivityRegistry ar;
-
-  // Create vector of service configurations.
-  string scfgServices;
+  cout << "Fetch art service helper." << endl;
+  ArtServiceHelper& ash = ArtServiceHelper::instance();
 
   cout << line << endl;
-  cout << "Configure TFile service." << endl;
-  {
-    string scfg = "service_type: \"TFileService\" fileName: \"" + ofilename + "\"";
-    string sscfg = "TFileService: { " + scfg + " }";
-    cout << sscfg << endl;
-    scfgServices += sscfg;
-  }
-
-  // Use ServiceDirector to create and register user services.
-  // See art/Framework/EventProcessor/EventProcessor.cc
-  cout << line << endl;
-  cout << "Create service director." << endl;
-  ParameterSet cfgServices;
-  make_ParameterSet(scfgServices, cfgServices);
-  ServiceToken serviceToken;
-  ServiceDirector director(cfgServices, ar, serviceToken);
-
-  // Add the TriggerNames service.
-  // TFileService needs this to find the process name.
-  cout << "Configure and register the trigger names service." << endl;
-  ParameterSet cfgTriggerNamesService;
-  string scfgTriggerNamesService = "process_name: \"myproc\"";
-  cout << scfgTriggerNamesService << endl;
-  make_ParameterSet(scfgTriggerNamesService, cfgTriggerNamesService);
-  vector<string> tns;
-  unique_ptr<TriggerNamesService> ptns(new TriggerNamesService(cfgTriggerNamesService, tns));
-  director.addSystemService(std::move(ptns));
-
-  // Make the services available
-  ServiceRegistry::Operate operate(serviceToken);
+  cout << myname << "Add and fetch TFileService." << endl;
+  string scfg = "TFileService: { fileName: \"test.root\" service_type: \"TFileService\"}";
+  assert( ash.addService("TFileService", scfg) == 0 );
 
   cout << line << endl;
-  ServiceRegistry& sr = ServiceRegistry::instance();
-  cout << "Check TriggerNamesService is available." << endl;
-  assert(sr.isAvailable<TriggerNamesService>());
-  cout << "Check TFileService is available." << endl;
-  assert(sr.isAvailable<TFileService>());
-
-  cout << "Check TriggerNameService is accessible" << endl;
-  sr.get<TriggerNamesService>();
-  cout << "Check TFileService is accessible" << endl;
-  sr.get<TFileService>();
+  cout << myname << "Load the services." << endl;
+  assert( ash.loadServices() == 1 );
 
   cout << line << endl;
   cout << "Get TFile service." << endl;
   art::ServiceHandle<art::TFileService> pfs;
-  //TFileService& fs = sr.get<TFileService>();
   cout << "Check if TFile is open." << endl;
   assert(pfs->file().IsOpen());
   cout << "Retrieve TFile name." << endl;
@@ -133,6 +83,10 @@ int main() {
   assert( pf1 == nullptr );
   int rstat = test_TFileService("test.root");
   assert( rstat == 0 );
+  system("ls -ls");
+  cout << line << endl;
+  cout << "Close services." << endl;
+  ArtServiceHelper::close();
   system("ls -ls");
   cout << line << endl;
   cout << "Checking output root file" << endl;

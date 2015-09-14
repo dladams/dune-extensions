@@ -35,7 +35,7 @@ int test_ArtServiceHelper() {
 
   cout << line << endl;
   cout << myname << "Add TFileService" << endl;
-  scfg = "TFileService: { fileName: \"single35t_hist.root\" service_type: \"TFileService\"}";
+  scfg = "TFileService: { fileName: \"mytest.root\" service_type: \"TFileService\"}";
   assert( ash.addService("TFileService", scfg) == 0 );
   ash.print();
 
@@ -65,8 +65,9 @@ int test_ArtServiceHelper() {
   cout << "Fetch service registry." << endl;
   ServiceRegistry& sr = ServiceRegistry::instance();
   cout << myname << "Service registry address:  " << hex << &sr << endl;
-  //cout << "Check TriggerNamesService is available." << endl;
-  //assert(sr.isAvailable<TriggerNamesService>());
+  cout << line << endl;
+  cout << "Check TriggerNamesService is available." << endl;
+  assert(sr.isAvailable<art::TriggerNamesService>());
   cout << line << endl;
   cout << "Check RandomNumberGenerator is available." << endl;
   assert(sr.isAvailable<art::RandomNumberGenerator>());
