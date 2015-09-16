@@ -35,4 +35,10 @@ cet_test(test_DetectorProperties SOURCES test_DetectorProperties.cxx
     DetectorProperties_service
 )
 
+cet_test(test_LArProperties SOURCES test_LArProperties.cxx
+  LIBRARIES
+    DXArt
+    LArProperties_service
+)
+
 install_source()
