@@ -17,4 +17,10 @@ cet_test(test_Geometry SOURCES test_Geometry.cxx
     Geometry
 )
 
+cet_test(test_RandomNumberGenerator SOURCES test_RandomNumberGenerator.cxx
+  LIBRARIES
+    DXArt
+    Geometry
+)
+
 install_source()

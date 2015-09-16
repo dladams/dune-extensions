@@ -44,7 +44,7 @@ public:
   // Returns 0 for success.
   int addService(std::string name, std::string scfg);
 
-  // Load the services, i.e. make them avialble for use via art::ServiceHandle.
+  // Load the services, i.e. make them available for use via art::ServiceHandle.
   // Returns the status: 1 for success, 2 for failure.
   int loadServices();
 
@@ -82,6 +82,7 @@ private:
   std::string m_scfgs;
   int m_load = 0;
   bool m_needTriggerNamesService = false;
+  bool m_needCurrentModuleService = false;
   art::ServiceRegistry::Operate* m_poperate;
 
 };

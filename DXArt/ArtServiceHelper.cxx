@@ -10,6 +10,7 @@
 #include "art/Framework/Services/Registry/ServiceToken.h"
 #include "art/Framework/EventProcessor/ServiceDirector.h"
 #include "art/Framework/Services/System/TriggerNamesService.h"
+#include "art/Framework/Services/System/CurrentModule.h"
 
 using std::string;
 using std::ostream;
@@ -25,6 +26,7 @@ using art::ServiceDirector;
 using art::ActivityRegistry;
 using art::ServiceRegistry;
 using art::TriggerNamesService;
+using art::CurrentModule;
 
 typedef ArtServiceHelper::NameList NameList;
 typedef ArtServiceHelper::ConfigurationMap ConfigurationMap;
@@ -82,11 +84,16 @@ int ArtServiceHelper::addService(string name, string scfg) {
     cout << myname << "ERROR: TriggerNamesService is configured automatically." << endl;
     return 6;
   }
+  if ( name == "CurrentModule" ) {
+    cout << myname << "ERROR: CurrentModule service is configured automatically." << endl;
+    return 7;
+  }
   m_names.push_back(name);
   m_cfgmap[name] = scfg;
   if ( m_scfgs.size() ) m_scfgs += " ";
   m_scfgs += scfg;
   if ( name == "TFileService" ) m_needTriggerNamesService = true;
+  if ( name == "RandomNumberGenerator" ) m_needCurrentModuleService = true;
   return 0;
 }
 
@@ -117,8 +124,12 @@ int ArtServiceHelper::loadServices() {
     string scfgTriggerNamesService = "process_name: \"myproc\"";
     make_ParameterSet(scfgTriggerNamesService, cfgTriggerNamesService);
     std::vector<string> tns;
-    unique_ptr<TriggerNamesService> ptns(new TriggerNamesService(cfgTriggerNamesService, tns));
-    director.addSystemService(std::move(ptns));
+    unique_ptr<TriggerNamesService> psrv(new TriggerNamesService(cfgTriggerNamesService, tns));
+    director.addSystemService(std::move(psrv));
+  }
+  if ( m_needCurrentModuleService ) {
+    unique_ptr<CurrentModule> psrv(new CurrentModule(ar()));
+    director.addSystemService(std::move(psrv));
   }
   // Make the services available
   // We need to keep this object around if we want to use the services.

@@ -34,11 +34,11 @@ int test_Geometry(string gname) {
   string line = "-----------------------------";
   string scfg;
 
-  cout << line << endl;
-  cout << "Fetch art service helper." << endl;
+  cout << myname << line << endl;
+  cout << myname << "Fetch art service helper." << endl;
   ArtServiceHelper& ash = ArtServiceHelper::instance();
 
-  cout << line << endl;
+  cout << myname << line << endl;
   cout << myname << "Add the Geometry service." << endl;
   scfg = "Geometry: { DisableWiresInG4: true GDML: \"dune35t4apa_v5.gdml\" Name: \"" + gname +
          "\" ROOT: \"" + gname + "\" SortingParameters: { DetectorVersion: \"" + gname +
@@ -46,23 +46,23 @@ int test_Geometry(string gname) {
   cout << myname << "Configuration: " << scfg << endl;
   assert( ash.addService("Geometry", scfg) == 0 );
 
-  cout << line << endl;
+  cout << myname << line << endl;
   cout << myname << "Add the DUNE geometry helper service (required to load DUNE geometry)." << endl;
   scfg = "ExptGeoHelperInterface: { service_provider: \"DUNEGeometryHelper\" service_type: \"ExptGeoHelperInterface\"}";
   cout << myname << "Configuration: " << scfg << endl;
   assert( ash.addService("DUNEGeometryHelper", scfg) == 0 );
 
-  cout << line << endl;
+  cout << myname << line << endl;
   cout << myname << "Load the services." << endl;
   assert( ash.loadServices() == 1 );
   ash.print();
 
-  cout << line << endl;
-  cout << "Get Geometry service." << endl;
+  cout << myname << line << endl;
+  cout << myname << "Get Geometry service." << endl;
   art::ServiceHandle<geo::Geometry> pgeo;
   cout << myname << "Geometry name: " << pgeo->DetectorName() << endl;
 
-  cout << line << endl;
+  cout << myname << line << endl;
   return 0;
 }
 
