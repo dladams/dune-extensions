@@ -23,4 +23,16 @@ cet_test(test_RandomNumberGenerator SOURCES test_RandomNumberGenerator.cxx
     Geometry
 )
 
+cet_test(test_TimeService SOURCES test_TimeService.cxx
+  LIBRARIES
+    DXArt
+    TimeService_service
+)
+
+cet_test(test_DetectorProperties SOURCES test_DetectorProperties.cxx
+  LIBRARIES
+    DXArt
+    DetectorProperties_service
+)
+
 install_source()

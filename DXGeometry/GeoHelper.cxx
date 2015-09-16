@@ -245,7 +245,7 @@ Index GeoHelper::rop(geo::PlaneID pid) const {
 //**********************************************************************
 
 PlanePositionVector GeoHelper::planePositions(const double postim[]) const {
-  const string myname = "LbTupler::planePositions: ";
+  const string myname = "GeoHelper::planePositions: ";
   PlanePositionVector pps;
   if ( geometry() == nullptr ) {
     cout << myname << "ERROR: Geometry is null." << endl;
