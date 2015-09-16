@@ -56,6 +56,7 @@ ArtServiceHelper& ArtServiceHelper::instance() {
 //**********************************************************************
 
 void ArtServiceHelper::close() {
+  if ( instance().m_load == 3 ) return;
   delete instance().m_poperate;               // Close existing services and registry.
   instance().m_poperate = nullptr;            // Reset the old operatre.
   instancePtr().reset(new ArtServiceHelper);  // Delete the old service helper.

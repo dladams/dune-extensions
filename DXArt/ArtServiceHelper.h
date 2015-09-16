@@ -28,9 +28,11 @@ public:
   // Return the one instance of this (singleton) class.
   static ArtServiceHelper& instance();
 
-  // Delete the one instance of this class.
+  // Close the one instance of this class.
   // Services are not longer available.
   // The current instance of this class and all services are deleted.
+  // For TFileService, the files are written and renamed.
+  // The load status is set to 3.
   static void close();
 
   // Dtor.

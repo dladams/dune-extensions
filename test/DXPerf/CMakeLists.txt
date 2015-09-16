@@ -3,5 +3,5 @@ cet_test(test_TpcSignalMap SOURCES test_TpcSignalMap.cxx
 )
 
 cet_test(test_MCTrajectoryFollower SOURCES test_MCTrajectoryFollower.cxx
-  LIBRARIES DXPerf
+  LIBRARIES DXPerf DXArt
 )
