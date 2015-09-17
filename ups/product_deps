@@ -6,7 +6,8 @@ defaultqual	e7
 fcldir product_dir job
 #
 product         version
-dunetpc 	v04_21_01
+dunetpc 	v04_22_00
+art_extensions  v00_00_01
 gcc		v4_9_2
 
 #cetbuildtools	v4_04_03	-	only_for_build

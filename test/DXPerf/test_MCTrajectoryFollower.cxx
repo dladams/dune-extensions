@@ -1,4 +1,4 @@
-// test_test_MCTrajectoryFollower.cxx
+// test_MCTrajectoryFollower.cxx
 
 // David Adams
 // September 2015
@@ -11,7 +11,7 @@
 #include <iostream>
 #include <cassert>
 #include "DXGeometry/GeoHelper.h"
-#include "DXArt/ArtServiceHelper.h"
+#include "AXService/ArtServiceHelper.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "TFile.h"
