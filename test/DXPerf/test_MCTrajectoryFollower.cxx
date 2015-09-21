@@ -36,7 +36,7 @@ int main() {
   cout << myname << "Retrieve service helper.";
   ArtServiceHelper& ash = ArtServiceHelper::instance();
   cout << myname << "Add TFileService" << endl;
-  string scfg = "TFileService: { fileName: \"mctraj_test.root\" service_type: \"TFileService\"}";
+  string scfg = "fileName: \"mctraj_test.root\"";
   assert( ash.addService("TFileService", scfg) == 0 );
   cout << myname << "Load services." << endl;
   assert( ash.loadServices() == 1 );
