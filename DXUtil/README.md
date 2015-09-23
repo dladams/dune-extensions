@@ -1,6 +1,6 @@
 # dune_extensions/DXUtil
 
-Utilitiies for dune_extensions.
+Utilities for dune_extensions.
 
 * Range: Template class to hold and iterate over a range of values.
 * reducedPDG: Function that converts PDG codes to a small number of integer codes.
