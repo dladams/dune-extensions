@@ -55,9 +55,9 @@ int main() {
   mom.SetXYZM(0.1*pz, -0.2*pz, pz, m);
   par0.SetGvtx(pos);
   TLorentzVector dpos(1.0, -2.0, 10.0, 0.35);
-  for ( int ipt=0; ipt<10; ++ipt) {
-    pos += dpos;
+  for ( int ipt=0; ipt<11; ++ipt) {
     par0.AddTrajectoryPoint(pos, mom);
+    pos += dpos;
     pos.Print();
   }
 
@@ -87,6 +87,8 @@ int main() {
   cout << myname << "Add particle." << endl;
   f1.addMCParticle(par0);
   cout << myname << "Tree entry count: " << ptree->GetEntries() << endl;
+  cout << myname << "Tree print: " << endl;
+  ptree->Scan("npt:nptdet:nptcry:StartXYZT:EndXYZT:StartPE:EndPE:ptx:pty:ptz:ptt:pte");
 
   cout << myname << line << endl;
   pfs->file().ls();
