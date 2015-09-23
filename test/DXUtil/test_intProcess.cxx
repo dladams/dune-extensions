@@ -1,7 +1,7 @@
 // test_intProcess.cxx
 
 // David Adams
-// May 2015
+// September 2015
 //
 // Test script for Range.
 
@@ -25,6 +25,6 @@ int main() {
   assert( intProcess("primary") == 0 );
   assert( intProcess("nCapture") == 5 );
   assert( intProcess("bad") == -1 );
-  cout << myname << "Ending test" << endl;
+  cout << myname << "Done." << endl;
   return 0;
 }

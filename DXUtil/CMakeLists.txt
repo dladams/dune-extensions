@@ -8,6 +8,8 @@
 
 art_make(BASENAME_ONLY
   LIB_LIBRARIES
+    ${ART_FRAMEWORK_SERVICES_OPTIONAL}
+    ${ROOT_BASIC_LIB_LIST}
     boost_system
 )
 

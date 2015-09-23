@@ -1,7 +1,7 @@
 // test_reducedPDG.cxx
 
 // David Adams
-// May 2015
+// September 2015
 //
 // Test script for Range.
 
@@ -27,6 +27,6 @@ int main() {
   assert( reducedPDG(13) == 2 );
   assert( reducedPDG(-2212) == -3 );
   assert( reducedPDG(99) == -12 );
-  cout << myname << "Ending test" << endl;
+  cout << myname << "Done." << endl;
   return 0;
 }

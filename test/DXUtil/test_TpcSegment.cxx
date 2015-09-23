@@ -1,7 +1,7 @@
 // test_TpcSegment.cxx
 
 // David Adams
-// May 2015
+// September 2015
 //
 // Test script for Range.
 
@@ -41,6 +41,6 @@ int main() {
   cout << "Segment length: " << seg.length << endl;
   assert(seg.length > 3.46);
   assert(seg.length < 3.47);
-  cout << myname << "Ending test" << endl;
+  cout << myname << "Done." << endl;
   return 0;
 }

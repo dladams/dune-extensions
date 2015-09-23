@@ -1,7 +1,7 @@
 // test_TpcTypes.cxx
 
 // David Adams
-// May 2015
+// September 2015
 //
 // Test script for Range.
 
@@ -32,6 +32,6 @@ int main() {
   is.push_back(11);
   is.push_back(12);
   assert(is.size() == 2 );
-  cout << myname << "Ending test" << endl;
+  cout << myname << "Done." << endl;
   return 0;
 }

@@ -1,7 +1,7 @@
 // test_Range.cxx
 
 // David Adams
-// May 2015
+// September 2015
 //
 // Test script for Range.
 
@@ -39,6 +39,6 @@ int main() {
   assert( rng2.last() == 2 );
   assert( rng2.size() == 1 );
 
-  cout << myname << "Ending test" << endl;
+  cout << myname << "Done." << endl;
   return 0;
 }

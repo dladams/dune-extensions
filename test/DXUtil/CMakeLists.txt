@@ -17,3 +17,7 @@ cet_test(test_TpcSegment SOURCES test_TpcSegment.cxx
   LIBRARIES DXUtil
 )
 
+cet_test(test_ChannelTickHistCreator SOURCES test_ChannelTickHistCreator.cxx
+  LIBRARIES DXUtil AXService ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
+)
+
