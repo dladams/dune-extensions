@@ -3,7 +3,7 @@
 // David Adams
 // September 2015
 //
-// Test script for test_MCTrajectoryFollower.cxx
+// Test script for using fcl tools.
 
 #include "fhiclcpp/ParameterSet.h"
 #include "fhiclcpp/make_ParameterSet.h"
