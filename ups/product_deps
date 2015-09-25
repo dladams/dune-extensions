@@ -6,7 +6,7 @@ defaultqual	e7
 fcldir product_dir job
 #
 product         version
-dunetpc 	v04_22_00
+dunetpc 	v04_23_00
 art_extensions  v00_00_01
 gcc		v4_9_2
 
