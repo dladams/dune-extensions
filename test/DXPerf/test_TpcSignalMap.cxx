@@ -86,11 +86,11 @@ int main(int argc, char* argv[]) {
   sm1.splitByRop(sms, true);
   cout << myname << "# split maps: " << sms.size() << endl;
   cout << myname << line << endl;
-  cout << line << endl;
   for ( const TpcSignalMapPtr psm : sms ) {
     psm->print(cout);
     cout << myname << line << endl;
   }
+  cout << myname << "Split signal map checks." << endl;
   assert(sms.size() == 2);
   assert(sms[0]->rop() == 9);
   assert(sms[1]->rop() == 9);
@@ -100,6 +100,6 @@ int main(int argc, char* argv[]) {
   assert(sms[1]->tickCount() == 5);
 
   cout << myname << line << endl;
-  cout << myname << "Ending test" << endl;
+  cout << myname << "Done." << endl;
   return 0;
 }
