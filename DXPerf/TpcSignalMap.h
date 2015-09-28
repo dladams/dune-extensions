@@ -9,6 +9,9 @@
 //
 // Objects of this class hold a map of float signals indexed by TPC channel
 // and TDC tick. They also hold hits indexed by channel and segments.
+//
+// For dune, one channel may be mapped to one or two TPCs.  TpcSignalMap has a
+// flag usetpc and if it is true, signals are reccorded separately for each TPC.
 
 #include <string>
 #include <vector>
@@ -38,6 +41,7 @@ public:
   typedef std::string Name;
   typedef tpc::Index Index;
   typedef tpc::Channel Channel;
+  typedef tpc::ChannelRange ChannelRange;
   typedef tpc::Tick Tick;
   typedef tpc::TickRange TickRange;
   typedef double Signal;
@@ -80,14 +84,17 @@ public:
   TpcSignalMap();
 
   // Ctor from name and geometry helper.
+  // The geometry helper is pgh.
   // If this is used, then each channel (and thus each signal and hit)
   // is assigned to a ROP (APA readout plane).
+  // The usetpc flag is set to ausetpc.
   TpcSignalMap(Name name, const GeoHelper* pgh, bool ausetpc =false);
 
   // Ctor adding an MC particle.
+  // The geometry helper is pgh.
+  // The usetpc flag is set to ausetpc.
   TpcSignalMap(std::string name, const simb::MCParticle& par, const GeoHelper* pgh =nullptr, bool ausetpc =false);
 
-  // Copy keeping only the signals for a given range of channels.
   // Dtor.
   virtual ~TpcSignalMap();
 
@@ -163,19 +170,17 @@ public:
   IndexPairVector sharedTpcPairs(const IndexVector& intpcs, bool same =false) const;
 
   // Range of data.
+  ChannelRange channelRange() const;
   Channel channelMin() const;
   Channel channelMax() const;
+  unsigned int channelCount() const;
+  TickRange tickRange() const;
   Tick tickMin() const;
   Tick tickMax() const;
-  TickRange tickRange() const;
-
-  // The number of included channels, summing over all TPCs.
-  unsigned int channelCount() const;
-
-  // The number of included ticks.
   unsigned int tickCount() const;
 
-  // The number of channel-tick bins.
+  // The bin count or size is the tototal number of populated
+  // channel-tick-TPC bins.
   unsigned int binCount() const;
   unsigned int size() const;
 
@@ -242,6 +247,7 @@ private:
   int m_dbg = 0;                  // Debug flag: nonzero to print messages.
   TpcTickChannelMap m_tpcticksig; // m_ticksig[itpc][chan][tick] is the signal for (itpc, chan, tick)
   TpcHitChannelMap m_tpchitsig;   // m_tpchitsig[chan][hit] is the hit for (chan, hit number)
+  ChannelRange m_channelRange;    // Range of channels covered by this signal map.
   TickRange m_tickRange;          // Range of ticks covered by this signal map.
   IndexVector m_ropnbin;          // Number of filled channel-tick bins for each ROP
   McInfoPtr m_pmci;               // Managing pointer to MC info.

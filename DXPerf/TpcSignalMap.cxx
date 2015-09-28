@@ -24,9 +24,10 @@ using tpc::badIndex;
 using tpc::badChannel;
 using tpc::badTick;
 
+typedef TpcSignalMap::Channel          Channel;
+typedef TpcSignalMap::ChannelRange     ChannelRange;
 typedef TpcSignalMap::Tick             Tick;
 typedef TpcSignalMap::TickRange        TickRange;
-typedef TpcSignalMap::Channel          Channel;
 typedef TpcSignalMap::Signal           Signal;
 typedef TpcSignalMap::Index            Index;
 typedef TpcSignalMap::IndexVector      IndexVector;
@@ -59,6 +60,7 @@ TpcSignalMap::Hit::Hit(unsigned int atick1, unsigned int atick2, double asignal)
 TpcSignalMap::TpcSignalMap()
 : m_pgh(nullptr),
   m_usetpc(false),
+  m_channelRange(std::numeric_limits<Channel>::max(), std::numeric_limits<Channel>::min()),
   m_tickRange(std::numeric_limits<Tick>::max(), std::numeric_limits<Tick>::min()),
   m_rop(badIndex()) { }
 
@@ -68,6 +70,7 @@ TpcSignalMap::TpcSignalMap(string name, const GeoHelper* pgh, bool ausetpc)
 : m_name(name),
   m_pgh(pgh),
   m_usetpc(ausetpc),
+  m_channelRange(std::numeric_limits<Channel>::max(), std::numeric_limits<Channel>::min()),
   m_tickRange(std::numeric_limits<Tick>::max(), std::numeric_limits<Tick>::min()),
   m_rop(badIndex()) {
   if ( m_pgh != nullptr ) {
@@ -81,6 +84,7 @@ TpcSignalMap::TpcSignalMap(string name, const simb::MCParticle& par, const GeoHe
 : m_name(name),
   m_pgh(pgh),
   m_usetpc(ausetpc),
+  m_channelRange(std::numeric_limits<Channel>::max(), std::numeric_limits<Channel>::min()),
   m_tickRange(std::numeric_limits<Tick>::max(), std::numeric_limits<Tick>::min()),
   m_pmci(new McInfo(par)),
   m_rop(badIndex()) {
@@ -120,6 +124,14 @@ int TpcSignalMap::addSignal(Channel chan, Tick tick, Signal signal, Index itpcin
       return 1;
     }
     if ( dbg() ) std::cout << myname << "  Using TPC " << itpc << endl;
+    if ( m_pgh != nullptr ) {
+      Index chanRop = m_pgh->channelRop(chan);
+      const IndexVector& ropTpcs = m_pgh->ropTpcs(chanRop);
+      if ( find(ropTpcs.begin(), ropTpcs.end(), itpc) == ropTpcs.end() ) {
+        cout << myname << "ERROR: Channel " << chan << " is not in TPC " << itpc << endl;
+        return 2;
+      }
+    }
   } else {
     itpc = badIndex();
     if ( dbg() ) std::cout << myname << "  Not using TPC " << endl;
@@ -144,6 +156,11 @@ int TpcSignalMap::addSignal(Channel chan, Tick tick, Signal signal, Index itpcin
     ticksig[tick] += signal;
   }
   if ( dbg() ) std::cout << myname << "  Map entry count: " << ticksig.size() << endl;
+  Channel& chan1 = m_channelRange.first();
+  Channel& chan2 = m_channelRange.last();
+  if ( chan < chan1 ) chan1 = chan;
+  if ( chan > chan2 ) chan2 = chan;
+  if ( dbg() ) std::cout << myname << "  Channel range: " << "[" << chan1 << ", " << chan2 << "]" << endl;
   Tick& tick1 = m_tickRange.first();
   Tick& tick2 = m_tickRange.last();
   if ( tick < tick1 ) tick1 = tick;
@@ -501,30 +518,32 @@ sharedTpcPairs(const IndexVector& intpcs, bool same) const {
 
 //**********************************************************************
 
+ChannelRange TpcSignalMap::channelRange() const {
+  return m_channelRange;
+}
+
+//**********************************************************************
+
 Channel TpcSignalMap::channelMin() const {
-  Channel chmin = badChannel();
-  for ( auto tpcticksig : m_tpcticksig ) {
-    TickChannelMap& ticksig = tpcticksig.second;
-    if ( ticksig.size() != 0 ) {
-      Channel newchmin = ticksig.begin()->first;
-      if ( chmin == badChannel() || newchmin < chmin ) chmin = newchmin;
-    }
-  }
-  return chmin;
+  return m_channelRange.first();
 }
 
 //**********************************************************************
 
 Channel TpcSignalMap::channelMax() const {
-  Channel chmax = badChannel();
-  for ( auto tpcticksig : m_tpcticksig ) {
-    TickChannelMap& ticksig = tpcticksig.second;
-    if ( ticksig.size() != 0 ) {
-      Channel newchmax = ticksig.rbegin()->first;
-      if ( chmax == badChannel() || newchmax > chmax ) chmax = newchmax;
-    }
-  }
-  return chmax;
+  return m_channelRange.last();
+}
+
+//**********************************************************************
+
+unsigned int TpcSignalMap::channelCount() const {
+  return channelRange().size();
+}
+
+//**********************************************************************
+
+TickRange TpcSignalMap::tickRange() const {
+  return m_tickRange;
 }
 
 //**********************************************************************
@@ -537,23 +556,6 @@ Tick TpcSignalMap::tickMin() const {
 
 Tick TpcSignalMap::tickMax() const {
   return m_tickRange.last();
-}
-
-//**********************************************************************
-
-TickRange TpcSignalMap::tickRange() const {
-  return m_tickRange;
-}
-
-//**********************************************************************
-
-unsigned int TpcSignalMap::channelCount() const {
-  unsigned int count = 0;
-  for ( auto tpcticksig : m_tpcticksig ) {
-    TickChannelMap& ticksig = tpcticksig.second;
-    count += ticksig.size();
-  }
-  return count;
 }
 
 //**********************************************************************
@@ -832,6 +834,7 @@ int TpcSignalMap::splitByRop(TpcSignalMapVector& tsms, bool splitByTpc) const {
   const GeoHelper& geohelp = *geometryHelper();
   // Loop over ROPs in the detector.
   for ( Index irop=0; irop<geohelp.nrop(); ++irop ) {
+    if ( dbg() > 1 ) cout << myname << "ROP " << irop << endl;
     IndexVector roptpcs = geohelp.ropTpcs(irop);
     // Find the TPCs to cover.
     IndexVector tpcs;
@@ -841,6 +844,7 @@ int TpcSignalMap::splitByRop(TpcSignalMapVector& tsms, bool splitByTpc) const {
       tpcs.push_back(GeoHelper::badIndex());
     }
     for ( Index itpc : tpcs ) {
+      if ( dbg() > 1 ) cout << myname << "  TPC " << itpc << endl;
       // Suffix to make names unique for ROPs with mutiple TPCs.
       string namesuf;
       if ( splitByTpc && itpc!=badIndex() && roptpcs.size()>1 ) {
@@ -858,8 +862,9 @@ int TpcSignalMap::splitByRop(TpcSignalMapVector& tsms, bool splitByTpc) const {
       if ( itts == m_tpcticksig.end() ) continue;
       const TickChannelMap& ticksig = itts->second;
       auto ithv = m_tpchitsig.find(itpc);
-      if ( ithv == m_tpchitsig.end() ) continue;
-      const HitChannelMap& hitmap = ithv->second;
+      HitChannelMap hitmap;
+      if ( ithv != m_tpchitsig.end() ) hitmap = ithv->second;
+      if ( dbg() > 1 ) cout << myname << "    Found " << hitmap.size() << " hits for the TPC." << endl;
       Index ch1 = geohelp.ropFirstChannel(irop);
       Index ch2 = ch1 + geohelp.ropNChannel(irop);
       if ( locdbg ) {

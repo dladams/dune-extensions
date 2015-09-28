@@ -12,6 +12,7 @@ typedef unsigned int Channel;
 typedef unsigned int Index;
 typedef int Tick;
 
+typedef Range<Channel> ChannelRange;
 typedef Range<Tick> TickRange;
 typedef std::vector<Index> IndexVector;
 
