@@ -54,7 +54,12 @@ int main(int narg, char** argv) {
     gname = argv[1];
   }
   if ( gname == "-h" || gname == "help" ) {
-    cout << "Usage: " << argv[0] << " [GEONAME]" << endl;
+    cout << "Usage: " << argv[0] << " [GEONAME =dune10kt_v1] [USECHAN =true] [PRINT =0] [DBG =0]" << endl;
+    cout << "  GEONAME is any of the following:" << endl;
+    for ( string name : gnames ) cout << "    " << name << endl;
+    cout << "  USECHAN nonzero to load channel map." << endl;
+    cout << "  PRINT nonzero to dump geometry to log." << endl;
+    cout << "  DBG is the debug level for GeoHelper." << endl;
     return 0;
   }
   if ( narg > 2 ) {
