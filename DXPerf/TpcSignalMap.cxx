@@ -878,7 +878,7 @@ int TpcSignalMap::splitByRop(TpcSignalMapVector& tsms, bool splitByTpc) const {
                                    << ", " << ticksig.rbegin()->first << ")";
         cout << endl;
       }
-      TpcSignalMapPtr psm(new TpcSignalMap("tmp", m_pgh, true));
+      TpcSignalMapPtr psm(new TpcSignalMap("tmp", m_pgh, splitByTpc));
       for ( Channel ich=ch1; ich<ch2; ++ich ) {
         TickChannelMap::const_iterator its = ticksig.find(ich);
         HitChannelMap::const_iterator ihs = hitmap.find(ich);
