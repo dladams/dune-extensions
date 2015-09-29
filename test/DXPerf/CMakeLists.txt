@@ -10,6 +10,10 @@ cet_test(test_TpcSignalMatcher SOURCES test_TpcSignalMatcher.cxx
   LIBRARIES DXPerf dune_Geometry
 )
 
+cet_test(test_TpcSignalMatchTree SOURCES test_TpcSignalMatchTree.cxx
+  LIBRARIES DXPerf AXService dune_Geometry
+)
+
 cet_test(test_MCTrajectoryFollower SOURCES test_MCTrajectoryFollower.cxx
   LIBRARIES DXPerf AXService
 )
