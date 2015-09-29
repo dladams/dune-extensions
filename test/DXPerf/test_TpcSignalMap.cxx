@@ -55,7 +55,6 @@ int main(int argc, char* argv[]) {
   cout << myname << line << endl;
   cout << myname << "Local fill of signal map:" << endl;
   TpcSignalMap sm1("sm1", &gh, true);
-  sm1.setDbg(dbg);
   assert(sm1.check() == 0);
   assert( sm1.addSignal(1200, 201, 4.1, 1) != 0);
   cout << myname << line << endl;
@@ -79,6 +78,7 @@ int main(int argc, char* argv[]) {
   assert(sm1.channelCount() == 2);
   assert(sm1.tickCount() == 8);
   assert(sm1.binCount() == 12);
+  assert(sm1.haveRop() == false);
   assert(sm1.rop() == badIndex());
 
   cout << myname << "Split signal map." << endl;
@@ -92,6 +92,7 @@ int main(int argc, char* argv[]) {
   }
   cout << myname << "Split signal map checks." << endl;
   assert(sms.size() == 2);
+  assert(sms[0]->haveRop());
   assert(sms[0]->rop() == 9);
   assert(sms[1]->rop() == 9);
   assert(sms[0]->channelCount() == 2);

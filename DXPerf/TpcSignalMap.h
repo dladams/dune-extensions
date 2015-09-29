@@ -206,6 +206,9 @@ public:
   const McInfo* mcinfo() const;
 
   // Set the ROP for this set of signals.
+  // Caller is reponsible for checking that present an future signals actually
+  // belong to the assigned ROP.
+  // To guarantee consistency, first add all signals and the use splitByRop.
   void setRop(Index rop);
 
   // Return if this set of signals is assigned to a ROP.
