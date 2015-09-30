@@ -46,7 +46,7 @@ public:
 
   // Call this to add an MCParticle to the current event.
   //   par - The input MCParticle.
-  //   pmctp - If non-null, the MCparticle is used to fill this performance object.
+  //   pmtsm - If non-null, the MCparticle is used to fill this performance object.
   //   useDescendants - If true, descendants are also added to the signal map.
   //   ptids - if non-null, the ID for this track and descendants (if used) are added to
   //           this vector
