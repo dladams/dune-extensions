@@ -110,12 +110,16 @@ GeoHelper::GeoHelper(std::string gname, bool useChannels, Status dbg)
 //**********************************************************************
 
 DetectorProperties* GeoHelper::detectorProperties() const {
-  try {
-    static DetectorProperties* pref = art::ServiceHandle<DetectorProperties>().operator->();
-    return pref;
-  } catch(...) {
-    return nullptr;
+  const string myname = "GeoHelper::detectorProperties: ";
+  static DetectorProperties* pref = nullptr;
+  if ( pref == nullptr ) {
+    try {
+      pref = art::ServiceHandle<DetectorProperties>().operator->();
+    } catch(...) {
+      cout << myname << "Detector properties not found." << endl;
+    }
   }
+  return pref;
 }
 
 //**********************************************************************
@@ -244,21 +248,24 @@ Index GeoHelper::rop(geo::PlaneID pid) const {
 
 //**********************************************************************
 
-PlanePositionVector GeoHelper::planePositions(const double postim[]) const {
+PlanePositionVector GeoHelper::planePositions(const double postim[], bool usetime) const {
   const string myname = "GeoHelper::planePositions: ";
   PlanePositionVector pps;
   if ( geometry() == nullptr ) {
     cout << myname << "ERROR: Geometry is null." << endl;
     return pps;
   }
-  if ( detectorProperties() == nullptr ) {
-    cout << myname << "ERROR: Detector properties not found." << endl;
-    return pps;
-  }
-  double samplingrate = detectorProperties()->SamplingRate();
-  if ( samplingrate <= 0 ) {
-    cout << myname << "ERROR: Invalid sampling rate." << endl;
-    return pps;
+  double samplingrate = 0.0;
+  if ( usetime ) {
+    if ( detectorProperties() == nullptr ) {
+      cout << myname << "ERROR: Detector properties not found." << endl;
+      return pps;
+    }
+    samplingrate = detectorProperties()->SamplingRate();
+    if ( samplingrate <= 0 ) {
+      cout << myname << "ERROR: Invalid sampling rate." << endl;
+      return pps;
+    }
   }
   geo::TPCID tpcid = geometry()->FindTPCAtPosition(postim);
   if ( ! tpcid.isValid ) return pps;
@@ -266,16 +273,19 @@ PlanePositionVector GeoHelper::planePositions(const double postim[]) const {
   for ( unsigned int ipla=0; ipla<nplane; ++ipla ) {
     PlaneID tpp(tpcid, ipla);
     unsigned int irop = rop(tpp);
-    double tick = detectorProperties()->ConvertXToTicks(postim[0], ipla, tpcid.TPC, tpcid.Cryostat);
-    double tickoff = postim[3]/samplingrate;
-    tick += tickoff;
-    if ( m_dbg > 2 ) cout << myname << "Tick offset: " << tickoff << " = " << postim[3] << "/" << samplingrate << endl;
+    double tick = 0.0;
+    if ( usetime ) {
+      tick = detectorProperties()->ConvertXToTicks(postim[0], ipla, tpcid.TPC, tpcid.Cryostat);
+      double tickoff = postim[3]/samplingrate;
+      tick += tickoff;
+      if ( m_dbg > 2 ) cout << myname << "Tick offset: " << tickoff << " = " << postim[3] << "/" << samplingrate << endl;
+    }
     unsigned int ichan = geometry()->NearestChannel(postim, ipla, tpcid.TPC, tpcid.Cryostat);
     unsigned int iropchan = ichan - ropFirstChannel(irop);
     int itick = int(tick);
     if ( tick < 0.0 ) itick += -1;
     PlanePosition pp;
-    pp.plane = ipla;
+    pp.planeid = tpp;
     pp.rop = irop;
     pp.channel = ichan;
     pp.tick = tick;

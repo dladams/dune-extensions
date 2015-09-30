@@ -119,9 +119,11 @@ public:
   // Returns nrop() if the channel is not valid.
   Index channelRop(Index chan) const;
 
-  // Return all TPC plane postitions a spacetime point.
+  // Return all TPC plane positions for a spacetime point.
   // xyzt = {x, y, z, t} [cm,ns]
-  PlanePositionVector planePositions(const double xyzt[]) const;
+  // If usetime is false, the time component is not accessed and the DetectorProperties
+  // service is not required.
+  PlanePositionVector planePositions(const double xyzt[], bool usetime =true) const;
 
 private:
 

@@ -19,7 +19,7 @@ public:
 public:
 
   // Data.
-  Index plane;          // plane # in the TPC
+  geo::PlaneID planeid; // plane identifier (cryo, TPC, iplane)
   Index rop;            // Global readout plane index.
   Index channel;        // Global channel.
   Index ropchannel;     // Channel in the readout plane.
@@ -28,7 +28,7 @@ public:
   bool valid;           // True if this is a valid plane position
 
   // Default ctor.
-  PlanePosition() : plane(0), rop(0), channel(0), ropchannel(0), tick(0), valid(false) { }
+  PlanePosition() : rop(0), channel(0), ropchannel(0), tick(0), valid(false) { }
 
 };
 

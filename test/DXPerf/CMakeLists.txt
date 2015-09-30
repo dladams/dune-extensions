@@ -17,3 +17,7 @@ cet_test(test_TpcSignalMatchTree SOURCES test_TpcSignalMatchTree.cxx
 cet_test(test_MCTrajectoryFollower SOURCES test_MCTrajectoryFollower.cxx
   LIBRARIES DXPerf AXService
 )
+
+cet_test(test_SimChannelTupler SOURCES test_SimChannelTupler.cxx
+  LIBRARIES DXPerf AXService Simulation
+)
