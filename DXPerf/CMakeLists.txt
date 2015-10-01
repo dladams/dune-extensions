@@ -3,7 +3,7 @@
 # David Adams
 # September 2015
 #
-# CMake isntructions for the DXPerf library which holds
+# CMake instructions for the DXPerf library which holds
 # classes for evaluating DUNE reco performance.
 
 art_make(BASENAME_ONLY

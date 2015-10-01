@@ -67,6 +67,7 @@ include(BuildPlugins)
 add_subdirectory(DXUtil)
 add_subdirectory(DXGeometry)
 add_subdirectory(DXPerf)
+add_subdirectory(DXModules)
 
 # tests
 add_subdirectory(test)
