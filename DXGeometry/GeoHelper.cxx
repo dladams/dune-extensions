@@ -240,7 +240,7 @@ Index GeoHelper::rop(geo::PlaneID pid) const {
   const string myname = "GeoHelper::Rop: ";
   auto itrplane = m_tpprop.find(pid);
   if ( itrplane == m_tpprop.end() ) {
-    cout << myname << "WARNING: Unknown plane." << endl;
+    cout << myname << "WARNING: Unknown plane: " << pid << endl;
     return badIndex();
   }
   return itrplane->second;
@@ -624,8 +624,8 @@ Status GeoHelper::fillStandardApaMapping() {
           }
         }
         // Add this TPC plane to the TPC-plane-to-ROP map.
-        if ( m_dbg > 1 ) cout << myname << "Adding plane to ROP map." << endl;
         PlaneID pid(icry, icrytpc, ipla);
+        if ( m_dbg > 1 ) cout << myname << "Adding plane " << pid << " to ROP map." << endl;
         if ( m_tpprop.find(pid) != m_tpprop.end() ) {
           cout << myname << "ERROR: Duplicate TPC plane." << endl;
           abort();

@@ -463,7 +463,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "DoRefClusterSignalMaps" << sep << fDoRefClusterSignalMaps << endl;
   }
   cout << myname << endl;
-  fgeohelp = new GeoHelper(&*fGeometry, 0);
+  fgeohelp = new GeoHelper(&*fGeometry, true, 2);
   cout << myname << "Summary from geometry helper:" << endl;
   fgeohelp->print(cout, 0, myname);
   // Geometry dump from Michelle.
