@@ -512,7 +512,7 @@ void DXDisplay::analyze(const art::Event& event) {
     ncontour = 40;
   }
   ChannelTickHistCreator hcreateReco(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, 0, zmax, ncontour);
-  ChannelTickHistCreator hcreateRecoNeg(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, -zmax, zmax, ncontour);
+  ChannelTickHistCreator hcreateRecoNeg(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, -zmax, zmax, 2*ncontour);
   ChannelTickHistCreator hcreateRecoPeak(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, 0, 5*zmax, ncontour);
 
   // Formatting.
