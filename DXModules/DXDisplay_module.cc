@@ -463,7 +463,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "DoRefClusterSignalMaps" << sep << fDoRefClusterSignalMaps << endl;
   }
   cout << myname << endl;
-  fgeohelp = new GeoHelper(&*fGeometry, true, 2);
+  fgeohelp = new GeoHelper(&*fGeometry, true, 0);
   cout << myname << "Summary from geometry helper:" << endl;
   fgeohelp->print(cout, 0, myname);
   // Geometry dump from Michelle.
@@ -946,51 +946,55 @@ void DXDisplay::analyze(const art::Event& event) {
 
   if ( fDoRaw ) {
     // Get the raw digits for the event.
-    art::Handle< vector<raw::RawDigit> > rawDigitHandle;
-    event.getByLabel(fRawDigitProducerLabel, rawDigitHandle);
-    if ( fdbg > 1 ) cout << myname << "Raw channel count: " << rawDigitHandle->size() << endl;
+    try {
+      art::Handle< vector<raw::RawDigit> > rawDigitHandle;
+      event.getByLabel(fRawDigitProducerLabel, rawDigitHandle);
+      if ( fdbg > 1 ) cout << myname << "Raw channel count: " << rawDigitHandle->size() << endl;
 
-    // Create the Raw digit histograms.
-    if ( fDoRawSignalHists ) {
-      vector<TH2*> rawhists;
-      for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
-        TH2* ph = hcreateRecoNeg.create("raw" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
-                                     "Raw signals for " + geohelp.ropName(irop));
-        rawhists.push_back(ph);
-      }
-  
-      for ( auto const& digit : (*rawDigitHandle) ) {
-        int ichan = digit.Channel();
-        unsigned int irop = geohelp.channelRop(ichan);
-        TH2* ph = rawhists[irop];
-        unsigned int iropchan = ichan - geohelp.ropFirstChannel(irop);
-        int nadc = digit.NADC();
-        vector<short> adcs;
-        raw::Uncompress(digit.ADCs(), adcs, digit.Compression());
-        unsigned int nzero = 0;
-        for ( auto adc : adcs ) if ( adc == 0.0 ) ++nzero;
-        if ( fdbg > 3 ) cout << myname << "Digit channel " << ichan
-                            << " (ROP-chan = " << irop << "-" << iropchan
-                            << ") has " << nadc << " ADCs and "
-                            << digit.Samples() << " samples. Uncompressed size is " << adcs.size()
-                            << ". Number filled is " << adcs.size()-nzero << endl;
-        for ( unsigned int tick=0; tick<adcs.size(); ++tick ) {
-          double wt = adcs[tick];
-          if ( wt == 0 ) continue;
-          if ( fhistusede ) wt *= adc2de(ichan);
-          ph->Fill(tick, iropchan, wt);
-        }
-      }
-
-      // Display the contents of each raw data histogram.
-      if ( fdbg > 1 ) {
-        cout << myname << "Summary of raw data histograms:" << endl;
+      // Create the Raw digit histograms.
+      if ( fDoRawSignalHists ) {
+        vector<TH2*> rawhists;
         for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
-          summarize2dHist(rawhists[irop], myname, wnam, 4, 7);
+          TH2* ph = hcreateRecoNeg.create("raw" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
+                                       "Raw signals for " + geohelp.ropName(irop));
+          rawhists.push_back(ph);
         }
-      }
-    }  // end DoRawSignalHists
+  
+        for ( auto const& digit : (*rawDigitHandle) ) {
+          int ichan = digit.Channel();
+          unsigned int irop = geohelp.channelRop(ichan);
+          TH2* ph = rawhists[irop];
+          unsigned int iropchan = ichan - geohelp.ropFirstChannel(irop);
+          int nadc = digit.NADC();
+          vector<short> adcs;
+          raw::Uncompress(digit.ADCs(), adcs, digit.Compression());
+          unsigned int nzero = 0;
+          for ( auto adc : adcs ) if ( adc == 0.0 ) ++nzero;
+          if ( fdbg > 3 ) cout << myname << "Digit channel " << ichan
+                              << " (ROP-chan = " << irop << "-" << iropchan
+                              << ") has " << nadc << " ADCs and "
+                              << digit.Samples() << " samples. Uncompressed size is " << adcs.size()
+                              << ". Number filled is " << adcs.size()-nzero << endl;
+          for ( unsigned int tick=0; tick<adcs.size(); ++tick ) {
+            double wt = adcs[tick];
+            if ( wt == 0 ) continue;
+            if ( fhistusede ) wt *= adc2de(ichan);
+            ph->Fill(tick, iropchan, wt);
+          }
+        }
 
+        // Display the contents of each raw data histogram.
+        if ( fdbg > 1 ) {
+          cout << myname << "Summary of raw data histograms:" << endl;
+          for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
+            summarize2dHist(rawhists[irop], myname, wnam, 4, 7);
+          }
+        }
+      }  // end DoRawSignalHists
+
+    } catch(...) {
+      cout << myname << "ERROR: Unable to retrieve raw data contaienr with label " << fRawDigitProducerLabel << endl;
+    }
   }  // end DoRawDigit
 
   //************************************************************************
@@ -1000,48 +1004,51 @@ void DXDisplay::analyze(const art::Event& event) {
   if ( fDoWires ) {
     // See $LARDATA_DIR/include/RecoBase/Wire.h
     art::Handle< vector<recob::Wire> > wiresHandle;
-    event.getByLabel(fWireProducerLabel, wiresHandle);
-    if ( fdbg > 1 ) cout << myname << "Deconvoluted channel count: " << wiresHandle->size() << endl;
+    try {
+      event.getByLabel(fWireProducerLabel, wiresHandle);
+      if ( fdbg > 1 ) cout << myname << "Deconvoluted channel count: " << wiresHandle->size() << endl;
 
-    // Create the deconvoluted signal histograms.
-    if ( fDoDeconvolutedSignalHists ) {
-      vector<TH2*> dcohists;
-      for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
-        TH2* ph = hcreateReco.create("dco" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
-                                     "Deconvoluted signals for " + geohelp.ropName(irop));
-        dcohists.push_back(ph);
-      }
-
-      for ( auto const& wire : (*wiresHandle) ) {
-        int ichan = wire.Channel();
-        unsigned int irop = geohelp.channelRop(ichan);
-        unsigned int iropchan = ichan - geohelp.ropFirstChannel(irop);
-        auto sigs = wire.Signal();
-        const auto& roisigs = wire.SignalROI();
-        TH2* ph = dcohists[irop];
-        if ( fdbg > 3 ) cout << myname << "Deconvoluted channel " << ichan
-                            << " (ROP-chan = " << irop << "-" << iropchan << ")"
-                            << " with view " << wire.View()
-                            << " has " << sigs.size() << " signals"
-                            << " and " << roisigs.size() << " ROIs"
-                            << "." << endl;
-        for ( unsigned int tick=0; tick<sigs.size(); ++tick ) {
-          double wt = roisigs[tick];
-          if ( wt == 0 ) continue;
-          if ( fhistusede ) wt *= adc2de(ichan);
-          ph->Fill(tick, iropchan, wt);
-        }
-      }
-
-      // Display the contents of each deconvoluted signal histogram.
-      if ( fdbg > 1 ) {
-        cout << myname << "Summary of deconvoluted data histograms:" << endl;
+      // Create the deconvoluted signal histograms.
+      if ( fDoDeconvolutedSignalHists ) {
+        vector<TH2*> dcohists;
         for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
-          summarize2dHist(dcohists[irop], myname, wnam, 4, 7);
+          TH2* ph = hcreateReco.create("dco" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
+                                       "Deconvoluted signals for " + geohelp.ropName(irop));
+          dcohists.push_back(ph);
         }
-      }
-    }  // end DoDeconvolutedSignalHists
 
+        for ( auto const& wire : (*wiresHandle) ) {
+          int ichan = wire.Channel();
+          unsigned int irop = geohelp.channelRop(ichan);
+          unsigned int iropchan = ichan - geohelp.ropFirstChannel(irop);
+          auto sigs = wire.Signal();
+          const auto& roisigs = wire.SignalROI();
+          TH2* ph = dcohists[irop];
+          if ( fdbg > 3 ) cout << myname << "Deconvoluted channel " << ichan
+                              << " (ROP-chan = " << irop << "-" << iropchan << ")"
+                              << " with view " << wire.View()
+                              << " has " << sigs.size() << " signals"
+                              << " and " << roisigs.size() << " ROIs"
+                              << "." << endl;
+          for ( unsigned int tick=0; tick<sigs.size(); ++tick ) {
+            double wt = roisigs[tick];
+            if ( wt == 0 ) continue;
+            if ( fhistusede ) wt *= adc2de(ichan);
+            ph->Fill(tick, iropchan, wt);
+          }
+        }
+
+        // Display the contents of each deconvoluted signal histogram.
+        if ( fdbg > 1 ) {
+          cout << myname << "Summary of deconvoluted data histograms:" << endl;
+          for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
+            summarize2dHist(dcohists[irop], myname, wnam, 4, 7);
+          }
+        }
+      }  // end DoDeconvolutedSignalHists
+    } catch(...) {
+      cout << myname << "ERROR: Unable to fetch deconvoluted data with label " << fWireProducerLabel << endl;
+    }
   }  // end DoWires
 
   //************************************************************************

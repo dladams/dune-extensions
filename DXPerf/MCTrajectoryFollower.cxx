@@ -226,6 +226,7 @@ addMCParticle(const MCParticle& particle, TpcSignalMap* pmtsm, bool useDescendan
       cout << myname << "WARNING: Unknown process: " << particle.Process() << endl;
     }
     fnchild = particle.NumberDaughters();
+    fndetchild = 0;
     if ( fnchild > fmaxchild ) {
       cout << myname << "WARNING: Too many child particles: " << fnchild << endl;
       fnchild = fmaxchild;
@@ -236,7 +237,6 @@ addMCParticle(const MCParticle& particle, TpcSignalMap* pmtsm, bool useDescendan
       if ( m_ndetptmap[tid] ) fdetchild[fndetchild++] = tid;
     }
   }
-  fndetchild = 0;
   fndetin = 0;
   fndetout = 0;
   fntpcin = 0;
