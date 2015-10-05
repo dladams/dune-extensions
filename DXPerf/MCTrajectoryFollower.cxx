@@ -209,7 +209,7 @@ addMCParticle(const MCParticle& particle, TpcSignalMap* pmtsm, bool useDescendan
   const GeoHelper& geohelp = *m_geohelp;
   int trackid = particle.TrackId();
   int pdg = particle.PdgCode();
-  int rpdg = reducedPDG(fpdg);
+  int rpdg = reducedPDG(pdg);
   if ( ptids != nullptr ) {
     ptids->push_back(trackid);
     if ( m_dbg > 1 ) cout << myname << "New track ID count: " << ptids->size() << endl;
