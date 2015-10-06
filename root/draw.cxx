@@ -149,6 +149,42 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
     phdraw->SetTickLength(0.010, "Y");
     phdraw->SetTickLength(0.010, "Z");
     phdraw->GetYaxis()->SetTitleOffset(axyoff);
+    // Add projection hists.
+    string hprx_name = phdraw->GetName();
+    string hpry_name = phdraw->GetName();
+    hprx_name += "x";
+    hpry_name += "y";
+    string ylab = phdraw->GetZaxis()->GetTitle();
+    // Make an x-projection histogram for all channels.
+    TH1* hprx = phdraw->ProjectionX(hprx_name.c_str());
+    hprx->GetXaxis()->SetRangeUser(xmin, xmax);
+    hprx->GetYaxis()->SetTitle(ylab.c_str());
+    // Make an x-projection histogram for each channel.
+    string hname1;
+    string hname2;
+    for ( int ibin=1; ibin<=phdraw->GetNbinsY(); ++ibin ) {
+      int ich = ibin - 1;
+      ostringstream ssname;
+      ssname << hprx_name;
+      if ( ich < 100 ) ssname << "0";
+      if ( ich < 10 ) ssname << "0";
+      ssname << ich;
+      string hname = ssname.str().c_str();
+      if ( hname1.size() == 0 ) hname1 = hname;
+      hname2 = hname;
+      hprx = phdraw->ProjectionX(ssname.str().c_str(), ibin, ibin);
+      ostringstream sstitle;
+      sstitle << phdraw->GetTitle() << " channel " << ich;
+      hprx->SetTitle(sstitle.str().c_str());
+      hprx->GetXaxis()->SetRangeUser(xmin, xmax);
+      hprx->GetYaxis()->SetTitle(ylab.c_str());
+    }
+    // Make a y-projection histogram.
+    TH1* hpry = phdraw->ProjectionY(hpry_name.c_str(), xmin, xmax);
+    hpry->GetYaxis()->SetTitle(ylab.c_str());
+    cout << "Channel projection histogram: " << hpry_name << endl;
+    cout << "Time projection histogram: " << hprx_name << endl;
+    cout << "Time projection histogram for each channel: " << hname1 << ", ..., " << hname2 << endl;
   }
   // Draw.
   phdraw->Draw(dopt.c_str());

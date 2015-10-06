@@ -1,0 +1,3 @@
+#!/bin/bash
+
+root.exe ../run/single35t_gen.root dumpEvents.C -q 2>&1 | grep '^*Branch' | tee dumpEvents.log

@@ -1,0 +1,26 @@
+# deconvolute.fcl
+#
+# David Adams
+# October 2015
+#
+# Parameter file to run deconvolution for 35t data.
+#
+# Usage example:
+#   lar -c deconvolute.fcl -s single35t_gen.root -o single35t_decon.root
+
+#include "services_dune.fcl"
+#include "caldata_dune.fcl"
+
+services: {
+  TFileService:       { fileName: "deconvolute_hist.root" }
+  TimeTracker:        { }
+  SimpleMemoryCheck:  { ignoreTotal: 1 } # default is one
+  user:               @local::dune35t_services
+}
+
+physics: {
+  producers: {
+    deconvolute: @local::dune35t_calwire
+  }
+  reco: [deconvolute]
+}
