@@ -18,6 +18,18 @@
 // 12 - NeutronInelastic
 // 13 - hadElastic
 // 14 - PositronNuclear
+// 20   conv                  G4GammaConversion
+// 21   phot                  G4PhotoElectricEffect
+// 22   compt                 G4ComptonScattering
+// 23   PhotonInelastic       G4PhotoNuclearProcess  (aka photonNuclear?)
+// 30   eIoni                 G4eIonisation
+// 31   eBrem                 G4eBremsstrahlung
+// 32   msc                   G4eMultipleScattering
+// 33   annihil               G4eplusAnnihilation
+// 34   AnnihiToMuPair        G4AnnihiToMuPair
+// 40   muIoni                G4MuIonisation
+// 41   muBrems               G4MuBremsstrahlung
+// 42   muPairProd            G4MuPairProduction
 // -1 - Anything else
 
 #include <string>

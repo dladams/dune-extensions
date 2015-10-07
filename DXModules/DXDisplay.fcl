@@ -103,6 +103,7 @@ physics:
       DoSimChannelClusterMatching:    true
       DoRefClusterClusterMatching:    true
       DoTracks:                       true
+      UseSecondaries:                 false
 
       # The "module_type" tells us which module to run. The name here
       # matches the name supplied to DEFINE_ART_MODULE near the end of

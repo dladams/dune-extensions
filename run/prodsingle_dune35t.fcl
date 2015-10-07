@@ -72,4 +72,4 @@ physics.producers.generator.PDG:      [ 13,  13,  13]
 physics.producers.generator.X0:       [ 10, 110, 210]    # cm; large TPC are (-1.5, 222.5)
 physics.producers.generator.Theta0XZ: [  0,   0,   0]    # degrees
 
-services.user.LArG4Parameters.KeepEMShowerDaughters: false  # True to keep EM decays
+services.user.LArG4Parameters.KeepEMShowerDaughters: true   # True to keep EM decays

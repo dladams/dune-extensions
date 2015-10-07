@@ -160,7 +160,8 @@ private:
   // The parameters we'll read from the fcl file.
   int fdbg;                            // Debug level. Larger for more log noise.
   bool fDoTruth;                       // Read truth container.
-  bool fDoMcParticleTree;              // Create the McParticle tree.
+  int  fDoMcParticleTree;              // Create the McParticle tree. (1=initial state only, 2=all)
+  bool fSelectInitialState;            // Include only initial
   bool fDoSimChannelTree;              // Create the SimChannel tree.
   bool fDoMcParticleSignalHists;       // Create signal histograms for McParticles
   bool fDoMcDescendantSignalAllHists;  // Create signal histograms for McParticle descendants all tracks
@@ -185,6 +186,7 @@ private:
   string fTrackProducerLabel;          // The name of the producer that created tracks
   string fRawDigitProducerLabel;       // The name of the producer that created the raw digits.
   bool fUseGammaNotPi0;                // Flag to select MCParticle gamma from pi0 instead of pi0
+  bool fUseSecondaries;                // Flag to include secondary MC particles for tree and hists.
   double fBinSize;                     // For dE/dx work: the value of dx. 
 
   // Derived control parameters.
@@ -369,6 +371,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fRefClusterProducerLabel       = p.get<string>("RefClusterLabel");
   fTrackProducerLabel            = p.get<string>("TrackLabel");
   fUseGammaNotPi0                = p.get<bool>("UseGammaNotPi0");
+  fUseSecondaries                = p.get<bool>("UseSecondaries");
   fBinSize                       = p.get<double>("BinSize");
   fscCapacity                    = p.get<double>("SimChannelSize");
   ftdcTickMin                    = p.get<int>("TdcTickMin");
@@ -432,6 +435,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "ClusterLabel" << sep << fClusterProducerLabel << endl;
     cout << prefix << setw(wlab) << "RefClusterLabel" << sep << fRefClusterProducerLabel << endl;
     cout << prefix << setw(wlab) << "UseGammaNotPi0" << sep << fUseGammaNotPi0 << endl;
+    cout << prefix << setw(wlab) << "UseSecondaries" << sep << fUseSecondaries << endl;
     cout << prefix << setw(wlab) << "BinSize" << sep << fBinSize << endl;
     cout << prefix << setw(wlab) << "SimChannelSize" << sep << fscCapacity << endl;
     cout << prefix << setw(wlab) << "TdcTickMin" << sep << ftdcTickMin << endl;
@@ -582,6 +586,7 @@ void DXDisplay::analyze(const art::Event& event) {
         // 21apr2015: Keep also gammas
         // 08jul2015: Keep also gamma from initial state pi0
         // 089ul2015: Keep all with PROC=0 except pi0
+        // 07Oct2015: Add option to also keep secondaries.
         bool pi0gamma = false;  // True iff this is a pi0 from an initial-state pi0
         if ( rpdg == 6 && proc == 1 ) {
           int itrkmom = particle.Mother();
@@ -599,8 +604,16 @@ void DXDisplay::analyze(const art::Event& event) {
             cout << myname << "WARNING: Parent missing in particle map." << endl;
           }
         }
-        // Select initial-state particles.
-        bool select = proc == 0;
+        // Select initial-state particles. Unless fUseSecondaries is set, only keep primaries.
+        bool select = false;
+        if ( fUseSecondaries ) {
+          select = true;
+        } else if ( proc == 0 ) {
+          select = true;
+          if ( fUseGammaNotPi0 && rpdg == 9 ) select = false;
+        } else if ( fUseGammaNotPi0 && pi0gamma ) {
+          select = true;
+        }
         // Except, use decay gammas for pi0.
         if ( fUseGammaNotPi0 ) {
           if ( rpdg == 9 ) select = false;
