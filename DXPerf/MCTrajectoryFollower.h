@@ -101,9 +101,9 @@ private:
   unsigned int fntpc;    // # TPC
   unsigned int fnapa;    // Total # APA
   unsigned int fnrop;    // Total # readout planes (ROPs)
-  std::vector<int> fnpttpc;   // # trajectory point in each TPC
-  std::vector<int> fnptapa;   // # trajectory point in each APA
-  std::vector<int> fnptrop;   // # trajectory point in each ROP
+  std::vector<unsigned int> fnpttpc;   // # trajectory point in each TPC
+  std::vector<unsigned int> fnptapa;   // # trajectory point in each APA
+  std::vector<unsigned int> fnptrop;   // # trajectory point in each ROP
   float fptx[maxpt];     // point x
   float fpty[maxpt];     // point y
   float fptz[maxpt];     // point z

@@ -1,7 +1,47 @@
 // DXDisplay_module.cxx
 
 // David Adams
-// February 2015
+// October 2015
+//
+// This module creates many trees and histograms to aid in the understanding
+// of DUNE reconstruction performance.
+//
+// Trees:
+//   McParticleTree: One entry for each MC particle.
+//     DoMcParticleTree - Make this tree
+//     UseSecondaries - Include secondary tracks in the tree
+//     UseGammaNotPi0 - If not using secondaries, include daughter gammas instead of pi0s
+//   SimChannelTree:  See SimChannelTupler.
+//     UseSimChannelTree - Make this tree.
+//   SimChannelClusterMatch: Match of SimChannel clusters and reco clusters. What does this mean?
+//     DoSimChannelClusterMatching - Make this tree.
+//   RefClusterClusterMatch: Match of reference and reco clusters. What does this mean?
+//     DoRefClusterClusterMatching - Make this tree.
+// Signal (i.e. channel-tick) histograms. These are recorded in eventE.
+//   Notation:
+//     E is the event ID
+//     TTT denotes the track ID
+//     AAA is an APA identifier, e.g. 0u or 3z2
+//   Histograms:
+//     hE_mcpapaAAA -    All selected MC particle deposits for APA AAA
+//       DoMcParticleSignalHists - Make these histograms
+//     hE_mcpTTTapaAAA - MC particle deposits from particle TTT to APA AAA
+//       DoMcParticleSignalHists - Make these histograms
+//     hE_mcdapaAAA -    All selected MC particle and descendant contributions for APA AAA
+//       DoMcDescendantSignalAllHists - Make these histograms
+//     hE_mcdTTTapaAAA - Same as mcp adding particle descendants
+//       DoMcDescendantSignalHists - Make these histograms
+//     hE_simapaAAA -    All sim channel contributions for all particles
+//       DoSimChannelSignalHists - Make these histograms
+//     hE_ssiapaAAA -    All sim channel contributions for selected particles (based on UseSecondaries)
+//       DoSimChannelSignalHists - Make these histograms
+//     hE_mcsTTTapaAAA - Sim channel contributions for particle TTT to APA AAA
+//       DoSimChannelSignalHists - Make these histograms
+//       UseSimChannelDescendants - Include constributions from descendants (untracked are always included)
+//     hE_rawapaAAA -    Raw data for APA AAA
+//       DoRawSignalHists - Make these histograms
+//     hE_dcoapaAAA - Deconvoluted data (aka Wires) for APA AAA
+//       DoDeconvolutedSignalHists - Make these histograms
 
 #ifndef DXDisplay_Module
 #define DXDisplay_Module
@@ -187,6 +227,7 @@ private:
   string fRawDigitProducerLabel;       // The name of the producer that created the raw digits.
   bool fUseGammaNotPi0;                // Flag to select MCParticle gamma from pi0 instead of pi0
   bool fUseSecondaries;                // Flag to include secondary MC particles for tree and hists.
+  bool fUseSimChannelDescendants;      // Use descendants when making SimChannel signal hists
   double fBinSize;                     // For dE/dx work: the value of dx. 
 
   // Derived control parameters.
@@ -372,6 +413,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fTrackProducerLabel            = p.get<string>("TrackLabel");
   fUseGammaNotPi0                = p.get<bool>("UseGammaNotPi0");
   fUseSecondaries                = p.get<bool>("UseSecondaries");
+  fUseSimChannelDescendants      = p.get<bool>("UseSimChannelDescendants");
   fBinSize                       = p.get<double>("BinSize");
   fscCapacity                    = p.get<double>("SimChannelSize");
   ftdcTickMin                    = p.get<int>("TdcTickMin");
@@ -436,6 +478,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "RefClusterLabel" << sep << fRefClusterProducerLabel << endl;
     cout << prefix << setw(wlab) << "UseGammaNotPi0" << sep << fUseGammaNotPi0 << endl;
     cout << prefix << setw(wlab) << "UseSecondaries" << sep << fUseSecondaries << endl;
+    cout << prefix << setw(wlab) << "UseSimChannelDescendants" << sep << fUseSimChannelDescendants << endl;
     cout << prefix << setw(wlab) << "BinSize" << sep << fBinSize << endl;
     cout << prefix << setw(wlab) << "SimChannelSize" << sep << fscCapacity << endl;
     cout << prefix << setw(wlab) << "TdcTickMin" << sep << ftdcTickMin << endl;
@@ -827,7 +870,11 @@ void DXDisplay::analyze(const art::Event& event) {
         // Add the sim channel info to the selected tracks.
         for ( auto const& simchan : (*simChannelHandle) ) {
           Index tid = pmctp->mcinfo()->trackID;
-          pmctp->addSimChannel(*&simchan, descendants[tid]);
+          if ( fUseSimChannelDescendants ) {
+            pmctp->addSimChannel(*&simchan, descendants[tid]);
+          } else {
+            pmctp->addSimChannel(*&simchan, tid);
+          }
         }  // End loop over sim channels in the event. 
         pmctp->buildHits();
       }  // End loop over selected SimChannel MC tracks

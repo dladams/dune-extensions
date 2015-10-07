@@ -62,9 +62,12 @@ MCTrajectoryFollower(double dsmax, string tname, const GeoHelper* pgeohelp,
   if ( m_filltree ) m_ptree = tfs->make<TTree>(tname.c_str(), m_tname.c_str());
 
   // Set array sizes.
-  fnpttpc.resize(geohelp.ntpc());
-  fnptapa.resize(geohelp.napa());
-  fnptrop.resize(geohelp.nrop());
+  fntpc = geohelp.ntpc();
+  fnapa = geohelp.napa();
+  fnrop = geohelp.nrop();
+  fnpttpc.resize(fntpc);
+  fnptapa.resize(fnapa);
+  fnptrop.resize(fnrop);
 
   // Define the branches (columns) of the tree.
   if ( m_filltree ) {
