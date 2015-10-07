@@ -1,0 +1,40 @@
+# run.fcl
+#
+# David Adams
+# October 2015
+#
+# Parameter file to run the DXDisplay module.
+#
+# Usage example:
+#   lar -c run.fcl -s single35t_decon.root
+
+#include "DXDisplay.fcl"
+
+physics.analyzers.DXDisplay.DebugLevel:         2
+physics.analyzers.DXDisplay.TdcTickMax:      2800    # 1 drift is about 2780 ticks
+physics.analyzers.DXDisplay.UseSecondaries:  true    # Include secoondaries in tree and histograms
+
+# Include descendants in SimChannel hists for individual particles
+physics.analyzers.DXDisplay.UseSimChannelDescendants:  false
+
+physics.analyzers.DXDisplay.WireLabel:        "deconvolute"
+
+physics.analyzers.DXDisplay.DoTruth:                        false
+physics.analyzers.DXDisplay.DoMcParticleTree:                true    # small
+physics.analyzers.DXDisplay.DoSimChannelTree:               false    # small
+physics.analyzers.DXDisplay.DoMcParticleSignalHists:         true    # 12 MB 22%
+physics.analyzers.DXDisplay.DoMcDescendantSignalAllHists:    true    #  7 MB 14%
+physics.analyzers.DXDisplay.DoMcDescendantSignalHists:       true    #  0 MB  1%
+physics.analyzers.DXDisplay.DoSimChannelSignalHists:         true    # 24 MB 44%
+physics.analyzers.DXDisplay.DoRawSignalHists:                true    # 12 MB 22%
+physics.analyzers.DXDisplay.DoDeconvolutedSignalHists:       true    # empty
+physics.analyzers.DXDisplay.DoWireSignalHists:              false    # empty
+physics.analyzers.DXDisplay.DoHitSignalHists:               false    # 12 MB 22%
+physics.analyzers.DXDisplay.DoClusterSignalHists:           false    # empty
+physics.analyzers.DXDisplay.DoRefClusterSignalHists:        false    # empty
+physics.analyzers.DXDisplay.DoMcParticleClusterMatching:    false    # empty
+physics.analyzers.DXDisplay.DoMcDescendantClusterMatching:  false
+physics.analyzers.DXDisplay.DoSimChannelClusterMatching:    false
+physics.analyzers.DXDisplay.DoRefClusterClusterMatching:    false
+physics.analyzers.DXDisplay.DoTracks:                       false
+

@@ -1285,7 +1285,9 @@ summarize2dHist(TH2* ph, string prefix,
                 unsigned int wnam, unsigned int wbin, unsigned int went) const {
   cout << prefix << "  " << setw(wnam) << std::left << ph->GetName()
        << std::right << " bins=" << setw(wbin) << ph->GetNbinsY() << "x" << ph->GetNbinsX()
-       << ", entries=" << setw(went) << ph->GetEntries() << endl;
+       << ", entries=" << setw(went) << ph->GetEntries()
+       << ", integral=" << setw(went) << ph->Integral()
+       << endl;
 }
 
 //************************************************************************
