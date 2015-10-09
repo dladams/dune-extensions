@@ -19,6 +19,9 @@ if [ -n "$3" ]; then NSKIP=$3; fi
 DBG=off
 if [ -n "$4" ]; then DBG=$4; fi
 
+# Remove trailing .fcl if present.
+SAMPLE=${SAMPLE%.fcl}
+
 NEED_DATA=
 
 if [ -n "$NEED_DATA" ]; then

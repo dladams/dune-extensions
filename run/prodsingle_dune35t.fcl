@@ -3,6 +3,7 @@
 #include "largeantmodules_dune.fcl"
 #include "detsimmodules_dune.fcl"
 #include "caldata_dune.fcl"
+#include "hitfindermodules_dune.fcl"
 
 process_name: SinglesGen
 
@@ -35,12 +36,13 @@ physics: {
    daq:       @local::dune35t_simwire       
    rns:       { module_type: "RandomNumberSaver" }
    simcounter: @local::dune35t_simcounter
-   deconvolute: @local::dune35t_calwire
+   caldata: @local::dune35t_calwire
+   gaushit: @local::dune35t_gaushitfinder
  }
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulate: [ generator, largeant, daq, rns, simcounter, deconvolute ] 
+ simulate: [generator, largeant, daq, rns, simcounter, caldata, gaushit] 
 # simulate: [ generator, largeant, daq, rns] 
  
  #define the output stream, there could be more than one if using filters 
@@ -63,13 +65,15 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "single35t_gen_decon.root" #default file name, can override from command line with -o or --output
+   fileName:    "single35t_gen_reco.root" #default file name, can override from command line with -o or --output
  }
 }
 
-physics.producers.generator.PadOutVectors: true
-physics.producers.generator.PDG:      [ 13,  13,  13]
+physics.producers.generator.PadOutVectors: true          # So all arrays don't have to be the same size
+physics.producers.generator.PDG:      [ 11]
+physics.producers.generator.P0:       [  0.4]    # Momentum [GeV]
 physics.producers.generator.X0:       [ 10, 110, 210]    # cm; large TPC are (-1.5, 222.5)
+physics.producers.generator.Z0:       [ 10,  10,  10]    # cm; large TPC are (-1.5, 222.5)
 physics.producers.generator.Theta0XZ: [  0,   0,   0]    # degrees
 
 services.user.LArG4Parameters.KeepEMShowerDaughters: true   # True to keep EM decays

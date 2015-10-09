@@ -20,7 +20,7 @@ services: {
 
 physics: {
   producers: {
-    deconvolute: @local::dune35t_calwire
+    caldata: @local::dune35t_calwire
   }
-  reco: [deconvolute]
+  reco: [caldata]
 }

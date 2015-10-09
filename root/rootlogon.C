@@ -27,11 +27,12 @@
   gSystem->AddLinkedLibs("$DUNETPC_LIB/libdune_Geometry.so");
   gSystem->AddLinkedLibs("$DUNE_EXTENSIONS_LIB/libDXUtil.so");
   gSystem->AddLinkedLibs("$DUNE_EXTENSIONS_LIB/libDXGeometry.so");
-  TFile* pfile = TFile::Open("../run/DXDisplay.root");
+  string ifname = "perf.root";
+  TFile* pfile = TFile::Open(ifname.c_str());
   if ( pfile == 0 || ! pfile.IsOpen() ) {
-    cout << "Input file not found." << endl;
+    cout << "Input file not found: " << ifname << endl;
   } else {
-    DXDisplay->cd();
+    pfile->cd("DXDisplay");
   }
   gROOT->ProcessLine(".L palette.cxx+");
   //gROOT->ProcessLine(".L gettrees.cxx+");

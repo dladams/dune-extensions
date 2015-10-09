@@ -17,7 +17,8 @@ physics.analyzers.DXDisplay.UseSecondaries:  true    # Include secoondaries in t
 # Include descendants in SimChannel hists for individual particles
 physics.analyzers.DXDisplay.UseSimChannelDescendants:  false
 
-physics.analyzers.DXDisplay.WireLabel:        "deconvolute"
+physics.analyzers.DXDisplay.WireLabel:      "caldata"
+physics.analyzers.DXDisplay.HitLabel:       "gaushit"
 
 physics.analyzers.DXDisplay.DoTruth:                        false
 physics.analyzers.DXDisplay.DoMcParticleTree:                true    # small
@@ -28,8 +29,7 @@ physics.analyzers.DXDisplay.DoMcDescendantSignalHists:       true    #  0 MB  1%
 physics.analyzers.DXDisplay.DoSimChannelSignalHists:         true    # 24 MB 44%
 physics.analyzers.DXDisplay.DoRawSignalHists:                true    # 12 MB 22%
 physics.analyzers.DXDisplay.DoDeconvolutedSignalHists:       true    # empty
-physics.analyzers.DXDisplay.DoWireSignalHists:              false    # empty
-physics.analyzers.DXDisplay.DoHitSignalHists:               false    # 12 MB 22%
+physics.analyzers.DXDisplay.DoHitSignalHists:                true    # 12 MB 22%
 physics.analyzers.DXDisplay.DoClusterSignalHists:           false    # empty
 physics.analyzers.DXDisplay.DoRefClusterSignalHists:        false    # empty
 physics.analyzers.DXDisplay.DoMcParticleClusterMatching:    false    # empty

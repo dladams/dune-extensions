@@ -94,7 +94,6 @@ physics:
       DoSimChannelSignalHists:        true
       DoRawSignalHists:               true
       DoDeconvolutedSignalHists:      true
-      DoWireSignalHists:              true 
       DoHitSignalHists:               true
       DoClusterSignalHists:           true
       DoRefClusterSignalHists:        true
