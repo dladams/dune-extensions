@@ -712,7 +712,9 @@ ostream& TpcSignalMap::print(ostream& out, int fulldetail, string hdrprefix, str
     }
     out << " and has " << setw(4) << channelCount() << " channels with "
         << setw(6) << hitCount() << " hits and " << setw(5) << tickCount() << " ticks"
-        << " and " << setw(2) << segments().size() << " segments." << endl;
+        << " and " << setw(2) << segments().size() << " segments."
+        << " Edep=" << tickSignal()
+        << endl;
   } else if ( detail1 == 1 ) {
     out << hdrprefix << "TpcSignalMap map has " << channelCount() << " channels:" << endl;
     Tick badtick = badTick();

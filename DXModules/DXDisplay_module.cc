@@ -714,8 +714,10 @@ void DXDisplay::analyze(const art::Event& event) {
           double efac = 1000.0;
           if ( abs(rpdg)==3 || rpdg==7 || rpdg==11 ) {
             cout << " Ekin=" << setw(5) << int(efac*(particle.E() - particle.Mass()));
+            cout << " Kend=" << setw(5) << int(efac*(particle.EndE() - particle.Mass()));
           } else {
             cout << " Etot=" << setw(5) << int(efac*particle.E());
+            cout << " Eend=" << setw(5) << int(efac*particle.EndE());
           }
           cout << " MeV";
           cout << endl;
@@ -727,9 +729,12 @@ void DXDisplay::analyze(const art::Event& event) {
       if ( fDoMcParticleSignalMaps ) {
         if ( fdbg > 0 ) cout << myname << "Summary of selected MC particle signal maps (size = "
                              << selectedMcTpcSignalMapsMC.size() << "):" << endl;
+        double edep = 0.0;
         for ( auto pmctp : selectedMcTpcSignalMapsMC ) {
           pmctp->print(cout, flag, myname + "  ");
-        }  // End loop over selected MC tracks
+          edep += pmctp->tickSignal();
+        }
+        cout << myname << "Total deposited energy: " << edep << endl;
       }
       if ( fDoMcDescendantSignalMaps ) {
         if ( fdbg > 0 ) cout << myname << "Summary of selected MD particle signal maps (size = "

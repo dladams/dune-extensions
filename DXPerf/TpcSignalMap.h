@@ -246,7 +246,7 @@ private:
 
   std::string m_name;             // Name.
   const GeoHelper* m_pgh;         // Geometry helper maps channels to ROPs.
-  bool m_usetpc;                  // Are signals and hits indesced by TPC?
+  bool m_usetpc;                  // Are signals and hits indexed by TPC?
   int m_dbg = 0;                  // Debug flag: nonzero to print messages.
   TpcTickChannelMap m_tpcticksig; // m_ticksig[itpc][chan][tick] is the signal for (itpc, chan, tick)
   TpcHitChannelMap m_tpchitsig;   // m_tpchitsig[chan][hit] is the hit for (chan, hit number)

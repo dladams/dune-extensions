@@ -70,10 +70,10 @@ outputs:
 }
 
 physics.producers.generator.PadOutVectors: true          # So all arrays don't have to be the same size
-physics.producers.generator.PDG:      [ 11]
-physics.producers.generator.P0:       [  0.4]    # Momentum [GeV]
-physics.producers.generator.X0:       [ 10, 110, 210]    # cm; large TPC are (-1.5, 222.5)
-physics.producers.generator.Z0:       [ 10,  10,  10]    # cm; large TPC are (-1.5, 222.5)
-physics.producers.generator.Theta0XZ: [  0,   0,   0]    # degrees
+physics.producers.generator.PDG:      [13]
+physics.producers.generator.P0:       [0.1]    # Momentum [GeV]
+physics.producers.generator.X0:       [110]    # cm; large TPC are (-1.5, 222.5)
+physics.producers.generator.Z0:       [ 10]    # cm; large TPC are (-1.5, 222.5)
+physics.producers.generator.Theta0XZ: [  0]    # degrees
 
 services.user.LArG4Parameters.KeepEMShowerDaughters: true   # True to keep EM decays
