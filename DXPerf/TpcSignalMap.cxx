@@ -623,6 +623,25 @@ Signal TpcSignalMap::tickSignal() const {
 
 //**********************************************************************
 
+Signal TpcSignalMap::viewTickSignal(geo::View_t aview) const {
+  const GeoHelper& geohelp = *geometryHelper();
+  Signal sigtot = 0.0;
+  for ( TpcTickChannelMap::value_type tpctickmap : m_tpcticksig ) {
+    for ( TickChannelMap::value_type chticksigmap : tpctickmap.second ) {
+      Index chan = chticksigmap.first;
+      Index rop = geohelp.channelRop(chan);
+      geo::View_t view = geohelp.ropView(rop);
+      if ( view != aview ) continue;
+      for ( SignalTickMap::value_type ticksig : chticksigmap.second ) {
+        sigtot += ticksig.second;
+      }
+    }
+  }
+  return sigtot;
+}
+
+//**********************************************************************
+
 Signal TpcSignalMap::hitSignal() const {
   Signal sig = 0.0;
   for ( TpcHitChannelMap::value_type tpchitvecs : m_tpchitsig ) {

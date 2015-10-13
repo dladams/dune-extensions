@@ -730,18 +730,35 @@ void DXDisplay::analyze(const art::Event& event) {
         if ( fdbg > 0 ) cout << myname << "Summary of selected MC particle signal maps (size = "
                              << selectedMcTpcSignalMapsMC.size() << "):" << endl;
         double edep = 0.0;
+        double edepz = 0.0;
+        double edepu = 0.0;
+        double edepv = 0.0;
         for ( auto pmctp : selectedMcTpcSignalMapsMC ) {
           pmctp->print(cout, flag, myname + "  ");
           edep += pmctp->tickSignal();
+          edepz += pmctp->viewTickSignal(geo::kZ);
+          edepu += pmctp->viewTickSignal(geo::kU);
+          edepv += pmctp->viewTickSignal(geo::kV);
         }
-        cout << myname << "Total deposited energy: " << edep << endl;
+        cout << myname << "Total deposited energy: " << edep
+             << " (" << edepz << ", " << edepu << ", " << edepv << ") MeV" << endl;
       }
       if ( fDoMcDescendantSignalMaps ) {
+        double edep = 0.0;
+        double edepz = 0.0;
+        double edepu = 0.0;
+        double edepv = 0.0;
         if ( fdbg > 0 ) cout << myname << "Summary of selected MD particle signal maps (size = "
                              << selectedMcTpcSignalMapsMD.size() << "):" << endl;
         for ( auto pmctp : selectedMcTpcSignalMapsMD ) {
           pmctp->print(cout, flag, myname + "  ");
+          edep += pmctp->tickSignal();
+          edepz += pmctp->viewTickSignal(geo::kZ);
+          edepu += pmctp->viewTickSignal(geo::kU);
+          edepv += pmctp->viewTickSignal(geo::kV);
         }  // End loop over selected MC tracks
+        cout << myname << "Total deposited energy: " << edep
+             << " (" << edepz << ", " << edepu << ", " << edepv << ") MeV" << endl;
       }
     }  // end DoMcParticleSelection
   

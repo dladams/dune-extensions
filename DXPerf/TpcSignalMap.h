@@ -193,6 +193,10 @@ public:
   // Return the total signal summed over ticks and channels.
   Signal tickSignal() const;
 
+  // Return the total signal summed over ticks and channels
+  // for one wire orientation, e.g. geo::kZ, geo::kU or geo::kZ.
+  Signal viewTickSignal(geo::View_t aview) const;
+
   // Return the total signal summed over hits and channels.
   Signal hitSignal() const;
 

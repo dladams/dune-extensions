@@ -21,6 +21,13 @@ using tpc::badIndex;
 typedef TpcSignalMap::TpcSignalMapPtr TpcSignalMapPtr;
 typedef TpcSignalMap::TpcSignalMapVector TpcSignalMapVector;
 
+bool floatcmp(double x1, double x2) {
+  if ( x1 == x2 ) return 0.0;
+  double den = std::max(fabs(x1), fabs(x2));
+  double dif = fabs(x2-x1);
+  return dif/den < 1.e-5;
+}
+
 int main(int argc, char* argv[]) {
   const string myname = "test_TpcSignalMap: ";
   cout << myname << "Starting test" << endl;
@@ -75,11 +82,33 @@ int main(int argc, char* argv[]) {
   cout << myname << "Tick count: " << sm1.tickCount() << endl;
   cout << myname << "Bin count: " << sm1.binCount() << endl;
   cout << myname << "ROP (readout plane): " << sm1.rop() << endl;
+  cout << myname << "Tick signal: " << sm1.tickSignal() << endl;
+  cout << myname << "Tick U signal: " << sm1.viewTickSignal(geo::kU) << endl;
+  cout << myname << "Tick V signal: " << sm1.viewTickSignal(geo::kV) << endl;
+  cout << myname << "Tick Z signal: " << sm1.viewTickSignal(geo::kZ) << endl;
   assert(sm1.channelCount() == 2);
   assert(sm1.tickCount() == 8);
   assert(sm1.binCount() == 12);
   assert(sm1.haveRop() == false);
   assert(sm1.rop() == badIndex());
+  assert(sm1.tickSignal() > 51.9);
+  assert(sm1.tickSignal() < 52.1);
+  assert( floatcmp(5, 5.000001) );
+  assert( !floatcmp(5, 5.1) );
+  assert( floatcmp(sm1.tickSignal(), 52.0) );
+  assert( floatcmp(sm1.viewTickSignal(geo::kV), 52.0) );
+  assert( sm1.viewTickSignal(geo::kU) == 0.0 );
+  assert( sm1.viewTickSignal(geo::kZ) == 0.0 );
+
+  TpcSignalMap sm2("sm1", &gh, true);
+  assert( sm2.addSignal(1100, 201, 1.0, 4) == 0);  // U plane
+  cout << myname << "Tick U signal: " << sm2.viewTickSignal(geo::kU) << endl;
+  assert( sm2.viewTickSignal(geo::kU) ==  1.0);
+
+  TpcSignalMap sm3("sm1", &gh, true);
+  assert( sm3.addSignal(1000, 201, 2.0, 3) == 0);  // Z-plane
+  cout << myname << "Tick Z signal: " << sm3.viewTickSignal(geo::kZ) << endl;
+  assert( sm3.viewTickSignal(geo::kZ) ==  2.0);
 
   cout << myname << "Split signal map." << endl;
   TpcSignalMapVector sms;
