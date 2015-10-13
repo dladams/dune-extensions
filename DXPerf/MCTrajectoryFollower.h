@@ -88,6 +88,7 @@ private:
   static const unsigned int fmaxchild = 50;
   int fchild[fmaxchild];
   int fdetchild[fmaxchild];
+  float fm;                  // Mass
 
   // Arrays for 4-vectors: (x,y,z,t) and (Px,Py,Pz,E).
   float fStartXYZT[4];

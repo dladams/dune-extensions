@@ -740,7 +740,7 @@ void DXDisplay::analyze(const art::Event& event) {
           edepu += pmctp->viewTickSignal(geo::kU);
           edepv += pmctp->viewTickSignal(geo::kV);
         }
-        cout << myname << "Total deposited energy: " << edep
+        cout << myname << "Total mcp deposited energy: " << edep
              << " (" << edepz << ", " << edepu << ", " << edepv << ") MeV" << endl;
       }
       if ( fDoMcDescendantSignalMaps ) {
@@ -757,7 +757,7 @@ void DXDisplay::analyze(const art::Event& event) {
           edepu += pmctp->viewTickSignal(geo::kU);
           edepv += pmctp->viewTickSignal(geo::kV);
         }  // End loop over selected MC tracks
-        cout << myname << "Total deposited energy: " << edep
+        cout << myname << "Total mcd deposited energy: " << edep
              << " (" << edepz << ", " << edepu << ", " << edepv << ") MeV" << endl;
       }
     }  // end DoMcParticleSelection
@@ -912,6 +912,10 @@ void DXDisplay::analyze(const art::Event& event) {
       if ( fdbg > 0 ) {
         cout << myname << "Summary of complete SimChannel signal map:" << endl;
         ptpsim->print(cout, flag, myname + "  ");
+        cout << myname << "Total MCS deposited energy: " << ptpsim->tickSignal()
+             << " (" << ptpsim->viewTickSignal(geo::kZ)
+             << ", " << ptpsim->viewTickSignal(geo::kU)
+             << ", " << ptpsim->viewTickSignal(geo::kV) << ") MeV" << endl;
         cout << myname << "Summary of complete SimChannel signal maps (size = "
              << tpsimByRop.size() << ") after splitting" << endl;
         for ( auto ptsm : tpsimByRop ) {
@@ -919,9 +923,19 @@ void DXDisplay::analyze(const art::Event& event) {
         }  // End loop over signal maps
         cout << myname << "Summary of selected-track SimChannel signal maps (size = "
              << selectedMcTpcSignalMapsSC.size() << ")" << endl;
+        double edep = 0.0;
+        double edepz = 0.0;
+        double edepu = 0.0;
+        double edepv = 0.0;
         for ( auto ptsm : selectedMcTpcSignalMapsSC ) {
           ptsm->print(cout, flag, myname + "  ");
+          edep  += ptsm->tickSignal();
+          edepz += ptsm->viewTickSignal(geo::kZ);
+          edepu += ptsm->viewTickSignal(geo::kU);
+          edepv += ptsm->viewTickSignal(geo::kV);
         }  // End loop over signal maps
+        cout << myname << "Total mcs deposited energy: " << edep
+             << " (" << edepz << ", " << edepu << ", " << edepv << ") MeV" << endl;
         cout << myname << "Summary of selected-track SimChannel signal maps (size = "
              << selectedMcTpcSignalMapsSCbyROP.size() << ") after splitting" << endl;
         for ( auto ptsm : selectedMcTpcSignalMapsSCbyROP ) {

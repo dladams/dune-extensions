@@ -94,6 +94,7 @@ MCTrajectoryFollower(double dsmax, string tname, const GeoHelper* pgeohelp,
     m_ptree->Branch("EndXYZT",     fEndXYZT,         "EndXYZT[4]/F");       // Ending point
     m_ptree->Branch("StartPE",     fStartPE,         "StartPE[4]/F");       // Starting momentum
     m_ptree->Branch("EndPE",       fEndPE,           "EndPE[4]/F");         // Ending momentum
+    m_ptree->Branch("m",           &fm,              "m/F");                // Ending momentum
     // Trajectory points.
     m_ptree->Branch("npt",          &fnpt,          "npt/i");             // # points
     m_ptree->Branch("nptdet",       &fnptdet,       "nptdet/i");          // # points in detector
@@ -213,6 +214,7 @@ addMCParticle(const MCParticle& particle, TpcSignalMap* pmtsm, bool useDescendan
   int trackid = particle.TrackId();
   int pdg = particle.PdgCode();
   int rpdg = reducedPDG(pdg);
+  fm = particle.Mass();
   if ( ptids != nullptr ) {
     ptids->push_back(trackid);
     if ( m_dbg > 1 ) cout << myname << "New track ID count: " << ptids->size() << endl;
