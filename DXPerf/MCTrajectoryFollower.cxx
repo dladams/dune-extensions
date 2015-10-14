@@ -76,7 +76,8 @@ MCTrajectoryFollower(double dsmax, string tname, const GeoHelper* pgeohelp,
     m_ptree->Branch("subrun",      &fSubRun,         "subrun/I");
     m_ptree->Branch("pdg",         &fpdg,            "pdg/I");              // PDG ID
     m_ptree->Branch("rpdg",        &frpdg,           "rpdg/I");             // reduced PDG ID
-    m_ptree->Branch("proc",        &fproc,           "proc/I");             // reduced PDG ID
+    m_ptree->Branch("proc",        &fproc,           "proc/I");             // start process (see intProcess)
+    m_ptree->Branch("endproc",     &fendproc,        "endproc/I");          // end process
     m_ptree->Branch("itrk",        &fitrk,           "itrk/I");             // Track index
     m_ptree->Branch("trackid",     &ftrackid,        "trackid/I");          // Track ID
     m_ptree->Branch("parent",      &fparent,         "parent/I");           // Parent 
@@ -229,6 +230,10 @@ addMCParticle(const MCParticle& particle, TpcSignalMap* pmtsm, bool useDescendan
     fproc = intProcess(particle.Process());
     if ( fproc < 0 ) {
       cout << myname << "WARNING: Unknown process: " << particle.Process() << endl;
+    }
+    fendproc = intProcess(particle.EndProcess());
+    if ( fendproc < 0 ) {
+      cout << myname << "WARNING: Unknown end process: " << particle.EndProcess() << endl;
     }
     fnchild = particle.NumberDaughters();
     fndetchild = 0;

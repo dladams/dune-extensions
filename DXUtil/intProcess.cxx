@@ -10,6 +10,7 @@ int intProcess(std::string sproc) {
   if ( sproc == "muMinusCaptureAtRest" ) return  3;
   if ( sproc == "muPlusCaptureAtRest"  ) return  4;
   if ( sproc == "nCapture"             ) return  5;
+  if ( sproc == "nKiller"              ) return  6;
   if ( sproc == "CoulombScat"          ) return 10;
   if ( sproc == "ProtonInelastic"      ) return 11;
   if ( sproc == "NeutronInelastic"     ) return 12;
@@ -24,9 +25,11 @@ int intProcess(std::string sproc) {
   if ( sproc == "msc"                  ) return 32;
   if ( sproc == "annihil"              ) return 33;
   if ( sproc == "AnnihiToMuPair"       ) return 34;
+  if ( sproc == "FastScintillation"    ) return 35;
   if ( sproc == "muIoni"               ) return 40;
   if ( sproc == "muBrems"              ) return 41;
   if ( sproc == "muPairProd"           ) return 42;
+  if ( sproc == "CoupledTransportation") return 51;
   return -1;
 }
 

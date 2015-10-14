@@ -13,6 +13,7 @@
 //  3 - muMinusCaptureAtRest
 //  4 - muPlusCaptureAtRest
 //  5 - nCapture
+//  6 - nKiller               G4NeutronKiller
 // 10 - CoulombScat
 // 11 - ProtonInelastic
 // 12 - NeutronInelastic
@@ -27,9 +28,11 @@
 // 32   msc                   G4eMultipleScattering
 // 33   annihil               G4eplusAnnihilation
 // 34   AnnihiToMuPair        G4AnnihiToMuPair
+// 35   FastScintillation     LArG4/FastOpticalPhysics
 // 40   muIoni                G4MuIonisation
 // 41   muBrems               G4MuBremsstrahlung
 // 42   muPairProd            G4MuPairProduction
+// 50   CoupledTransportation G4?
 // -1 - Anything else
 
 #include <string>

@@ -74,6 +74,7 @@ private:
   int fpdg;                  // PDG ID
   int frpdg;                 // reduced PDG ID
   int fproc;                 // Process
+  int fendproc;              // End process
   int fitrk;                 // Track index (0, 1, ...)
   int ftrackid;              // Track ID
   int fparent;               // Parent track ID
