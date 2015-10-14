@@ -86,7 +86,6 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
   if ( how == 0 ) {
     // Standard canvas.
     pcan = new TCanvas;
-    pcan->Print();
   } else if ( how == 1 ) {
     // Extra-wide canvas.
     pcan = new TCanvas(cname.c_str(), cname.c_str(), 1600, 500);
