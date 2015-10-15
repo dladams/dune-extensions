@@ -47,7 +47,7 @@ bool inrange(double x, double x1, double x2) {
 int main(int narg, char** argv) {
   //string geopath = "services.Geometry";
   const string myname = "test_geometry: ";
-  vector<string> gnames = {"lbne10kt", "lbne35t", "dune35t4apa_v4", "dune10kt_v1", "dune35t4apa_v5"};
+  vector<string> gnames = {"lbne10kt", "lbne35t", "dune35t4apa_v4", "dune10kt_v1", "dune35t4apa_v5", "dune10kt_v1_workspace"};
   string gname = gnames[3];
   bool useChan = true;
   if ( narg > 1 ) {
@@ -82,11 +82,11 @@ int main(int narg, char** argv) {
   cout << myname << "        Print: " << print << endl;
   cout << myname << "        Debug: " << dbg << endl;
   // (xref,yref,zref) is a point inside a TPC
-  vector<double> xref = {-500.0, 0.0, 0.0, -500.0, 0.0};
-  vector<double> yref = {   0.0, 0.0, 0.0,    0.0, 0.0};
-  vector<double> zref = {   0.0, 0.0, 0.0,    0.0, 0.0};
-  vector<int> ncryExp = {2, 1, 1, 1, 1};
-  vector<int> ntpcExp = {120, 6, 8, 300, 8};
+  vector<double> xref = {-500.0, 0.0, 0.0, -500.0, 0.0, 180.0};
+  vector<double> yref = {   0.0, 0.0, 0.0,    0.0, 0.0, 300.0};
+  vector<double> zref = {   0.0, 0.0, 0.0,    0.0, 0.0, 100.0};
+  vector<int> ncryExp = {2, 1, 1, 1, 1, 1};
+  vector<int> ntpcExp = {120, 6, 8, 300, 8, 300};
   cout << "Checking geometry name: " << gname << endl;
   unsigned int ndet = gnames.size();
   unsigned int idet = 0;

@@ -69,14 +69,16 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "genrec10kt.root" #default file name, can override from command line with -o or --output
+   fileName:    "genrec10ktw.root" #default file name, can override from command line with -o or --output
  }
 }
 
 physics.producers.generator.PadOutVectors: true
 physics.producers.generator.PDG:      [ 13]
 physics.producers.generator.P0:       [1.0]    # GeV
-physics.producers.generator.X0:       [110]    # cm
+physics.producers.generator.X0:       [180]    # cm  TPC 2: (3, 363)
+physics.producers.generator.y0:       [300]    # cm  TPC 2: (0, 607)
+physics.producers.generator.X0:       [-10]    # cm  TPC 2: (2, 231)
 physics.producers.generator.Theta0XZ: [  0]    # degrees
 
 #services.LArG4Parameters.KeepEMShowerDaughters: true   # True to keep EM decays
