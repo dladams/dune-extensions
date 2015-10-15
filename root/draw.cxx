@@ -187,6 +187,9 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
     // Make a y-projection histogram.
     TH1* hpry = phdraw->ProjectionY(hpry_name.c_str(), xbin1, xbin2);
     hpry->GetYaxis()->SetTitle(ylab.c_str());
+    ostringstream sstpry;
+    sstpry << hpry->GetTitle() << " channels " << xmin << "-" << xmax-1;
+    hpry->SetTitle(sstpry.str().c_str());
     cout << "Channel projection histogram: " << hpry_name << endl;
     cout << "Time projection histogram: " << hprx_name << endl;
     cout << "Time projection histogram for each channel: " << hname1 << ", ..., " << hname2 << endl;
