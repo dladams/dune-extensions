@@ -37,8 +37,11 @@
   gROOT->ProcessLine(".L palette.cxx+");
   gROOT->ProcessLine(".L gettree.cxx+");
   gROOT->ProcessLine(".L draw.cxx+");
+  gROOT->ProcessLine(".L drawpars.cxx+");
+  draw::set35t();
+  draw::set10ktw();
   //gROOT->ProcessLine(".L detlar.cxx+");
-  //gROOT->ProcessLine(".L drawTracks.C");
+  gROOT->ProcessLine(".L drawTracks.C");
   gStyle->SetPadRightMargin(0.14);   // For 2D plots
   if ( mcptree("McParticleTree") ) {
     mcptree()->SetMarkerStyle(2);
