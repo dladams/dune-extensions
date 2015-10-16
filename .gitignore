@@ -1,0 +1,7 @@
+*.d
+*.so
+*.log
+*.png
+*.root
+*.pdf
+jobs

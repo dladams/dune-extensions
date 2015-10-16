@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# David Adams
+# October 2015
+#
+# Generate performance results.
+
+NAME=$1
+NEVT=$2
+
+if [ -z "$NAME" -o "$NAME" = "-h" ]; then
+  echo Usage: $0 NAME
+  exit 0
+fi
+
+# Choose options file based on geometry.
+GEO=
+for TRYGEO in 10ktw 10ktw 35t; do
+  if echo $NAME | grep 10ktw 2>&1 1>/dev/null; then
+    GEO=$TRYGEO
+    break
+  fi
+done
+if [ -z "$GEO" ]; then
+  echo Unable to deduce geometry from input name: $NAME
+  exit 2
+fi
+echo Geometry is $GEO
+GFILE=perf$GEO.fcl
+INNAME=${NAME}-event
+OUTNAME=${NAME}_perf
+echo "  Configuration file: $GFILE"
+echo "          Input file: $INNAME.root"
+echo "         Output file: $OUTNAME.root"
+echo "            Log file: $OUTNAME.log"
+
+if [ ! -r $INNAME.root ]; then
+  echo Input data file not found: $INNAME.root
+  exit 1
+fi
+
+ARGS=
+if [ -n "$NEVT" ]; then
+  ARGS="-n $NEVT"
+fi
+
+echo Running...
+lar -c $GFILE -s $INNAME.root -T $OUTNAME.root $ARGS 2>&1 | tee $OUTNAME.log
+
+echo Done
+echo "  Configuration file: $GFILE"
+echo "          Input file: $INNAME.root"
+echo "         Output file: $OUTNAME.root"
+echo "            Log file: $OUTNAME.log"

@@ -154,7 +154,7 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
     hprx_name += "x";
     hpry_name += "y";
     string ylab = phdraw->GetZaxis()->GetTitle();
-    // Make an x-projection histogram for all channels.
+    // Make an tick-projection histogram for all channels.
     int xbin1 = 1;
     int xbin2 = phdraw->GetNbinsX();
     if ( xmin < xmax ) {
@@ -164,7 +164,7 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
     TH1* hprx = phdraw->ProjectionX(hprx_name.c_str());
     hprx->GetXaxis()->SetRangeUser(xbin1, xbin2);
     hprx->GetYaxis()->SetTitle(ylab.c_str());
-    // Make an x-projection histogram for each channel.
+    // Make an tick-projection histogram for each channel.
     string hname1;
     string hname2;
     for ( int ibin=1; ibin<=phdraw->GetNbinsY(); ++ibin ) {
@@ -184,11 +184,11 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
       hprx->GetXaxis()->SetRangeUser(xbin1, xbin2);
       hprx->GetYaxis()->SetTitle(ylab.c_str());
     }
-    // Make a y-projection histogram.
+    // Make a channel-projection histogram.
     TH1* hpry = phdraw->ProjectionY(hpry_name.c_str(), xbin1, xbin2);
     hpry->GetYaxis()->SetTitle(ylab.c_str());
     ostringstream sstpry;
-    sstpry << hpry->GetTitle() << " channels " << xmin << "-" << xmax-1;
+    sstpry << hpry->GetTitle() << " ticks " << xmin << "-" << xmax-1;
     hpry->SetTitle(sstpry.str().c_str());
     cout << "Channel projection histogram: " << hpry_name << endl;
     cout << "Time projection histogram: " << hprx_name << endl;

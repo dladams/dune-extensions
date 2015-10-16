@@ -46,4 +46,6 @@
   if ( mcptree("McParticleTree") ) {
     mcptree()->SetMarkerStyle(2);
   }
+  gStyle->SetTitleY(0.97);
+
 }

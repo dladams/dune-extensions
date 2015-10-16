@@ -1,0 +1,26 @@
+# hitfinder.fcl
+#
+# David Adams
+# October 2015
+#
+# Parameter file to run deconvolution for 35t data.
+#
+# Usage example:
+#   lar -c hitfinder.fcl -s single35t_gen_decon.root -o single35t_hit.root
+
+#include "services_dune.fcl"
+#include "hitfindermodules_dune.fcl"
+
+services: {
+  TFileService:       { fileName: "deconvolute_hist.root" }
+  TimeTracker:        { }
+  SimpleMemoryCheck:  { ignoreTotal: 1 } # default is one
+  user:               @local::dune35t_services
+}
+
+physics: {
+  producers: {
+    gaushit: @local::dune35t_gaushitfinder
+  }
+  reco: [gaushit]
+}

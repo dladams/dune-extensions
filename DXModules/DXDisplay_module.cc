@@ -292,6 +292,9 @@ private:
   // LArProperties service (for drift speed)
   art::ServiceHandle<util::DetectorProperties> fdetprop;
 
+  // Vector of event hists that should be removed at the end of the event.
+  mutable vector<TH1*> m_eventhists;
+
 }; // class DXDisplay
 
 
@@ -792,6 +795,7 @@ void DXDisplay::analyze(const art::Event& event) {
       for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
         TH2* ph = hcreateSim.create("mcp" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
                                         "MC particle signals for " + geohelp.ropName(irop));
+        m_eventhists.push_back(ph);
         for ( auto pmctp : selectedMcTpcSignalMapsMC ) pmctp->fillRopChannelTickHist(ph, irop);
         if ( fdbg > 1 ) summarize2dHist(ph, myname, wnam, 4, 4);
       }
@@ -806,6 +810,7 @@ void DXDisplay::analyze(const art::Event& event) {
         if ( nbin ) {
           TH2* ph = hcreateSim.create("mcd" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
                                             "MC par+desc signals for " + geohelp.ropName(irop));
+          m_eventhists.push_back(ph);
           for ( auto pmctp : selectedMcTpcSignalMapsMD ) pmctp->fillRopChannelTickHist(ph, irop);
           if ( fdbg > 1 ) summarize2dHist(ph, myname, wnam, 4, 4);
         }
@@ -824,6 +829,7 @@ void DXDisplay::analyze(const art::Event& event) {
                                         "MC particle signals for " + geohelp.ropName(irop),
                                         "", "particle " + smcp, pmctp->tickRange());
         if ( ph != nullptr ) {
+          m_eventhists.push_back(ph);
           pmctp->fillRopChannelTickHist(ph, irop);
           if ( fdbg > 1 ) summarize2dHist(ph, myname, wnam+8, 4, 4);
         }
@@ -841,6 +847,7 @@ void DXDisplay::analyze(const art::Event& event) {
                                     "MD particle signals for " + geohelp.ropName(irop),
                                     "", "particle " + smcd, pmctp->tickRange());
         if ( ph != nullptr ) {
+          m_eventhists.push_back(ph);
           pmctp->fillRopChannelTickHist(ph, irop);
           if ( fdbg > 1 ) summarize2dHist(ph, myname, wnam+8, 4, 4);
         }
@@ -957,6 +964,7 @@ void DXDisplay::analyze(const art::Event& event) {
         TH2* ph = hcreateSim.create("sim" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
                                     "Sim channels for " + geohelp.ropName(irop));
         spahists.push_back(ph);
+        m_eventhists.push_back(ph);
         for ( const auto pmctp : tpsimByRop ) {
           if ( pmctp->ropNbin(irop) == 0 ) continue;
           pmctp->fillRopChannelTickHist(ph, irop);
@@ -976,6 +984,7 @@ void DXDisplay::analyze(const art::Event& event) {
         TH2* ph = hcreateSim.create("ssi" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
                                     "Sim channels for " + geohelp.ropName(irop));
         sphists.push_back(ph);
+        m_eventhists.push_back(ph);
         for ( const auto pmctp : selectedMcTpcSignalMapsSC ) {
           if ( pmctp->ropNbin(irop) == 0 ) continue;
           pmctp->fillRopChannelTickHist(ph, irop);
@@ -997,12 +1006,13 @@ void DXDisplay::analyze(const art::Event& event) {
         sstrk << itrk;
         string strk = sstrk.str();
         Index irop = pmctp->rop();
-        TH2* pht = hcreateSim.create(pmctp->name(), 0, geohelp.ropNChannel(irop),
+        TH2* ph = hcreateSim.create(pmctp->name(), 0, geohelp.ropNChannel(irop),
                                      "Sim channels for " + geohelp.ropName(irop),
                                      "", "MC particle " + strk, pmctp->tickRange());
-        if ( pht != nullptr ) {
-          pmctp->fillRopChannelTickHist(pht, irop);
-          summarize2dHist(pht, myname, wnam+8, 4, 4);
+        if ( ph != nullptr ) {
+          m_eventhists.push_back(ph);
+          pmctp->fillRopChannelTickHist(ph, irop);
+          summarize2dHist(ph, myname, wnam+8, 4, 4);
         }
       }
   
@@ -1054,6 +1064,7 @@ void DXDisplay::analyze(const art::Event& event) {
           TH2* ph = hcreateRecoNeg.create("raw" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
                                        "Raw signals for " + geohelp.ropName(irop));
           rawhists.push_back(ph);
+          m_eventhists.push_back(ph);
         }
   
         for ( auto const& digit : (*rawDigitHandle) ) {
@@ -1111,6 +1122,7 @@ void DXDisplay::analyze(const art::Event& event) {
           TH2* ph = hcreateReco.create("dco" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
                                        "Deconvoluted signals for " + geohelp.ropName(irop));
           dcohists.push_back(ph);
+          m_eventhists.push_back(ph);
         }
 
         for ( auto const& wire : (*wiresHandle) ) {
@@ -1165,6 +1177,7 @@ void DXDisplay::analyze(const art::Event& event) {
         TH2* ph = hcreateRecoPeak.create("hip" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
                                          "Hit peaks for " + geohelp.ropName(irop));
         hithists.push_back(ph);
+          m_eventhists.push_back(ph);
       }
 
       for ( auto const& hit : (*hitsHandle) ) {
@@ -1208,11 +1221,13 @@ void DXDisplay::analyze(const art::Event& event) {
 
       // Create the new hit histograms.
       TH2* phallhits = hcreateReco.create("hsgall", 0, fGeometry->Nchannels(), "Hits for ");
+      m_eventhists.push_back(phallhits);
       hitsSignalMap.fillChannelTickHist(phallhits);
       if ( fdbg > 1 ) cout << myname << "Summary of hit histograms:" << endl;
       for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
         TH2* ph = hcreateReco.create("hit" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
                                      "Hits for " + geohelp.ropName(irop));
+        m_eventhists.push_back(ph);
         hitsSignalMap.fillRopChannelTickHist(ph,irop);
         if ( fdbg > 1 ) summarize2dHist(ph, myname, wnam, 4, 7);
       }
@@ -1286,6 +1301,19 @@ void DXDisplay::analyze(const art::Event& event) {
   if ( fDoTracks ) {
     processTracks(event, fTrackProducerLabel, "trk");
   }
+
+  //************************************************************************
+  // Delete event hists.
+  //************************************************************************
+  if ( fdbg > 1 ) cout << "Deleting events hists, count = " << m_eventhists.size() << endl;
+  for ( TH1* ph : m_eventhists ) {
+    if ( fdbg > 2 ) cout << myname << "Removing " << ph->GetName() << endl;
+    ph->Write();
+    ph->SetDirectory(0);
+    delete ph;
+  }
+  m_eventhists.clear();
+  if ( fdbg > 1 ) cout << "After delete event hist count: " << m_eventhists.size() << endl;
 
   //************************************************************************
   // Done.
@@ -1392,6 +1420,7 @@ processClusters(const art::Event& event, string conname, string label,
     for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
       TH2* ph = hcreateReco.create(label + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
                                    "Cluster hits for " + geohelp.ropName(irop));
+      m_eventhists.push_back(ph);
       allClusterSignalMap.fillRopChannelTickHist(ph,irop);
       if ( fdbg > 1 ) summarize2dHist(ph, myname, wnam, 4, 7);
     }
@@ -1413,6 +1442,7 @@ processClusters(const art::Event& event, string conname, string label,
                                      //"", "cluster " + sclu, pch->tickRange());
                                      "", pch->name(), pch->tickRange());
         if ( ph != nullptr ) {
+          m_eventhists.push_back(ph);
           pch->fillRopChannelTickHist(ph,irop);
           if ( fdbg > 1 ) summarize2dHist(ph, myname, wnam+10, 4, 7);
         }
