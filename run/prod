@@ -52,7 +52,7 @@ if [ $DBG = gdb -o $DBG = d ]; then
   echo "gdb --arg lar $ARGS"
   gdb --arg lar $ARGS
 else if [ $DBG = off ]; then
-  LOG=run_$SAMPLE.log
+  LOG=${SAMPLE}_prod.log
   lar $ARGS | tee $LOG
   echo Output is in $LOG
 else if [ $DBG = fcl -o $DBG = f ]; then

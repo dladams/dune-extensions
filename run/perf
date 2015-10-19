@@ -7,6 +7,7 @@
 
 NAME=$1
 NEVT=$2
+NSKIP=$3
 
 if [ -z "$NAME" -o "$NAME" = "-h" ]; then
   echo Usage: $0 NAME
@@ -16,7 +17,7 @@ fi
 # Choose options file based on geometry.
 GEO=
 for TRYGEO in 10ktw 10ktw 35t; do
-  if echo $NAME | grep 10ktw 2>&1 1>/dev/null; then
+  if echo $NAME | grep $TRYGEO 2>&1 1>/dev/null; then
     GEO=$TRYGEO
     break
   fi
@@ -43,11 +44,16 @@ ARGS=
 if [ -n "$NEVT" ]; then
   ARGS="-n $NEVT"
 fi
+if [ -n "$NSKIP" ]; then
+  ARGS="$ARGS --nskip $NSKIP"
+fi
 
 echo Running...
-lar -c $GFILE -s $INNAME.root -T $OUTNAME.root $ARGS 2>&1 | tee $OUTNAME.log
+COM="lar -c $GFILE -s $INNAME.root -T $OUTNAME.root $ARGS"
+$COM 2>&1 | tee $OUTNAME.log
 
 echo Done
+echo "             Command: $COM"
 echo "  Configuration file: $GFILE"
 echo "          Input file: $INNAME.root"
 echo "         Output file: $OUTNAME.root"

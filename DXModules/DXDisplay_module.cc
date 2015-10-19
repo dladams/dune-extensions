@@ -1060,21 +1060,44 @@ void DXDisplay::analyze(const art::Event& event) {
       // Create the Raw digit histograms.
       if ( fDoRawSignalHists ) {
         vector<TH2*> rawhists;
+        if ( fdbg > 2 ) cout << myname << "Creating raw data histograms." << endl;
         for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
           TH2* ph = hcreateRecoNeg.create("raw" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
-                                       "Raw signals for " + geohelp.ropName(irop));
+                                         "Raw signals for " + geohelp.ropName(irop));
+          if ( fdbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
           rawhists.push_back(ph);
           m_eventhists.push_back(ph);
         }
   
+        if ( fdbg > 2 ) cout << myname << "Uncompressing data." << endl;
+        bool first = true;
         for ( auto const& digit : (*rawDigitHandle) ) {
+          if ( fdbg > 4 ) cout << myname << "----------" << endl;
           int ichan = digit.Channel();
+          if ( fdbg > 4 ) cout << myname << "    Channel: " << ichan << endl;
           unsigned int irop = geohelp.channelRop(ichan);
+          if ( fdbg > 4 ) cout << myname << "        ROP: " << irop << endl;
           TH2* ph = rawhists[irop];
           unsigned int iropchan = ichan - geohelp.ropFirstChannel(irop);
+          if ( fdbg > 4 ) cout << myname << "ROP channel: " << iropchan << endl;
           int nadc = digit.NADC();
           vector<short> adcs;
-          raw::Uncompress(digit.ADCs(), adcs, digit.Compression());
+          if ( fdbg > 4 ) cout << myname << "Compression: " << digit.Compression() << endl;
+          if ( digit.Compression() == raw::kNone ) {
+            if ( fdbg > 4 ) cout << myname << "Uncompressing..." << endl;
+            adcs = digit.ADCs();
+          } else {
+            if ( fdbg > 4 ) cout << myname << "Uncompressing..." << endl;
+            raw::Uncompress(digit.ADCs(), adcs, digit.Compression());
+            if ( fdbg > 4 ) cout << myname << "Uncompressed." << endl;
+          }
+          if ( first ) {
+            if ( fdbg > 1 ) {
+              cout << myname << " Compression level for first digit: " << digit.Compression() << endl;
+              cout << myname << "      # TDC slices for first digit: " << adcs.size() << endl;
+            }
+            first = false;
+          }
           unsigned int nzero = 0;
           for ( auto adc : adcs ) if ( adc == 0.0 ) ++nzero;
           if ( fdbg > 3 ) cout << myname << "Digit channel " << ichan
@@ -1089,6 +1112,7 @@ void DXDisplay::analyze(const art::Event& event) {
             ph->Fill(tick, iropchan, wt);
           }
         }
+        if ( fdbg > 4 ) cout << myname << "----------" << endl;
 
         // Display the contents of each raw data histogram.
         if ( fdbg > 1 ) {
