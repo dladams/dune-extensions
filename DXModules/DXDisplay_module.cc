@@ -173,6 +173,8 @@ public:
   // The analysis routine, called once per event. 
   void analyze (const art::Event& evt); 
 
+private:
+
   // Return the ADC-to-energy conversion factor for a channel.
   double adc2de(unsigned int ichan) const;
 
@@ -191,6 +193,10 @@ public:
 
   // Process a track contaienr.
   void processTracks(const art::Event& evt, string conname, string label) const;
+
+  // Delete event histograms after writing them to the output file.
+  // This saves a lot of memory.
+  void removeEventHists();
 
 private:
 
@@ -854,6 +860,7 @@ void DXDisplay::analyze(const art::Event& event) {
       }  // End loop over selected MC particles by ROP
     }
 
+    removeEventHists();
   }  // end DoMcParticles
 
   //************************************************************************
@@ -1024,6 +1031,7 @@ void DXDisplay::analyze(const art::Event& event) {
       m_sctupler->fill(event.id(), *simChannelHandle);
     }
 
+    removeEventHists();
   }  // end DoSimChannel
 
   // Display the signal maps.
@@ -1126,6 +1134,7 @@ void DXDisplay::analyze(const art::Event& event) {
     } catch(...) {
       cout << myname << "ERROR: Unable to retrieve raw data contaienr with label " << fRawDigitProducerLabel << endl;
     }
+    removeEventHists();
   }  // end DoRawDigit
 
   //************************************************************************
@@ -1181,6 +1190,7 @@ void DXDisplay::analyze(const art::Event& event) {
     } catch(...) {
       cout << myname << "ERROR: Unable to fetch deconvoluted data with label " << fWireProducerLabel << endl;
     }
+    removeEventHists();
   }  // end DoWires
 
   //************************************************************************
@@ -1259,6 +1269,7 @@ void DXDisplay::analyze(const art::Event& event) {
 
     }  // end DoHitSignalHists
 
+    removeEventHists();
   }  // end DoHits
 
   //************************************************************************
@@ -1316,6 +1327,7 @@ void DXDisplay::analyze(const art::Event& event) {
       if ( m_ptsmtRefClusterCluster ) m_ptsmtRefClusterCluster->fill(event.id(), match);
     }
 
+    removeEventHists();
   }  // end DoClusters
 
   //************************************************************************
@@ -1327,22 +1339,9 @@ void DXDisplay::analyze(const art::Event& event) {
   }
 
   //************************************************************************
-  // Delete event hists.
-  //************************************************************************
-  if ( fdbg > 1 ) cout << "Deleting events hists, count = " << m_eventhists.size() << endl;
-  for ( TH1* ph : m_eventhists ) {
-    if ( fdbg > 2 ) cout << myname << "Removing " << ph->GetName() << endl;
-    ph->Write();
-    ph->SetDirectory(0);
-    delete ph;
-  }
-  m_eventhists.clear();
-  if ( fdbg > 1 ) cout << "After delete event hist count: " << m_eventhists.size() << endl;
-
-  //************************************************************************
   // Done.
   //************************************************************************
-
+  removeEventHists();
   return;
 }
 
@@ -1515,6 +1514,21 @@ processTracks(const art::Event& event, string conname, string label) const {
       cout << myname << *pclu << endl;
     }
   }
+}
+
+//************************************************************************
+
+void DXDisplay::removeEventHists() {
+  const string myname = "DXDisplay::removeEventHists: ";
+  if ( fdbg > 1 ) cout << "Deleting events hists, count = " << m_eventhists.size() << endl;
+  for ( TH1* ph : m_eventhists ) {
+    if ( fdbg > 2 ) cout << myname << "Removing " << ph->GetName() << endl;
+    ph->Write();
+    ph->SetDirectory(0);
+    delete ph;
+  }
+  m_eventhists.clear();
+  if ( fdbg > 1 ) cout << "After delete event hist count: " << m_eventhists.size() << endl;
 }
 
 //************************************************************************
