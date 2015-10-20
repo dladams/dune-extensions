@@ -5,3 +5,4 @@
 # ======================================================================
 
 add_subdirectory( DXGeometry )
+add_subdirectory( scripts )

@@ -10,6 +10,7 @@
 //   setup dune_extensions v00_00_03 -q e7:prof
 
 {
+  gSystem->SetBuildDir(".aclic");
   gSystem->AddIncludePath("-I$BOOST_INC");
   //gSystem->AddIncludePath("-DBOOST_NO_CWCHAR");
   gSystem->AddIncludePath("-I$CPP0X_INC");

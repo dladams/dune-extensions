@@ -72,6 +72,9 @@ add_subdirectory(DXModules)
 # executables
 add_subdirectory(exe)
 
+# Root scripts
+add_subdirectory(root)
+
 # tests
 add_subdirectory(test)
 

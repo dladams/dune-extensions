@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Find the root script directory.
+if [ -z "$DUNE_EXTENSIONS_ROOTSCRIPTS" ]; then
+  if [ -n "$DUNE_EXTENSIONS_DIR" ]; then
+    if [ -r $DUNE_EXTENSIONS_DIR/rootscripts ]; then
+      export DUNE_EXTENSIONS_ROOTSCRIPTS=$DUNE_EXTENSIONS_DIR/rootscripts
+    else
+      echo Unable to find rootscripts in dune_extensions product at
+      echo "  $DUNE_EXTENSIONS_DIR"
+      echo Remedy this or define DUNE_EXTENSIONS_ROOTSCRIPTS
+      exit 3
+    fi
+  else
+    echo "Please set up dune_extensions or define DUNE_EXTENSIONS_ROOTSCRIPTS "
+    exit 1
+  fi
+fi
+
+if [ ! -r rootlogon.C ]; then
+  echo Creating dune_extensions rootlogon
+  FILE=$DUNE_EXTENSIONS_ROOTSCRIPTS/client_rootlogon.C
+  if [ ! -r $FILE ]; then
+    echo "Unable to find $FILE"
+    exit 2
+  fi
+  cp $FILE rootlogon.C
+fi
+root.exe $*
