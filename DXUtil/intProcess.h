@@ -33,6 +33,8 @@
 // 41   muBrems               G4MuBremsstrahlung
 // 42   muPairProd            G4MuPairProduction
 // 50   CoupledTransportation G4?
+// 51   LArVoxelReadoutScoringProcess
+// 51   PMTReadoutScoringProcess
 // -1 - Anything else
 
 #include <string>

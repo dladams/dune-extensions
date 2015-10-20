@@ -47,3 +47,17 @@ TTree* mcptree(string tname) {
 }
 
 //**********************************************************************
+
+TTree* perftree(string tname) {
+  const string myname = "perftree: ";
+  static TTree* ptree = nullptr;
+  static string treename;
+  if ( tname.size() && tname != treename ) {
+    ptree = gettree(tname);
+    treename = tname;
+    cout << myname << "Tree " << treename << " found at " << hex << long(ptree) << dec << endl;
+  }
+  return ptree;
+}
+
+//**********************************************************************

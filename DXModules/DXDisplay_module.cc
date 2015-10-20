@@ -17,6 +17,7 @@
 //     DoSimChannelClusterMatching - Make this tree.
 //   RefClusterClusterMatch: Match of reference and reco clusters. What does this mean?
 //     DoRefClusterClusterMatching - Make this tree.
+//   McPerfTree: Performance for the first select MC track.
 // Signal (i.e. channel-tick) histograms. These are recorded in eventE.
 //   Notation:
 //     E is the event ID
@@ -222,6 +223,7 @@ private:
   bool fDoMcDescendantClusterMatching; // Match clusters to McParticle descendant signals.
   bool fDoSimChannelClusterMatching;   // Match clusters to SimChannel signals.
   bool fDoRefClusterClusterMatching;   // Match clusters to reference clusters.
+  bool fDoMcPerfTree;                  // Create MC performance tree.
   string fTruthProducerLabel;          // The name of the producer that tracked simulated particles through the detector
   string fParticleProducerLabel;       // The name of the producer that tracked simulated particles through the detector
   string fSimulationProducerLabel;     // The name of the producer that tracked simulated particles through the detector
@@ -265,14 +267,20 @@ private:
 
   // The n-tuples we'll create.
   SimChannelTupler* m_sctupler;
-  TTree* fReconstructionNtuple;
+  TTree* fMcPerfTree;
 
-  // The variables that will go into the n-tuple.
+  // The variables that will go into the performance tree.
   int fevent;
-  int fRun;
-  int fSubRun;
-  int fpdg;                  // PDG ID
-  int ftrackid;              // Track ID
+  int frun;
+  int fsubrun;
+  int fprf_pdg;                  // PDG ID
+  int fprf_trackid;              // Track ID
+  int fprf_endproc;              // End process
+  float fprf_e;                  // Start energy [GeV]
+  float fprf_enu;                // Evergy in neutrinos.
+  float fprf_mcsedepz;           // Total deposited energy from SimChannels.
+  float fprf_mcsedepu;           // Total deposited energy from SimChannels.
+  float fprf_mcsedepv;           // Total deposited energy from SimChannels.
 
   // Other variables that will be shared between different methods.
   double                            fElectronsToGeV; // conversion factor
@@ -315,6 +323,7 @@ DXDisplay::DXDisplay(fhicl::ParameterSet const& parameterSet)
 : EDAnalyzer(parameterSet), fdbg(0),
   m_pmctrajmc(nullptr), m_pmctrajmd(nullptr),
   m_sctupler(nullptr),
+  fMcPerfTree(nullptr),
   fgeohelp(nullptr) {
   // Read in the parameters from the .fcl file.
   this->reconfigure(parameterSet);
@@ -362,17 +371,26 @@ void DXDisplay::beginJob() {
   m_ptsmtSimChannelCluster.reset(new TpcSignalMatchTree("SimChannelClusterMatch"));
   m_ptsmtRefClusterCluster.reset(new TpcSignalMatchTree("RefClusterClusterMatch"));
 
-  // Reconstruction tree.
-  fReconstructionNtuple = tfs->make<TTree>("DXDisplayReconstruction","DXDisplayReconstruction");
-  fReconstructionNtuple->Branch("Event",   &fevent,          "Event/I");
-  fReconstructionNtuple->Branch("SubRun",  &fSubRun,         "SubRun/I");
-  fReconstructionNtuple->Branch("Run",     &fRun,            "Run/I");
-  fReconstructionNtuple->Branch("TrackID", &ftrackid,        "TrackID/I");
-  fReconstructionNtuple->Branch("PDG",     &fpdg,            "PDG/I");
-
   // Sim channel tree.
   if ( fDoSimChannels && fDoSimChannelTree ) {
     m_sctupler = new SimChannelTupler(*fgeohelp, *tfs, fscCapacity);
+  }
+
+  // MC performance tree.
+  if ( fDoMcPerfTree ) {
+    if (  fdbg > 0 ) cout << myname << "Creating MC performance tree." << endl;
+    fMcPerfTree = tfs->make<TTree>("McPerfTree", "MC performance tree");
+    fMcPerfTree->Branch("event",    &fevent,          "event/I");
+    fMcPerfTree->Branch("subrun",   &fsubrun,         "subrun/I");
+    fMcPerfTree->Branch("run",      &frun,            "run/I");
+    fMcPerfTree->Branch("trackid",  &fprf_trackid,    "trackid/I");
+    fMcPerfTree->Branch("pdg",      &fprf_pdg,        "pdg/I");
+    fMcPerfTree->Branch("endproc",  &fprf_endproc,    "endproc/I");
+    fMcPerfTree->Branch("e",        &fprf_e,          "e/F");
+    fMcPerfTree->Branch("enu",      &fprf_enu,        "enu/F");
+    fMcPerfTree->Branch("mcsedepz", &fprf_mcsedepz,   "mcsedepz/F");
+    fMcPerfTree->Branch("mcsedepu", &fprf_mcsedepu,   "mcsedepu/F");
+    fMcPerfTree->Branch("mcsedepv", &fprf_mcsedepv,   "mcsedepv/F");
   }
 
   if ( fdbg > 0 ) cout << myname << "End begin job." << endl;
@@ -411,6 +429,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fDoMcDescendantClusterMatching = p.get<bool>("DoMcDescendantClusterMatching");
   fDoSimChannelClusterMatching   = p.get<bool>("DoSimChannelClusterMatching");
   fDoRefClusterClusterMatching   = p.get<bool>("DoSimChannelClusterMatching");
+  fDoMcPerfTree                  = p.get<bool>("DoMcPerfTree");
   fTruthProducerLabel            = p.get<string>("TruthLabel");
   fParticleProducerLabel         = p.get<string>("ParticleLabel");
   fSimulationProducerLabel       = p.get<string>("SimulationLabel");
@@ -439,15 +458,15 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fDoMcParticleSignalMaps   = fDoMcParticleSignalHists   || fDoMcParticleClusterMatching;
   fDoMcDescendantSignalMaps = fDoMcDescendantSignalAllHists ||fDoMcDescendantSignalHists ||
                               fDoMcDescendantClusterMatching;
-  fDoSimChannelSignalMaps   = fDoSimChannelSignalHists   || fDoSimChannelClusterMatching;
+  fDoSimChannelSignalMaps   = fDoSimChannelSignalHists   || fDoSimChannelClusterMatching || fDoMcPerfTree;
   fDoClusterSignalMaps = fDoClusterSignalHists ||
                          fDoMcParticleClusterMatching || fDoMcDescendantClusterMatching ||
                          fDoSimChannelClusterMatching || fDoRefClusterClusterMatching;
   fDoRefClusterSignalMaps = fDoRefClusterSignalHists || fDoRefClusterClusterMatching;
   fDoMcParticleSelection = fDoMcParticleSignalMaps || fDoMcDescendantSignalMaps || fDoSimChannelSignalMaps ||
-                           fDoMcParticleTree;
+                           fDoMcParticleTree || fDoMcPerfTree;
   fDoMcParticles = fDoMcParticleSelection;
-  fDoSimChannels = fDoSimChannelSignalMaps || fDoSimChannelTree;
+  fDoSimChannels = fDoSimChannelSignalMaps || fDoSimChannelTree || fDoMcPerfTree;
   fDoRaw = fDoRawSignalHists;
   fDoWires = fDoDeconvolutedSignalHists;
   fDoHits = fDoHitSignalHists;
@@ -539,9 +558,9 @@ void DXDisplay::analyze(const art::Event& event) {
 
   // Start by fetching some basic event information for trees and histogram labels.
   fevent  = event.id().event(); 
-  fRun    = event.run();
-  fSubRun = event.subRun();
-  if ( fdbg > 0 ) cout << myname << "Processing run " << fRun << "-" << fSubRun
+  frun    = event.run();
+  fsubrun = event.subRun();
+  if ( fdbg > 0 ) cout << myname << "Processing run " << frun << "-" << fsubrun
                        << ", event " << fevent << endl;
 
   // Create string representations of the event number.
@@ -627,13 +646,24 @@ void DXDisplay::analyze(const art::Event& event) {
     // Note that descendants typically adds nothing. The descendants are not saved for showers.
     // Use the SimChannel map to see showers.
     ParticleMap pars;   // Particle map indexed by trackid so we can find ancestors.
+    bool firstselect = true;
+    fprf_trackid = 0;
+    fprf_pdg = 0;
+    fprf_endproc = 0;
+    fprf_e = 0.0;
+    fprf_enu = 0.0;
+    fprf_mcsedepz = 0.0;
+    fprf_mcsedepu = 0.0;
+    fprf_mcsedepv = 0.0;
     if ( fDoMcParticleSelection ) {
       if ( fdbg > 1 ) cout << myname << "Selecting MC particles." << endl;
       for ( auto const& particle : (*particleHandle) ) {
         int trackid = particle.TrackId();
         pars[trackid] = &particle;
         int rpdg = reducedPDG(particle.PdgCode());
+        if ( rpdg == 8 && !firstselect ) fprf_enu += particle.E();
         int proc = intProcess(particle.Process());
+        int endproc = intProcess(particle.EndProcess());
         // Select particles.
         // 21apr2015: Keep also gammas
         // 08jul2015: Keep also gamma from initial state pi0
@@ -683,6 +713,13 @@ void DXDisplay::analyze(const art::Event& event) {
           int keepstat = m_pmctrajmc->addMCParticle(particle, pmctpmc.get(), false);
           // Keep tracks inside detector.
           if ( keepstat == 0 ) {
+            if ( firstselect ) {
+              fprf_trackid = trackid;
+              fprf_pdg = particle.PdgCode();
+              fprf_endproc = endproc;
+              fprf_e = particle.E();
+              firstselect = false;
+            }
             string snam = ssnam.str();
             if ( fDoMcParticleSignalMaps ) {
               pmctpmc->buildHits();
@@ -715,6 +752,7 @@ void DXDisplay::analyze(const art::Event& event) {
                << " RPDG=" << setw(2) << rpdg
                << " Status=" << setw(2) << particle.StatusCode()
                << " PROC=" << setw(2) << proc
+               << " ENDP=" << setw(2) << endproc
                << " parent=" << setw(3) << particle.Mother()
                << " nchild=" << setw(3) << particle.NumberDaughters()
                << " at (" << setw(3) << int(particle.Vx())
@@ -919,6 +957,12 @@ void DXDisplay::analyze(const art::Event& event) {
       for ( const TpcSignalMapPtr& ptsm : selectedMcTpcSignalMapsSC ) {
         ptsm->splitByRop(selectedMcTpcSignalMapsSCbyROP, true);
       }  
+
+      // Add the total deposited energy.
+      double mevtogev = 0.001;
+      fprf_mcsedepz = mevtogev*ptpsim->viewTickSignal(geo::kZ);
+      fprf_mcsedepu = mevtogev*ptpsim->viewTickSignal(geo::kU);
+      fprf_mcsedepv = mevtogev*ptpsim->viewTickSignal(geo::kV);
 
       // Display the selected-track SimChannel signal maps.
       int flag = 0;
@@ -1342,6 +1386,7 @@ void DXDisplay::analyze(const art::Event& event) {
   // Done.
   //************************************************************************
   removeEventHists();
+  if ( fMcPerfTree ) fMcPerfTree->Fill();
   return;
 }
 

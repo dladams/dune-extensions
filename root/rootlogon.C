@@ -43,8 +43,8 @@
   //gROOT->ProcessLine(".L detlar.cxx+");
   gROOT->ProcessLine(".L drawTracks.C");
   gStyle->SetPadRightMargin(0.14);   // For 2D plots
-  if ( mcptree("McParticleTree") ) {
-    mcptree()->SetMarkerStyle(2);
+  if ( mcptree("McParticleTree") ) mcptree()->SetMarkerStyle(2);
+  if ( perftree("McPerfTree") ) perftree()->SetMarkerStyle(2);
   }
   gStyle->SetTitleY(0.97);
 

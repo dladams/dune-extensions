@@ -13,7 +13,8 @@ class TTree;
 // The name "null" returns 0.
 TTree* gettree(std::string tname);
 
-// Following functions return pointers to trees and remember the
-// name so that a subsequent call can be made without a name.
-// The name "null" can be used to reset the pointer to null.
+// Find MC particle tree.
 TTree* mcptree(std::string tname ="");
+
+// Find MC performance tree.
+TTree* perftree(std::string tname ="");

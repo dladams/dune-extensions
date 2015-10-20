@@ -85,25 +85,26 @@ physics:
     {
 
       # Control flags.
-      DoTruth:                        true
-      DoMcParticleTree:               true
-      DoSimChannelTree:               true
-      DoMcParticleSignalHists:        true
+      DoTruth:                        false
+      DoMcParticleTree:               false
+      DoSimChannelTree:               false
+      DoMcParticleSignalHists:        false
       DoMcDescendantSignalAllHists:   false
-      DoMcDescendantSignalHists:      true
-      DoSimChannelSignalHists:        true
-      DoRawSignalHists:               true
-      DoDeconvolutedSignalHists:      true
-      DoHitSignalHists:               true
-      DoClusterSignalHists:           true
-      DoRefClusterSignalHists:        true
-      DoMcParticleClusterMatching:    true
-      DoMcDescendantClusterMatching:  true
-      DoSimChannelClusterMatching:    true
-      DoRefClusterClusterMatching:    true
-      DoTracks:                       true
+      DoMcDescendantSignalHists:      false
+      DoSimChannelSignalHists:        false
+      DoRawSignalHists:               false
+      DoDeconvolutedSignalHists:      false
+      DoHitSignalHists:               false
+      DoClusterSignalHists:           false
+      DoRefClusterSignalHists:        false
+      DoMcParticleClusterMatching:    false
+      DoMcDescendantClusterMatching:  false
+      DoSimChannelClusterMatching:    false
+      DoRefClusterClusterMatching:    false
+      DoTracks:                       false
+      DoMcPerfTree:                   false
       UseSecondaries:                 false
-      UseSimChannelDescendants:       true
+      UseSimChannelDescendants:       false
 
       # The "module_type" tells us which module to run. The name here
       # matches the name supplied to DEFINE_ART_MODULE near the end of
