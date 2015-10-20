@@ -69,6 +69,9 @@ add_subdirectory(DXGeometry)
 add_subdirectory(DXPerf)
 add_subdirectory(DXModules)
 
+# executables
+add_subdirectory(exe)
+
 # tests
 add_subdirectory(test)
 

@@ -1,4 +1,4 @@
-// draw_geometry.cxx
+// draw_detector.cxx
 
 // David Adams
 // August 2015
@@ -35,7 +35,7 @@ int main(int narg, char** argv) {
   }
   string line = "==========================================";
   cout << line << endl;
-  cout << "Drawing geometry " << gname << endl;
+  cout << "Drawing detector " << gname << endl;
   cout << "For help: " << argv[0] << " help" << endl;
   cout << "To exit, use Eve menus: \"Browser\", \"Quit Root\"" << endl;
   cout << line << endl;
