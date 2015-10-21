@@ -26,7 +26,7 @@ physics.analyzers.DXDisplay.DoSimChannelTree:               false    # small
 physics.analyzers.DXDisplay.DoMcParticleSignalHists:         false   # 12 MB 22%
 physics.analyzers.DXDisplay.DoMcDescendantSignalAllHists:    false   #  7 MB 14%
 physics.analyzers.DXDisplay.DoMcDescendantSignalHists:       false   #  0 MB  1%
-physics.analyzers.DXDisplay.DoSimChannelSignalHists:         false   # 24 MB 44%
+physics.analyzers.DXDisplay.DoSimChannelSignalHists:         true    # 24 MB 44%
 physics.analyzers.DXDisplay.DoRawSignalHists:                false   # 12 MB 22%
 physics.analyzers.DXDisplay.DoDeconvolutedSignalHists:       false   # empty
 physics.analyzers.DXDisplay.DoHitSignalHists:                false   # 12 MB 22%
