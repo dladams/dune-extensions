@@ -6,6 +6,9 @@
 # Generate performance results.
 
 NAME=$1
+if [ -z "$NAME" ]; then
+  NAME=genrec
+fi
 NEVT=$2
 NSKIP=$3
 
@@ -23,10 +26,10 @@ for TRYGEO in 10ktw 10ktw 35t; do
   fi
 done
 if [ -z "$GEO" ]; then
-  echo Unable to deduce geometry from input name: $NAME
-  exit 2
+  echo Using implicit geometry.
+else
+  echo Geometry is $GEO
 fi
-echo Geometry is $GEO
 GFILE=perf$GEO.fcl
 INNAME=${NAME}-event
 OUTNAME=${NAME}_perf

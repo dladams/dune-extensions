@@ -288,6 +288,7 @@ private:
   double fadcmevu;   // MeV to ADC conversion factor for U-planes.
   double fadcmevv;   // MeV to ADC conversion factor for V-planes.
   double fadcmevz;   // MeV to ADC conversion factor for X-planes.
+  double fadcfc;     // ADC to fC conversion factor.
   bool fhistusede;   // If true, raw and wire spectra are converted to MeV.
   double fdemaxmcp;  // Max energy deposit for histogram ranges for McParticle
   double fdemax;     // Max energy deposit for histogram ranges
@@ -447,9 +448,10 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   ftdcTickMin                    = p.get<int>("TdcTickMin");
   ftdcTickMax                    = p.get<int>("TdcTickMax");
   fmcpdsmax                      = p.get<double>("McParticleDsMax");
-  fadcmevu                       = p.get<double>("AdcToMeVConversionU");
-  fadcmevv                       = p.get<double>("AdcToMeVConversionV");
-  fadcmevz                       = p.get<double>("AdcToMeVConversionZ");
+  fadcmevu                       = p.get<double>("AdcToMevConversionU");
+  fadcmevv                       = p.get<double>("AdcToMevConversionV");
+  fadcmevz                       = p.get<double>("AdcToMevConversionZ");
+  fadcfc                         = p.get<double>("AdcToFcConversion");
   fdemaxmcp                      = p.get<double>("HistDEMaxMcParticle");
   fdemax                         = p.get<double>("HistDEMax");
   fhistusede                     = p.get<bool>("HistUseDE");
@@ -512,9 +514,10 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "TdcTickMin" << sep << ftdcTickMin << endl;
     cout << prefix << setw(wlab) << "TdcTickMax" << sep << ftdcTickMax << endl;
     cout << prefix << setw(wlab) << "McParticleDsMax" << sep << fmcpdsmax << endl;
-    cout << prefix << setw(wlab) << "AdcToMeVConversionU" << sep << fadcmevu << endl;
-    cout << prefix << setw(wlab) << "AdcToMeVConversionV" << sep << fadcmevv << endl;
-    cout << prefix << setw(wlab) << "AdcToMeVConversionZ" << sep << fadcmevz << endl;
+    cout << prefix << setw(wlab) << "AdcToMevConversionU" << sep << fadcmevu << endl;
+    cout << prefix << setw(wlab) << "AdcToMevConversionV" << sep << fadcmevv << endl;
+    cout << prefix << setw(wlab) << "AdcToMevConversionZ" << sep << fadcmevz << endl;
+    cout << prefix << setw(wlab) << "AdcToFcConversion" << sep << fadcfc << endl;
     cout << prefix << setw(wlab) << "HistDEMaxMcParticle" << sep << fdemaxmcp << endl;
     cout << prefix << setw(wlab) << "HistDEMax" << sep << fdemax << endl;
     cout << prefix << setw(wlab) << "HistUseDE" << sep << fhistusede << endl;
@@ -586,9 +589,12 @@ void DXDisplay::analyze(const art::Event& event) {
     zmax = fdemax;
     ncontour = 40;
   }
+  string ztitleDco = "Q [fC]";
+  double zmaxDco = 20;
   ChannelTickHistCreator hcreateReco(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, 0, zmax, ncontour);
   ChannelTickHistCreator hcreateRecoNeg(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, -zmax, zmax, 2*ncontour);
   ChannelTickHistCreator hcreateRecoPeak(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, 0, 5*zmax, ncontour);
+  ChannelTickHistCreator hcreateDco(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitleDco, 0, zmaxDco, ncontour);
 
   // Formatting.
   int wnam = 12 + sevtf.size();                  // Base width for a histogram name.
@@ -1196,7 +1202,7 @@ void DXDisplay::analyze(const art::Event& event) {
       if ( fDoDeconvolutedSignalHists ) {
         vector<TH2*> dcohists;
         for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
-          TH2* ph = hcreateReco.create("dco" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
+          TH2* ph = hcreateDco.create("dco" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
                                        "Deconvoluted signals for " + geohelp.ropName(irop));
           dcohists.push_back(ph);
           m_eventhists.push_back(ph);
