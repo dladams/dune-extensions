@@ -21,11 +21,6 @@ e7:opt		e7:opt  	-nq-
 e7:prof		e7:prof  	-nq-
 end_qualifier_list
 
-# Define the env variable DUNE_EXTENSIONS_ROOTSCRIPTS
-table_fragment_begin
-     envSet(DUNE_EXTENSIONS_ROOTSCRIPTS, ${DUNE_EXTENSIONS_DIR}/rootscripts)
-table_fragment_end
-
 # Preserve tabs and formatting in emacs and vi / vim:
 
 ### Local Variables:
