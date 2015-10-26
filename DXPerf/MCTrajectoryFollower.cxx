@@ -515,11 +515,11 @@ addMCParticle(const MCParticle& particle, TpcSignalMap* pmtsm, bool useDescendan
     tpcid0 = tpcid;
     icry0 = icry;
     pseg0 = pseg.get();
-    if ( m_dbg > 3 ) cout << myname << "  Current energy deposit: " << pmtsm->tickSignal() << " MeV" << endl;
+    if ( m_dbg > 3 && pmtsm != nullptr ) cout << myname << "  Current energy deposit: " << pmtsm->tickSignal() << " MeV" << endl;
   }  // End loop over trajectory points.
 
   // Add segments to signal map.
-  if ( pmtsm ) {
+  if ( pmtsm != nullptr ) {
     for ( const TpcSegmentPtr& pseg : segments ) {
       float de = pseg->e1 - pseg->e2;
       if ( de > 0.0 && !deAtEndOfSegment ) {
