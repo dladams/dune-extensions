@@ -345,8 +345,6 @@ void DXDisplay::beginJob() {
     cout << myname << "ERROR: Geometry helper is absent." << endl;
     return;
   }
-  const GeoHelper& geohelp = *fgeohelp;
-
   // Access ART's TFileService, which will handle creating and writing
   // histograms and n-tuples for us. 
   art::ServiceHandle<art::TFileService> tfs;
@@ -1534,7 +1532,6 @@ processClusters(const art::Event& event, string conname, string label,
 void DXDisplay::
 processTracks(const art::Event& event, string conname, string label) const {
   const string myname = "DXDisplay::processTracks: ";
-  GeoHelper& geohelp = *fgeohelp;
 
   // Get the tracks for the event.
   // See $LARDATA_DIR/include/RecoBase/Track.h
