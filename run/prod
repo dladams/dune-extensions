@@ -2,7 +2,7 @@
 
 SAMPLES="prodsingle_dune35t prodsingle_dunefd"
 
-if [ -z "$1" -o "$1" = "-h" ]; then
+if [ "$1" = "-h" ]; then
   echo Usage: $0 SAMPLE NEVT NSKIP DBG
   echo "Known samples:"
   for SAMPLE in $SAMPLES; do echo "  $SAMPLE"; done
@@ -10,7 +10,7 @@ if [ -z "$1" -o "$1" = "-h" ]; then
   exit 0
 fi
 
-SAMPLE=
+SAMPLE=genrec
 if [ -n "$1" ]; then SAMPLE=$1; fi
 NEVT=10
 if [ -n "$2" ]; then NEVT=$2; fi

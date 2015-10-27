@@ -176,9 +176,10 @@ physics:
       #AdcToMeVConversionU:  0.014976
       #AdcToMeVConversionV:  0.016616
       #AdcToMeVConversionZ:  0.032766
-      AdcToMeVConversionU:  0.00382
-      AdcToMeVConversionV:  0.00382
-      AdcToMeVConversionZ:  0.00180
+      AdcToMevConversionU:  0.00382
+      AdcToMevConversionV:  0.00382
+      AdcToMevConversionZ:  0.00180
+      AdcToFcConversion:    11.7        # 35t 4.24.00
 
       # Range for energy deposit [MeV] in histograms.
       HistDEMaxMcParticle:  5.0
