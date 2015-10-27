@@ -126,6 +126,10 @@ int TpcSignalMap::addSignal(Channel chan, Tick tick, Signal signal, Index itpcin
     if ( dbg() ) std::cout << myname << "  Using TPC " << itpc << endl;
     if ( m_pgh != nullptr ) {
       Index chanRop = m_pgh->channelRop(chan);
+      if ( chanRop >= m_pgh->nrop() ) {
+        cout << myname << "ERROR: Channel " << chan << " is not in detector." << endl;
+        return 2;
+      }
       const IndexVector& ropTpcs = m_pgh->ropTpcs(chanRop);
       if ( find(ropTpcs.begin(), ropTpcs.end(), itpc) == ropTpcs.end() ) {
         cout << myname << "ERROR: Channel " << chan << " is not in TPC " << itpc << endl;
