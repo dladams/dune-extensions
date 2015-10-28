@@ -237,6 +237,7 @@ private:
   bool fUseSecondaries;                // Flag to include secondary MC particles for tree and hists.
   bool fUseSimChannelDescendants;      // Use descendants when making SimChannel signal hists
   double fBinSize;                     // For dE/dx work: the value of dx. 
+  double fRawAdcPedestal;              // Pedestal to subtract from raw data.
 
   // Derived control parameters.
   bool fDoMcParticles;             // Read MC particles.
@@ -453,6 +454,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fdemaxmcp                      = p.get<double>("HistDEMaxMcParticle");
   fdemax                         = p.get<double>("HistDEMax");
   fhistusede                     = p.get<bool>("HistUseDE");
+  fRawAdcPedestal                = p.get<double>("RawAdcPedestal");
 
   // Derived control flags.
   fDoMcParticleSignalMaps   = fDoMcParticleSignalHists   || fDoMcParticleClusterMatching;
@@ -519,6 +521,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "HistDEMaxMcParticle" << sep << fdemaxmcp << endl;
     cout << prefix << setw(wlab) << "HistDEMax" << sep << fdemax << endl;
     cout << prefix << setw(wlab) << "HistUseDE" << sep << fhistusede << endl;
+    cout << prefix << setw(wlab) << "RawAdcPedestal" << sep << fRawAdcPedestal << endl;
   }
 
   if ( fdbg > 1 ) {
@@ -587,12 +590,12 @@ void DXDisplay::analyze(const art::Event& event) {
     zmax = fdemax;
     ncontour = 40;
   }
-  string ztitleDco = "Q [fC]";
+  string ztitleDco = "Charge [fC]";
   double zmaxDco = 20;
   ChannelTickHistCreator hcreateReco(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, 0, zmax, ncontour);
   ChannelTickHistCreator hcreateRecoNeg(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, -zmax, zmax, 2*ncontour);
   ChannelTickHistCreator hcreateRecoPeak(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, 0, 5*zmax, ncontour);
-  ChannelTickHistCreator hcreateDco(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitleDco, 0, zmaxDco, ncontour);
+  ChannelTickHistCreator hcreateDco(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitleDco, -zmaxDco, zmaxDco, 2*ncontour);
 
   // Formatting.
   int wnam = 12 + sevtf.size();                  // Base width for a histogram name.
@@ -1139,8 +1142,9 @@ void DXDisplay::analyze(const art::Event& event) {
           int nadc = digit.NADC();
           vector<short> adcs;
           if ( fdbg > 4 ) cout << myname << "Compression: " << digit.Compression() << endl;
+          if ( fdbg > 4 ) cout << myname << "   Pedestal: " << digit.GetPedestal() << endl;
           if ( digit.Compression() == raw::kNone ) {
-            if ( fdbg > 4 ) cout << myname << "Uncompressing..." << endl;
+            if ( fdbg > 4 ) cout << myname << "Copying uncompressed..." << endl;
             adcs = digit.ADCs();
           } else {
             if ( fdbg > 4 ) cout << myname << "Uncompressing..." << endl;
@@ -1162,7 +1166,7 @@ void DXDisplay::analyze(const art::Event& event) {
                               << digit.Samples() << " samples. Uncompressed size is " << adcs.size()
                               << ". Number filled is " << adcs.size()-nzero << endl;
           for ( unsigned int tick=0; tick<adcs.size(); ++tick ) {
-            double wt = adcs[tick];
+            double wt = adcs[tick] - fRawAdcPedestal;
             if ( wt == 0 ) continue;
             if ( fhistusede ) wt *= adc2de(ichan);
             ph->Fill(tick, iropchan, wt);
@@ -1180,7 +1184,7 @@ void DXDisplay::analyze(const art::Event& event) {
       }  // end DoRawSignalHists
 
     } catch(...) {
-      cout << myname << "ERROR: Unable to retrieve raw data contaienr with label " << fRawDigitProducerLabel << endl;
+      cout << myname << "ERROR: Unable to retrieve raw data container with label " << fRawDigitProducerLabel << endl;
     }
     removeEventHists();
   }  // end DoRawDigit
