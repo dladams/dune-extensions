@@ -587,12 +587,12 @@ void DXDisplay::analyze(const art::Event& event) {
     zmax = fdemax;
     ncontour = 40;
   }
-  string ztitleDco = "Q [fC]";
+  string ztitleDco = "Charge [fC]";
   double zmaxDco = 20;
   ChannelTickHistCreator hcreateReco(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, 0, zmax, ncontour);
   ChannelTickHistCreator hcreateRecoNeg(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, -zmax, zmax, 2*ncontour);
   ChannelTickHistCreator hcreateRecoPeak(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, 0, 5*zmax, ncontour);
-  ChannelTickHistCreator hcreateDco(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitleDco, 0, zmaxDco, ncontour);
+  ChannelTickHistCreator hcreateDco(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitleDco, -zmaxDco, zmaxDco, 2*ncontour);
 
   // Formatting.
   int wnam = 12 + sevtf.size();                  // Base width for a histogram name.
