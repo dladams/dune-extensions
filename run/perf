@@ -53,7 +53,11 @@ fi
 
 echo Running...
 COM="lar -c $GFILE -s $INNAME.root -T $OUTNAME.root $ARGS"
-$COM 2>&1 | tee $OUTNAME.log
+echo $Log from $0 > $OUTNAME.log
+echo "Command $COM" >> $OUTNAME.log
+date >> $OUTNAME.log
+echo >> $OUTNAME.log
+$COM 2>&1 | tee -a $OUTNAME.log
 
 echo Done
 echo "             Command: $COM"

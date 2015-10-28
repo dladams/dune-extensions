@@ -39,6 +39,7 @@
   gROOT->ProcessLine(".L gettree.cxx+");
   gROOT->ProcessLine(".L draw.cxx+");
   gROOT->ProcessLine(".L drawpars.cxx+");
+  gROOT->ProcessLine(".L getLabel.cxx+");
   draw::set35t();
   draw::set10ktw();
   //gROOT->ProcessLine(".L detlar.cxx+");

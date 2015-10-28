@@ -75,6 +75,9 @@ add_subdirectory(exe)
 # Root scripts
 add_subdirectory(root)
 
+# Run scripts
+add_subdirectory(run)
+
 # tests
 add_subdirectory(test)
 
