@@ -300,7 +300,8 @@ private:
   // Tick range for histograms.
   unsigned int fTdcTickMin;         // First TDC bin to draw.
   unsigned int fTdcTickMax;         // Last+1 TDC bin to draw.
-  unsigned int fNTdcTickPerBin;     // Rebinning factor for ticks in channel-tick histograms.
+  unsigned int fNTdcTickPerBin;     // Tick rebinning factor for ticks in channel-tick histograms.
+  unsigned int fNChanPerBinForAll;  // Channel rebinning factor for all-detector channel-tick histos.
 
   // Geometry service.
   GeoHelper* fgeohelp;
@@ -448,6 +449,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fTdcTickMin                    = p.get<int>("TdcTickMin");
   fTdcTickMax                    = p.get<int>("TdcTickMax");
   fNTdcTickPerBin                = p.get<int>("NTdcTickPerBin");
+  fNChanPerBinForAll             = p.get<int>("NChanPerBinForAll");
   fmcpdsmax                      = p.get<double>("McParticleDsMax");
   fadcmevu                       = p.get<double>("AdcToMevConversionU");
   fadcmevv                       = p.get<double>("AdcToMevConversionV");
@@ -516,6 +518,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "TdcTickMin" << sep << fTdcTickMin << endl;
     cout << prefix << setw(wlab) << "TdcTickMax" << sep << fTdcTickMax << endl;
     cout << prefix << setw(wlab) << "NTdcTickPerBin" << sep << fNTdcTickPerBin << endl;
+    cout << prefix << setw(wlab) << "NChanPerBinForAll" << sep << fNChanPerBinForAll << endl;
     cout << prefix << setw(wlab) << "McParticleDsMax" << sep << fmcpdsmax << endl;
     cout << prefix << setw(wlab) << "AdcToMevConversionU" << sep << fadcmevu << endl;
     cout << prefix << setw(wlab) << "AdcToMevConversionV" << sep << fadcmevv << endl;
@@ -599,6 +602,8 @@ void DXDisplay::analyze(const art::Event& event) {
   ChannelTickHistCreator hcreateRecoNeg(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitle, -zmax, zmax, 2*ncontour, fNTdcTickPerBin);
   ChannelTickHistCreator hcreateRecoPeak(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitle, 0, 5*zmax, ncontour, fNTdcTickPerBin);
   ChannelTickHistCreator hcreateDco(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitleDco, -zmaxDco, zmaxDco, 2*ncontour, fNTdcTickPerBin);
+  // Hist creator for raw all channels.
+  ChannelTickHistCreator hcreateRawAll(htfs, sevt, fTdcTickMin, fTdcTickMax, "|ADC counts|", 0, zmax, ncontour, fNTdcTickPerBin, fNChanPerBinForAll);
 
   // Formatting.
   int wnam = 12 + sevtf.size();                  // Base width for a histogram name.
@@ -1125,12 +1130,17 @@ void DXDisplay::analyze(const art::Event& event) {
         if ( fdbg > 2 ) cout << myname << "Creating raw data histograms." << endl;
         for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
           TH2* ph = hcreateRecoNeg.create("raw" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
-                                         "Raw signals for " + geohelp.ropName(irop));
+                                          "Raw signals for " + geohelp.ropName(irop));
           if ( fdbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
           rawhists.push_back(ph);
           m_eventhists.push_back(ph);
         }
-  
+        TH2* phall = nullptr;
+        if ( fNChanPerBinForAll > 0 ) {
+          phall = hcreateRawAll.create("rawall", 0, geohelp.geometry()->Nchannels(),
+                                       "Raw signals for full detector");
+          m_eventhists.push_back(phall);
+        }
         if ( fdbg > 2 ) cout << myname << "Uncompressing data." << endl;
         bool first = true;
         for ( auto const& digit : (*rawDigitHandle) ) {
@@ -1173,6 +1183,7 @@ void DXDisplay::analyze(const art::Event& event) {
             if ( wt == 0 ) continue;
             if ( fhistusede ) wt *= adc2de(ichan);
             ph->Fill(tick, iropchan, wt);
+            if ( phall != nullptr ) phall->Fill(tick, ichan, fabs(wt));
           }
         }
         if ( fdbg > 4 ) cout << myname << "----------" << endl;
@@ -1183,6 +1194,7 @@ void DXDisplay::analyze(const art::Event& event) {
           for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
             summarize2dHist(rawhists[irop], myname, wnam, 4, 7);
           }
+          if ( phall != nullptr ) summarize2dHist(phall, myname, wnam, 4, 7);
         }
       }  // end DoRawSignalHists
 

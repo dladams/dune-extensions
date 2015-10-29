@@ -2,12 +2,14 @@
 
 #include "ChannelTickHistCreator.h"
 #include <iostream>
+#include <sstream>
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 #include "TH2.h"
 
 using std::string;
 using std::cout;
 using std::endl;
+using std::ostringstream;
 using art::TFileDirectory;
 
 //**********************************************************************
@@ -15,14 +17,15 @@ using art::TFileDirectory;
 ChannelTickHistCreator::
 ChannelTickHistCreator(TFileDirectory& tfs, string sevt, int tick1, int tick2, 
                        string zlab, double zmin, double zmax, int ncontour,
-                       unsigned int ntickperbin)
+                       unsigned int ntickperbin, unsigned int nchanperbin)
 : m_tfs(tfs),
   m_sevt(sevt),
   m_tickRange(tick1, tick2),
   m_zlab(zlab),
   m_zmin(zmin), m_zmax(zmax),
   m_ncontour(ncontour),
-  m_ntickperbin(ntickperbin) { }
+  m_ntickperbin(ntickperbin),
+  m_nchanperbin(nchanperbin) { }
 
 //**********************************************************************
 
@@ -34,6 +37,8 @@ create(string slab, unsigned int chan1, unsigned int chan2, string stitle,
   TH2* ph = nullptr;
   if ( chan2 <= chan1 ) return nullptr;
   int nchan = chan2 - chan1;
+  if ( m_nchanperbin > 1 ) nchan /= m_nchanperbin;
+  if ( nchan < 1 ) nchan = 1;
   int mtick1 = m_tickRange.first();
   int mtick2 = m_tickRange.last();
   int tick1 = mtick1;
@@ -64,12 +69,16 @@ create(string slab, unsigned int chan1, unsigned int chan2, string stitle,
   string hname = "h" + m_sevt + sevtNameSuffix + "_" + slab;
   string title = stitle + " event " + m_sevt;
   if ( sevtTitleSuffix.size() ) title += " " + sevtTitleSuffix;
-  title += ";TDC tick;Channel;" + m_zlab;
+  ostringstream sszlab;
+  sszlab << m_zlab;
+  if ( m_nchanperbin > 1 ) sszlab << " /(" << m_nchanperbin << " channels)";
+  if ( m_ntickperbin > 1 ) sszlab << " /(" << m_ntickperbin << " TDC ticks)";
+  title += ";TDC tick;Channel;" + sszlab.str();
   if ( dbg > 0 ) cout << myname << "Creating hit histo " << hname << " with " << ntick
                       << " TDC bins and " << nchan << " channel bins" << endl;
   if ( dbg > 1 ) cout << myname << "  Using TFileService." << endl;
   ph = m_tfs.make<TH2F>(hname.c_str(), title.c_str(),
-                          ntick, tick1, tick2, nchan, chan1, chan2);
+                        ntick, tick1, tick2, nchan, chan1, chan2);
   if ( ph == nullptr ) {
     cout << myname << "Unable to create histogram " << hname << endl;
   } else {
