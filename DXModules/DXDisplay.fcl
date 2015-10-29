@@ -164,6 +164,10 @@ physics:
       # Max number of sim channels.
       SimChannelSize:     10000
 
+      # Channel rebinning factor for all-detector channel-tick histos.
+      # IF zero, no such histos are created.
+      NChanPerBinForAll:      0
+
       # TDC range for histograms.
       TdcTickMin:          0
       TdcTickMax:       2800

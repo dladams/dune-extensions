@@ -32,10 +32,11 @@ public:  // methods
   //   zlab = z-axis lable, e.g. "ADC counts" or "Energy [MeV]"
   //   zmin, zmax = z-axis range
   //   ncontour = # contours for contour plotting
-  //   tickperbin = # ticks in each histogram bin
+  //   ntickperbin = Rebinning factor for ticks
+  //   nchanperbin = Rebinning factor for channels
   ChannelTickHistCreator(art::TFileDirectory& tfs, std::string sevt, int tick1, int tick2,
                          std::string zlab, double zmin, double zmax, int ncontour,
-                         unsigned int ntickperbin =1);
+                         unsigned int ntickperbin =1, unsigned int nchanperbin = 1);
 
   // Create a histogram for a given channel range.
   //   slab = Unique label, e.g. "hitapa2v" or "rawall"
@@ -58,6 +59,7 @@ private:  // data
   double m_zmax;
   int m_ncontour;
   unsigned int m_ntickperbin;
+  unsigned int m_nchanperbin;
 
 };
 
