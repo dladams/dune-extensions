@@ -298,8 +298,9 @@ private:
   unsigned int fscCapacity;
 
   // Tick range for histograms.
-  unsigned int ftdcTickMin;         // First TDC bin to draw.
-  unsigned int ftdcTickMax;         // Last+1 TDC bin to draw.
+  unsigned int fTdcTickMin;         // First TDC bin to draw.
+  unsigned int fTdcTickMax;         // Last+1 TDC bin to draw.
+  unsigned int fNTdcTickPerBin;     // Rebinning factor for ticks in channel-tick histograms.
 
   // Geometry service.
   GeoHelper* fgeohelp;
@@ -444,8 +445,9 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fUseSimChannelDescendants      = p.get<bool>("UseSimChannelDescendants");
   fBinSize                       = p.get<double>("BinSize");
   fscCapacity                    = p.get<double>("SimChannelSize");
-  ftdcTickMin                    = p.get<int>("TdcTickMin");
-  ftdcTickMax                    = p.get<int>("TdcTickMax");
+  fTdcTickMin                    = p.get<int>("TdcTickMin");
+  fTdcTickMax                    = p.get<int>("TdcTickMax");
+  fNTdcTickPerBin                = p.get<int>("NTdcTickPerBin");
   fmcpdsmax                      = p.get<double>("McParticleDsMax");
   fadcmevu                       = p.get<double>("AdcToMevConversionU");
   fadcmevv                       = p.get<double>("AdcToMevConversionV");
@@ -511,8 +513,9 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "UseSimChannelDescendants" << sep << fUseSimChannelDescendants << endl;
     cout << prefix << setw(wlab) << "BinSize" << sep << fBinSize << endl;
     cout << prefix << setw(wlab) << "SimChannelSize" << sep << fscCapacity << endl;
-    cout << prefix << setw(wlab) << "TdcTickMin" << sep << ftdcTickMin << endl;
-    cout << prefix << setw(wlab) << "TdcTickMax" << sep << ftdcTickMax << endl;
+    cout << prefix << setw(wlab) << "TdcTickMin" << sep << fTdcTickMin << endl;
+    cout << prefix << setw(wlab) << "TdcTickMax" << sep << fTdcTickMax << endl;
+    cout << prefix << setw(wlab) << "NTdcTickPerBin" << sep << fNTdcTickPerBin << endl;
     cout << prefix << setw(wlab) << "McParticleDsMax" << sep << fmcpdsmax << endl;
     cout << prefix << setw(wlab) << "AdcToMevConversionU" << sep << fadcmevu << endl;
     cout << prefix << setw(wlab) << "AdcToMevConversionV" << sep << fadcmevv << endl;
@@ -578,8 +581,8 @@ void DXDisplay::analyze(const art::Event& event) {
   art::TFileDirectory htfs = ptfs->mkdir("event" + sevt);
 
   // Channel-tick histogram creators for the simulation data products.
-  ChannelTickHistCreator hcreateSim(htfs, sevt, ftdcTickMin, ftdcTickMax, "Energy [MeV]", 0, 1.0, 20);
-  ChannelTickHistCreator hcreateSimPeak(htfs, sevt, ftdcTickMin, ftdcTickMax, "Energy [MeV]", 0, 5.0, 20);
+  ChannelTickHistCreator hcreateSim(htfs, sevt, fTdcTickMin, fTdcTickMax, "Energy [MeV]", 0, 1.0, 20, fNTdcTickPerBin);
+  ChannelTickHistCreator hcreateSimPeak(htfs, sevt, fTdcTickMin, fTdcTickMax, "Energy [MeV]", 0, 5.0, 20, fNTdcTickPerBin);
 
   // Channel-tick histogram creators for the reconstructed data products.
   string ztitle = "ADC counts";
@@ -592,10 +595,10 @@ void DXDisplay::analyze(const art::Event& event) {
   }
   string ztitleDco = "Charge [fC]";
   double zmaxDco = 20;
-  ChannelTickHistCreator hcreateReco(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, 0, zmax, ncontour);
-  ChannelTickHistCreator hcreateRecoNeg(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, -zmax, zmax, 2*ncontour);
-  ChannelTickHistCreator hcreateRecoPeak(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitle, 0, 5*zmax, ncontour);
-  ChannelTickHistCreator hcreateDco(htfs, sevt, ftdcTickMin, ftdcTickMax, ztitleDco, -zmaxDco, zmaxDco, 2*ncontour);
+  ChannelTickHistCreator hcreateReco(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitle, 0, zmax, ncontour, fNTdcTickPerBin);
+  ChannelTickHistCreator hcreateRecoNeg(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitle, -zmax, zmax, 2*ncontour, fNTdcTickPerBin);
+  ChannelTickHistCreator hcreateRecoPeak(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitle, 0, 5*zmax, ncontour, fNTdcTickPerBin);
+  ChannelTickHistCreator hcreateDco(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitleDco, -zmaxDco, zmaxDco, 2*ncontour, fNTdcTickPerBin);
 
   // Formatting.
   int wnam = 12 + sevtf.size();                  // Base width for a histogram name.

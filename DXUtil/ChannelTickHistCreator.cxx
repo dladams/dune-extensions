@@ -14,13 +14,15 @@ using art::TFileDirectory;
 
 ChannelTickHistCreator::
 ChannelTickHistCreator(TFileDirectory& tfs, string sevt, int tick1, int tick2, 
-                       string zlab, double zmin, double zmax, int ncontour)
+                       string zlab, double zmin, double zmax, int ncontour,
+                       unsigned int ntickperbin)
 : m_tfs(tfs),
   m_sevt(sevt),
   m_tickRange(tick1, tick2),
   m_zlab(zlab),
   m_zmin(zmin), m_zmax(zmax),
-  m_ncontour(ncontour) { }
+  m_ncontour(ncontour),
+  m_ntickperbin(ntickperbin) { }
 
 //**********************************************************************
 
@@ -56,7 +58,9 @@ create(string slab, unsigned int chan1, unsigned int chan2, string stitle,
     // Check if ther is no overlap between object and requested ranges.
     if ( tick2 <= tick1 ) return nullptr;
   }
-  int ntick = tick2 - tick1;
+  unsigned int ntick = tick2 - tick1;
+  if ( m_ntickperbin > 1 ) ntick /= m_ntickperbin;
+  if ( ntick < 1 ) ntick = 1;
   string hname = "h" + m_sevt + sevtNameSuffix + "_" + slab;
   string title = stitle + " event " + m_sevt;
   if ( sevtTitleSuffix.size() ) title += " " + sevtTitleSuffix;

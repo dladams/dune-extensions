@@ -165,8 +165,9 @@ physics:
       SimChannelSize:     10000
 
       # TDC range for histograms.
-      TdcTickMin:      0
-      TdcTickMax:  32000
+      TdcTickMin:          0
+      TdcTickMax:       2800
+      TdcNTickPerBin:      1
 
       # Maximum step size [cm] for filling the MC Particle trajectory histograms
       McParticleDsMax: 0.05
