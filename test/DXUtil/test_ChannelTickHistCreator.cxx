@@ -53,7 +53,7 @@ int test_ChannelTickHistCreator() {
   // Create histogram creator.
   cout << myname << line << endl;
   cout << myname << "Create histogram creator." << endl;
-  ChannelTickHistCreator cthc(*pfs, "123", 0.0, 1000, "ADC counts", 0, 200, 8);
+  ChannelTickHistCreator cthc(*pfs, "123", 0.0, 1000, "ADC counts", 0, 200, 8, 10);
 
   cout << myname << line << endl;
   cout << myname << "Create a histogram." << endl;
@@ -63,6 +63,8 @@ int test_ChannelTickHistCreator() {
   assert( pobj != nullptr );
   assert( pobj != nullptr );
   TH2* ph2 = dynamic_cast<TH2*>(pobj);
+  int nbinx = ph2->GetXaxis()->GetNbins();
+  int nbiny = ph2->GetYaxis()->GetNbins();
   assert( ph2 != nullptr );
   cout << myname << "Histogram ranges: "  << endl;
   cout << myname << "  Xmin: " << ph2->GetXaxis()->GetXmin() << endl;
@@ -71,6 +73,8 @@ int test_ChannelTickHistCreator() {
   cout << myname << "  Ymax: " << ph2->GetYaxis()->GetXmax() << endl;
   cout << myname << "  Zmin: " << ph2->GetMinimum() << endl;
   cout << myname << "  Zmax: " << ph2->GetMaximum() << endl;
+  cout << myname << "  # X-bin: " << nbinx << endl;
+  cout << myname << "  # Y-bin: " << nbiny << endl;
   cout << myname << "  # contours: " << ph2->GetContour() << endl;
   assert( ph2->GetXaxis()->GetXmin() ==  50 );
   assert( ph2->GetXaxis()->GetXmax() == 300 );
@@ -79,6 +83,8 @@ int test_ChannelTickHistCreator() {
   assert( ph2->GetMinimum() ==   0 );
   assert( ph2->GetMaximum() == 200 );
   assert( ph2->GetContour() == 8 );
+  assert( nbinx ==  25 );
+  assert( nbiny == 128 );
 
   cout << myname << line << endl;
   cout << myname << "Close services." << endl;
