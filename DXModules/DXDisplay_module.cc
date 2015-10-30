@@ -298,10 +298,11 @@ private:
   unsigned int fscCapacity;
 
   // Tick range for histograms.
-  unsigned int fTdcTickMin;         // First TDC bin to draw.
-  unsigned int fTdcTickMax;         // Last+1 TDC bin to draw.
-  unsigned int fNTdcTickPerBin;     // Tick rebinning factor for ticks in channel-tick histograms.
-  unsigned int fNChanPerBinForAll;  // Channel rebinning factor for all-detector channel-tick histos.
+  unsigned int fTdcTickMin;        // First TDC bin to draw.
+  unsigned int fTdcTickMax;        // Last+1 TDC bin to draw.
+  unsigned int fNTickPerBin;       // Tick rebinning factor for ticks in channel-tick histograms.
+  unsigned int fNTickPerBinForAll; // Tick rebinning factor for ticks in all-detector channel-tick histos.
+  unsigned int fNChanPerBinForAll; // Channel rebinning factor for all-detector channel-tick histos.
 
   // Geometry service.
   GeoHelper* fgeohelp;
@@ -448,7 +449,8 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fscCapacity                    = p.get<double>("SimChannelSize");
   fTdcTickMin                    = p.get<int>("TdcTickMin");
   fTdcTickMax                    = p.get<int>("TdcTickMax");
-  fNTdcTickPerBin                = p.get<int>("NTdcTickPerBin");
+  fNTickPerBin                   = p.get<int>("NTickPerBin");
+  fNTickPerBinForAll             = p.get<int>("NTickPerBinForAll");
   fNChanPerBinForAll             = p.get<int>("NChanPerBinForAll");
   fmcpdsmax                      = p.get<double>("McParticleDsMax");
   fadcmevu                       = p.get<double>("AdcToMevConversionU");
@@ -517,7 +519,8 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "SimChannelSize" << sep << fscCapacity << endl;
     cout << prefix << setw(wlab) << "TdcTickMin" << sep << fTdcTickMin << endl;
     cout << prefix << setw(wlab) << "TdcTickMax" << sep << fTdcTickMax << endl;
-    cout << prefix << setw(wlab) << "NTdcTickPerBin" << sep << fNTdcTickPerBin << endl;
+    cout << prefix << setw(wlab) << "NTickPerBin" << sep << fNTickPerBin << endl;
+    cout << prefix << setw(wlab) << "NTickPerBinForAll" << sep << fNTickPerBinForAll << endl;
     cout << prefix << setw(wlab) << "NChanPerBinForAll" << sep << fNChanPerBinForAll << endl;
     cout << prefix << setw(wlab) << "McParticleDsMax" << sep << fmcpdsmax << endl;
     cout << prefix << setw(wlab) << "AdcToMevConversionU" << sep << fadcmevu << endl;
@@ -584,8 +587,8 @@ void DXDisplay::analyze(const art::Event& event) {
   art::TFileDirectory htfs = ptfs->mkdir("event" + sevt);
 
   // Channel-tick histogram creators for the simulation data products.
-  ChannelTickHistCreator hcreateSim(htfs, sevt, fTdcTickMin, fTdcTickMax, "Energy [MeV]", 0, 1.0, 20, fNTdcTickPerBin);
-  ChannelTickHistCreator hcreateSimPeak(htfs, sevt, fTdcTickMin, fTdcTickMax, "Energy [MeV]", 0, 5.0, 20, fNTdcTickPerBin);
+  ChannelTickHistCreator hcreateSim(htfs, sevt, fTdcTickMin, fTdcTickMax, "Energy [MeV]", 0, 1.0, 20, fNTickPerBin);
+  ChannelTickHistCreator hcreateSimPeak(htfs, sevt, fTdcTickMin, fTdcTickMax, "Energy [MeV]", 0, 5.0, 20, fNTickPerBin);
 
   // Channel-tick histogram creators for the reconstructed data products.
   string ztitle = "ADC counts";
@@ -598,12 +601,13 @@ void DXDisplay::analyze(const art::Event& event) {
   }
   string ztitleDco = "Charge [fC]";
   double zmaxDco = 20;
-  ChannelTickHistCreator hcreateReco(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitle, 0, zmax, ncontour, fNTdcTickPerBin);
-  ChannelTickHistCreator hcreateRecoNeg(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitle, -zmax, zmax, 2*ncontour, fNTdcTickPerBin);
-  ChannelTickHistCreator hcreateRecoPeak(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitle, 0, 5*zmax, ncontour, fNTdcTickPerBin);
-  ChannelTickHistCreator hcreateDco(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitleDco, -zmaxDco, zmaxDco, 2*ncontour, fNTdcTickPerBin);
-  // Hist creator for raw all channels.
-  ChannelTickHistCreator hcreateRawAll(htfs, sevt, fTdcTickMin, fTdcTickMax, "|ADC counts|", 0, zmax, ncontour, fNTdcTickPerBin, fNChanPerBinForAll);
+  ChannelTickHistCreator hcreateReco(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitle, 0, zmax, ncontour, fNTickPerBin);
+  ChannelTickHistCreator hcreateRecoNeg(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitle, -zmax, zmax, 2*ncontour, fNTickPerBin);
+  ChannelTickHistCreator hcreateRecoPeak(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitle, 0, 5*zmax, ncontour, fNTickPerBin);
+  ChannelTickHistCreator hcreateDco(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitleDco, -zmaxDco, zmaxDco, 2*ncontour, fNTickPerBin);
+  // Hist creators for all channels.
+  ChannelTickHistCreator hcreateMcsAll(htfs, sevt, fTdcTickMin, fTdcTickMax, "Energy [MeV]", 0, zmax, ncontour, fNTickPerBinForAll, fNChanPerBinForAll);
+  ChannelTickHistCreator hcreateRawAll(htfs, sevt, fTdcTickMin, fTdcTickMax, "|ADC counts|", 0, zmax, ncontour, fNTickPerBinForAll, fNChanPerBinForAll);
 
   // Formatting.
   int wnam = 12 + sevtf.size();                  // Base width for a histogram name.
@@ -1136,7 +1140,7 @@ void DXDisplay::analyze(const art::Event& event) {
           m_eventhists.push_back(ph);
         }
         TH2* phall = nullptr;
-        if ( fNChanPerBinForAll > 0 ) {
+        if ( fNTickPerBinForAll > 0 && fNChanPerBinForAll > 0 ) {
           phall = hcreateRawAll.create("rawall", 0, geohelp.geometry()->Nchannels(),
                                        "Raw signals for full detector");
           m_eventhists.push_back(phall);
