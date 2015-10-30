@@ -164,14 +164,15 @@ physics:
       # Max number of sim channels.
       SimChannelSize:     10000
 
-      # Channel rebinning factor for all-detector channel-tick histos.
-      # IF zero, no such histos are created.
+      # Rebinning factors for all-detector channel-tick histos.
+      # If either is zero, no such histos are created.
+      NTickPerBinForAll:      0
       NChanPerBinForAll:      0
 
       # TDC range for histograms.
       TdcTickMin:          0
       TdcTickMax:       2800
-      TdcNTickPerBin:      1
+      NTickPerBin:      1
 
       # Maximum step size [cm] for filling the MC Particle trajectory histograms
       McParticleDsMax: 0.05
