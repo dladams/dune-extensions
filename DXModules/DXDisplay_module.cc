@@ -925,6 +925,7 @@ void DXDisplay::analyze(const art::Event& event) {
   //************************************************************************
 
   TpcSignalMapVector selectedMcTpcSignalMapsSCbyROP;
+  TpcSignalMapPtr ptpsim;
   if ( fDoSimChannels ) {
 
     // Get all the simulated channels for the event. These channels
@@ -940,7 +941,7 @@ void DXDisplay::analyze(const art::Event& event) {
 
     // Signal map for all sim hits and same split by ROP. 
     bool usetpc = true;
-    TpcSignalMapPtr ptpsim(new TpcSignalMap("allsim", fgeohelp, usetpc));
+    ptpsim.reset(new TpcSignalMap("allsim", fgeohelp, usetpc));
     TpcSignalMapVector tpsimByRop;
    
     // Add sim channel info and hits to the sim channel signal maps.
@@ -1023,12 +1024,14 @@ void DXDisplay::analyze(const art::Event& event) {
     }  // end DoMcTpcSignalMaps
 
     // Create the Sim channel histograms:
-    // one for each plane with all sim hits
-    // one for each plane with all selected particles.
-    // and one for each plane and selected particle.
+    // one for each plane with all sim hits,
+    // one for full detector with all sim hits,
+    // one for each plane with all selected particles,
+    // one for each plane and selected particle,
+    // and one for full detector and each selected particle.
     if ( fDoSimChannelSignalHists ) {
   
-      // All sim hits.
+      // All sim hits for each ROP.
       vector<TH2*> spahists;
       for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
         TH2* ph = hcreateSim.create("sim" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
@@ -1069,7 +1072,7 @@ void DXDisplay::analyze(const art::Event& event) {
       }
   
       // Create the Sim channel histograms: one for each plane and selected particle.
-      cout << myname << "Summary of SimChannel histograms for each selected particle:" << endl;
+      cout << myname << "Summary of per-TPC SimChannel histograms for each selected particle:" << endl;
       for ( const auto pmctp : selectedMcTpcSignalMapsSCbyROP ) {
         unsigned int itrk = pmctp->mcinfo()->trackID;
         ostringstream sstrk;
@@ -1077,12 +1080,44 @@ void DXDisplay::analyze(const art::Event& event) {
         string strk = sstrk.str();
         Index irop = pmctp->rop();
         TH2* ph = hcreateSim.create(pmctp->name(), 0, geohelp.ropNChannel(irop),
-                                     "Sim channels for " + geohelp.ropName(irop),
-                                     "", "MC particle " + strk, pmctp->tickRange());
+                                    "Sim channels for " + geohelp.ropName(irop),
+                                    "", "MC particle " + strk, pmctp->tickRange());
         if ( ph != nullptr ) {
           m_eventhists.push_back(ph);
           pmctp->fillRopChannelTickHist(ph, irop);
           summarize2dHist(ph, myname, wnam+8, 4, 4);
+        }
+      }
+
+      // All sim hits for full detector.
+      TH2* phall = nullptr;
+      if ( fNTickPerBinForAll > 0 && fNChanPerBinForAll > 0 ) {
+        cout << myname << "Summary of SimChannel histogram for full detector and all particles:" << endl;
+        phall = hcreateMcsAll.create("mcsall", 0, geohelp.geometry()->Nchannels(), "Sim channels for full detector");
+        m_eventhists.push_back(phall);
+        ptpsim->fillChannelTickHist(phall);
+        summarize2dHist(phall, myname, wnam, 4, 4);
+      }
+
+      // Create full-detector SimChannel histos for each selected particle.
+      // These are filled for the full tick range.
+      if ( fNTickPerBinForAll > 0 && fNChanPerBinForAll > 0 ) {
+        cout << myname << "Summary of full-detector SimChannel histograms for each selected particle:" << endl;
+        for ( const auto pmctp : selectedMcTpcSignalMapsSC ) {
+          unsigned int itrk = pmctp->mcinfo()->trackID;
+          ostringstream sstrk;
+          sstrk << itrk;
+          string strk = sstrk.str();
+          //TH2* ph = hcreateMcsAll.create(pmctp->name(), 0, geohelp.geometry()->Nchannels(),
+          //                               "Sim channels for full detector", 
+          //                               "", "MC particle " + strk, pmctp->tickRange());
+          TH2* ph = hcreateMcsAll.create(pmctp->name(), 0, geohelp.geometry()->Nchannels(),
+                                         "Sim channels for full detector", "", "MC particle " + strk);
+          if ( ph != nullptr ) {
+            m_eventhists.push_back(ph);
+            pmctp->fillChannelTickHist(ph);
+            summarize2dHist(ph, myname, wnam+8, 4, 4);
+          }
         }
       }
   
