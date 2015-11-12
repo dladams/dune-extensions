@@ -40,6 +40,7 @@
   gROOT->ProcessLine(".L draw.cxx+");
   gROOT->ProcessLine(".L drawpars.cxx+");
   gROOT->ProcessLine(".L getLabel.cxx+");
+  gROOT->ProcessLine(".L HistoCompare.cxx+");
   draw::set35t();
   draw::set10ktw();
   //gROOT->ProcessLine(".L detlar.cxx+");
