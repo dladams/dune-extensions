@@ -23,7 +23,7 @@ using std::endl;
 using std::hex;
 using std::dec;
 
-int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.0) {
+int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.0, double zmax =0.0) {
   const string myname = "draw: ";
   if ( name == "help" ) {
     cout << myname << endl;
@@ -72,7 +72,6 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
   }
   // Early draw to make palette available
   double zmin = phnew->GetMinimum();
-  cout << "zmin: " << zmin << endl;
   if ( zmin < 0.0 ) palette(2);
   else palette(1);
   // Draw canvas and determine set palette parameters.
@@ -202,6 +201,14 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
   //phdraw->GetListOfFunctions()->Print(); 
   if ( !add &&  xmax > xmin ) {
     phdraw->GetXaxis()->SetRangeUser(xmin, xmax);
+    phdraw->Draw(dopt.c_str());
+  }
+  if ( !add &&  zmax > 0.0 ) {
+    cout << "Changing z limits to zmax = " << zmax << "." << endl;
+    phdraw->SetMaximum(zmax);
+    if ( phdraw->GetMinimum() < 0.0 ) {
+      phdraw->SetMinimum(-zmax);
+    }
     phdraw->Draw(dopt.c_str());
   }
   gPad->Update();
