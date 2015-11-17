@@ -24,15 +24,19 @@ public:
   int compare(std::string hname);
 
   // Make comparison for all 35t planes: apa0u, ..., apa3z2
+  // Returns the number of channels that differ.
   // If evt1 > 0, comparison is made for hevt1_hpre, ..., hevt2_hpre
+  // Then returns the number of histograms that differ.
   int compare35t(std::string hpre, int evt1=0, int evt2=1);
 
   // Data.
   std::string fname1;
   std::string fname2;
   int dbg;
-  int nbad;
   int nbin;
+  int nbinbad;
+  int nhst; 
+  int nhstbad; 
 
 };
 
