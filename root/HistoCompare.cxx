@@ -2,10 +2,25 @@
 
 #include "HistoCompare.h"
 #include <iostream>
+#include <sstream>
 
 using std::string;
 using std::cout;
 using std::endl;
+using std::vector;
+using std::ostringstream;
+
+namespace {
+
+const vector<string> apas35t() {
+  vector<string> apas = {"0u", "0v", "0z1", "0z2",
+                         "1u", "1v", "1z1", "1z2",
+                         "2u", "2v", "2z1", "2z2",
+                         "3u", "3v", "3z1", "3z2"};
+  return apas;
+};
+
+}
 
 //**********************************************************************
 
@@ -102,14 +117,18 @@ int HistoCompare::compare(string hname) {
 
 //**********************************************************************
 
-int HistoCompare::compare35t(string hpre) {
+int HistoCompare::compare35t(string hpre, int evt1, int evt2) {
   nbad = 0;
+  if ( evt1 > 0 ) {
+    for ( int evt=evt1; evt<=evt2; ++evt ) {
+      ostringstream sspre;
+      sspre << "h" << evt << "_" << hpre;
+      nbad += compare35t(sspre.str());
+    }
+    return nbad;
+  }
   nbin = 0;
-  vector<string> apas = {"0u", "0v", "0z1", "0z2",
-                         "1u", "1v", "1z1", "1z2",
-                         "2u", "2v", "2z1", "2z2",
-                         "3u", "3v", "3z1", "3z2"};
-  for ( string sapa : apas ) {
+  for ( string sapa : apas35t() ) {
     string hname = hpre + "apa" + sapa;
     HistoCompare hc(fname1, fname2);
     hc.dbg = 0;

@@ -24,7 +24,8 @@ public:
   int compare(std::string hname);
 
   // Make comparison for all 35t planes: apa0u, ..., apa3z2
-  int compare35t(std::string hpre);
+  // If evt1 > 0, comparison is made for hevt1_hpre, ..., hevt2_hpre
+  int compare35t(std::string hpre, int evt1=0, int evt2=1);
 
   // Data.
   std::string fname1;
