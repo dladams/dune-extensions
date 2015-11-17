@@ -125,18 +125,24 @@ int HistoCompare::compare35t(string hpre, int evt1, int evt2) {
   nhst = 0;
   nbinbad = 0;
   nhstbad = 0;
+  int nerr = 0;
   if ( evt1 > 0 ) {
     for ( int evt=evt1; evt<=evt2; ++evt ) {
       ostringstream sspre;
       sspre << "h" << evt << "_" << hpre;
       HistoCompare hc(fname1, fname2);
       hc.compare35t(sspre.str());
-      nbin += hc.nbin;
-      nhst += hc.nhst;
-      nbinbad += hc.nbinbad;
-      nhstbad += hc.nhstbad;
+      if ( hc.nbinbad >= 0 ) {
+        nbin += hc.nbin;
+        nhst += hc.nhst;
+        nbinbad += hc.nbinbad;
+        nhstbad += hc.nhstbad;
+      } else {
+        ++nerr;
+      }
     }
-    return nhst;
+    if ( nerr ) return nbinbad = nhstbad = -10*nerr;
+    return nhstbad;
   }
   for ( string sapa : apas35t() ) {
     string hname = hpre + "apa" + sapa;
