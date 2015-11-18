@@ -33,14 +33,14 @@ TH1* getHist(TDirectory* apdir, string name, int dbg) {
   pdir->cd();
   pdir->Cd("DXDisplay");
   pdir = gDirectory;
-  if ( dbg ) cout << "Looking for object." << endl;
+  if ( dbg > 2 ) cout << "Looking for object." << endl;
   pdir->GetObject(name.c_str(), pobj);
   if ( pobj == 0 ) {
     size_t i1 = name.find('h') + 1;
     size_t i2 = name.find('_');
     if ( i1 ==1 && i2 != string::npos && i2 > i1) {
       string sevt = "event" + name.substr(i1, i2-i1);
-      if ( dbg ) cout << myname << "Trying event directory " << sevt << " for " << name << endl;
+      if ( dbg > 2 ) cout << myname << "Trying event directory " << sevt << " for " << name << endl;
       string savedir = pdir->GetPath();
       if ( pdir->cd(sevt.c_str()) ) {
         gDirectory->GetObject(name.c_str(), pobj);
@@ -58,10 +58,10 @@ TH1* getHist(TDirectory* apdir, string name, int dbg) {
 
 //**********************************************************************
 
-HistoCompare::HistoCompare(string afname1, string afname2)
+HistoCompare::HistoCompare(string afname1, string afname2, int adbg)
 : fname1(afname1),
   fname2(afname2),
-  dbg(1),
+  dbg(adbg),
   nbin(0), nbinbad(0), nhst(0), nhstbad(0) { }
 
 //**********************************************************************
@@ -102,7 +102,7 @@ int HistoCompare::compare(string hname) {
     for ( int ix=0; ix<=nx; ++ix ) {
       float val1 = ph1->GetBinContent(ix, iy);
       float val2 = ph2->GetBinContent(ix, iy);
-      if ( dbg > 1 ) cout << "  Bin " << ix << "-" << iy << ": " << val1 << " " << val2 << endl;
+      if ( (dbg == 1 && val1 != val2) || dbg > 2 ) cout << "  Bin " << ix << "-" << iy << ": " << val1 << " " << val2 << endl;
       bool same = val1 == val2;
       if ( ! same ) ++nbinbad;
       ++nbin;
@@ -130,7 +130,7 @@ int HistoCompare::compare35t(string hpre, int evt1, int evt2) {
     for ( int evt=evt1; evt<=evt2; ++evt ) {
       ostringstream sspre;
       sspre << "h" << evt << "_" << hpre;
-      HistoCompare hc(fname1, fname2);
+      HistoCompare hc(fname1, fname2, dbg);
       hc.compare35t(sspre.str());
       if ( hc.nbinbad >= 0 ) {
         nbin += hc.nbin;
@@ -146,8 +146,7 @@ int HistoCompare::compare35t(string hpre, int evt1, int evt2) {
   }
   for ( string sapa : apas35t() ) {
     string hname = hpre + "apa" + sapa;
-    HistoCompare hc(fname1, fname2);
-    hc.dbg = 0;
+    HistoCompare hc(fname1, fname2, dbg);
     int icstat = hc.compare(hname);
     if ( icstat < 0 ) {
       return nhstbad = icstat;
