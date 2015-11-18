@@ -17,7 +17,9 @@ class HistoCompare {
 public:
 
   // Ctor from the two input files.
-  HistoCompare(std::string afname1, std::string afname2);
+  // dbg = 1 shows values for differing channels
+  // dbg = 2 shows values for all channels
+  HistoCompare(std::string afname1, std::string afname2, int adbg =0);
 
   // Compare histogram with same name in the two files.
   // Returns the number of differing bins (nbad).
