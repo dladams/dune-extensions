@@ -1,5 +1,24 @@
 #!/bin/bash
 
+HELP=
+INFILE=
+while getopts hi: OPT; do
+  case $OPT in
+  h) HELP=true;;
+  i) INFILE=$OPTARG;;
+  esac
+done
+shift $(( OPTIND-1 ))
+
+if [ -n "$HELP" ]; then
+  echo Usage: $0 [-h] [-i INFILE] ARGS
+  echo Starts Root with the argment list ARGS.
+  echo Options:
+  echo "  -h: Show this message and exit."
+  echo "  -i: Open DXDISPLAY file INFILE before processing ARGS"
+  exit 0
+fi
+
 # Find the root script directory.
 if [ -z "$DUNE_EXTENSIONS_ROOTSCRIPTS" ]; then
   if [ -n "$DUNE_EXTENSIONS_DIR" ]; then
@@ -26,4 +45,10 @@ if [ ! -r rootlogon.C ]; then
   fi
   cp $FILE rootlogon.C
 fi
-root.exe $*
+
+ARG=
+if [ -n "$INFILE" ]; then
+  ARG='dxopen.C("'$INFILE'")'
+fi
+
+root.exe $ARG $*

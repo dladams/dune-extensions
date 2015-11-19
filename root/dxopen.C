@@ -1,0 +1,75 @@
+// dune_extensions/root/dxopen.C
+//
+// David Adams
+// November 2015
+//
+// Root macro top open a DXDISPLAY file and move to the
+// corresponding directory.
+
+TFile* gDXFile = 0;
+
+// Open a file by name.
+int dxopen(string ifname) {
+  const string myname = "dxopen: ";
+  TFile* pfile = TFile::Open(ifname.c_str());
+  if ( pfile == 0 || ! pfile->IsOpen() ) {
+    cout << myname << "Input file not found: " << ifname << endl;
+    return 1;
+  }
+  cout << myname << "Opened file " << pfile->GetName() << endl;
+  return dxopen(pfile);
+}
+
+// Initialize use of an open DXDISPLAY file.
+int dxopen(TFile* pfile) {
+  const string myname = "dxopen: ";
+  if ( pfile == 0 ) return 2;
+  pfile->cd();
+  if ( ! pfile->cd("DXDisplay") ) {
+    cout << myname << "Closing non-DXDisplay file " << pfile->GetName() << endl;
+    pfile->Close();
+    return 3;
+  }
+  gFile = pfile;
+  if ( gDXFile != 0 && gDXFile != pfile ) {
+    cout << myname << "Closing DXDisplay file " << gDXFile->GetName() << endl;
+    gDXFile->Close();
+  }
+  gDXFile = pfile;
+  if ( mcptree("McParticleTree") ) mcptree()->SetMarkerStyle(2);
+  if ( perftree("McPerfTree") ) perftree()->SetMarkerStyle(2);
+  return 0;
+}
+
+// Find a DXDISPLAY root file in an array of file names.
+// Open it and remove that name from the array.
+int dxopen(TObjArray* pobjs) {
+  if ( pobjs == 0 ) return 4;
+  for ( int iobj=0; iobj<pobjs->GetEntries(); ++iobj ) {
+    TObject* pobj = pobjs->At(iobj);
+    if ( pobj == 0 ) continue;
+    TObjString* pos = dynamic_cast<TObjString*>(pobj);
+    if ( pos == 0 ) continue;
+    string fname = pos->GetString();
+    int rstat = dxopen(fname);
+    if ( rstat == 0 ) {
+      pobjs->RemoveAt(iobj);
+      return 0;
+    }
+  }
+}
+
+// Open the current DXDisplay file.
+int dxopen() {
+  const string myname = "dxopen: ";
+  if ( gDXFile == 0 ) return 0;
+  string fname = gDXFile->GetName();
+  int rstat = dxopen(gDXFile);
+  if ( rstat ! = 0 ) {
+    cout << myname << "Unable to open DXDisplay file " << fname << endl;
+    cout << myname << "Error " << rstat << "." << endl;
+    return rstat;
+  }
+  cout << "DXDisplay file is " << gDXFile->GetName() << endl;
+  return 0;
+}
