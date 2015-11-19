@@ -10,7 +10,14 @@
 //   setup dune_extensions v00_00_03 -q e7:prof
 
 {
+  cout << "Welcome to DXRoot." << endl;
+
+  string mpath = TROOT::GetMacroPath();
+  mpath += "$DUNE_EXTENSIONS_ROOTSCRIPTS:";
+  TROOT::SetMacroPath(mpath.c_str());
+  gSystem->AddIncludePath("-I$DUNE_EXTENSIONS_ROOTSCRIPTS");
   gSystem->SetBuildDir(".aclic");
+
   gSystem->AddIncludePath("-I$BOOST_INC");
   //gSystem->AddIncludePath("-DBOOST_NO_CWCHAR");
   gSystem->AddIncludePath("-I$CPP0X_INC");
@@ -21,6 +28,7 @@
   gSystem->AddIncludePath("-I$DUNETPC_INC");
   gSystem->AddIncludePath("-I$ART_EXTENSIONS_INC");
   gSystem->AddIncludePath("-I$DUNE_EXTENSIONS_INC");
+
   gSystem->AddDynamicPath("-L$FHICLCPP_LIB -lfhiclcpp");
   gSystem->AddLinkedLibs("$CETLIB_LIB/libcetlib.so");
   gSystem->AddLinkedLibs("$FHICLCPP_LIB/libfhiclcpp.so");
@@ -28,27 +36,28 @@
   gSystem->AddLinkedLibs("$DUNETPC_LIB/libdune_Geometry.so");
   gSystem->AddLinkedLibs("$DUNE_EXTENSIONS_LIB/libDXUtil.so");
   gSystem->AddLinkedLibs("$DUNE_EXTENSIONS_LIB/libDXGeometry.so");
-  string ifname = "perf.root";
-  TFile* pfile = TFile::Open(ifname.c_str());
-  if ( pfile == 0 || ! pfile.IsOpen() ) {
-    cout << "Input file not found: " << ifname << endl;
-  } else {
-    pfile->cd("DXDisplay");
-  }
+
   gROOT->ProcessLine(".L palette.cxx+");
   gROOT->ProcessLine(".L gettree.cxx+");
   gROOT->ProcessLine(".L draw.cxx+");
   gROOT->ProcessLine(".L drawpars.cxx+");
   gROOT->ProcessLine(".L getLabel.cxx+");
   gROOT->ProcessLine(".L HistoCompare.cxx+");
+
   draw::set35t();
   draw::set10ktw();
+
   //gROOT->ProcessLine(".L detlar.cxx+");
   gROOT->ProcessLine(".L drawTracks.C");
+  gROOT->ProcessLine(".L dxopen.C");
+
   gStyle->SetPadRightMargin(0.14);   // For 2D plots
-  if ( mcptree("McParticleTree") ) mcptree()->SetMarkerStyle(2);
-  if ( perftree("McPerfTree") ) perftree()->SetMarkerStyle(2);
-  }
   gStyle->SetTitleY(0.97);
+
+  if ( dxopen(gApplication->InputFiles()) == 0 ) {
+    cout << "Opened DXDisplay file " << gFile->GetName() << endl;
+  } else {
+    cout << "No DXDISPLAY input file specified." << endl;
+  }
 
 }
