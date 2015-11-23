@@ -47,6 +47,7 @@
   draw::set35t();
   draw::set10ktw();
 
+  gROOT->ProcessLine(".L ex2dhist.C");
   //gROOT->ProcessLine(".L detlar.cxx+");
   gROOT->ProcessLine(".L drawTracks.C");
   gROOT->ProcessLine(".L dxopen.C");
