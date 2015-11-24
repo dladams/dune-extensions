@@ -43,10 +43,13 @@
   gROOT->ProcessLine(".L drawpars.cxx+");
   gROOT->ProcessLine(".L getLabel.cxx+");
   gROOT->ProcessLine(".L HistoCompare.cxx+");
+  gROOT->ProcessLine(".L slidingWindow.cxx+");
 
   draw::set35t();
   draw::set10ktw();
 
+  gROOT->ProcessLine(".L fix2dcanvas.C");
+  gROOT->ProcessLine(".L ex2dhist.C");
   //gROOT->ProcessLine(".L detlar.cxx+");
   gROOT->ProcessLine(".L drawTracks.C");
   gROOT->ProcessLine(".L dxopen.C");
