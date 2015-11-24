@@ -19,6 +19,7 @@ int ex2dhist() {
   ph2->SetMinimum(-10);
   ph2->SetMaximum( 10);
   new TCanvas("colz1", "colz1", 700, 700);
+  fix2dcanvas();  // Needed in Root 5.34.
   ph2->Draw("colz1");
   return 0;
 }
