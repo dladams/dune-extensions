@@ -15,6 +15,7 @@
 #include "TCanvas.h"
 #include "TPaletteAxis.h"
 #include "palette.h"
+#include "addaxis.h"
 
 using std::string;
 using std::ostringstream;
@@ -144,8 +145,8 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
     ppalax->SetTitleOffset(paltoff);
     // Set axis parameters.
     //ph2->SetTitleOffset(toff);   // Sets x-axis label!!
+    phdraw->SetTickLength(0.010, "X");
     phdraw->SetTickLength(0.010, "Y");
-    phdraw->SetTickLength(0.010, "Z");
     phdraw->GetYaxis()->SetTitleOffset(axyoff);
     // Add projection hists.
     string hprx_name = phdraw->GetName();
@@ -212,5 +213,6 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
     phdraw->Draw(dopt.c_str());
   }
   gPad->Update();
+  addaxis(phdraw);
   return 0;
 }
