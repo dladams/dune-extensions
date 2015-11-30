@@ -1,4 +1,4 @@
-// fix2dcanvas.C
+// fix2dcanvas.h
 //
 // David Adams
 // November 2015
@@ -7,6 +7,9 @@
 // background color to the first color in the palette.
 // This fixed COLZ plots made in Root 5.34.
 
-void fix2dcanvas() {
-  gPad->SetFrameFillColor(gStyle->GetColorPalette(0));
-}
+#ifndef fix2dcanvas_H
+#define fix2dcanvas_H
+
+void fix2dcanvas();
+
+#endif

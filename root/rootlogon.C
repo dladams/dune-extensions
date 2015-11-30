@@ -40,6 +40,7 @@
   gROOT->ProcessLine(".L palette.cxx+");
   gROOT->ProcessLine(".L gettree.cxx+");
   gROOT->ProcessLine(".L addaxis.cxx+");
+  gROOT->ProcessLine(".L fix2dcanvas.cxx+");
   gROOT->ProcessLine(".L draw.cxx+");
   gROOT->ProcessLine(".L drawpars.cxx+");
   gROOT->ProcessLine(".L getLabel.cxx+");
@@ -49,7 +50,6 @@
   draw::set35t();
   draw::set10ktw();
 
-  gROOT->ProcessLine(".L fix2dcanvas.C");
   gROOT->ProcessLine(".L ex2dhist.C");
   //gROOT->ProcessLine(".L detlar.cxx+");
   gROOT->ProcessLine(".L drawTracks.C");
