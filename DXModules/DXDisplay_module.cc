@@ -1136,19 +1136,21 @@ void DXDisplay::analyze(const art::Event& event) {
   if ( fDoSimChannelSignalMaps && fdbg > 2 ) {
     for ( unsigned int imcs=0; imcs<selectedMcTpcSignalMapsSC.size(); ++imcs ) {
       const auto mctsc = *selectedMcTpcSignalMapsSC.at(imcs);
-      const auto mctmc = *selectedMcTpcSignalMapsMC.at(imcs);
       cout << myname << "Dumping McTpcSignalMap sim channels for event " << fevent
            << " track " << mctsc.mcinfo()->trackID
            << "\n" << myname << "  Total tick/hit signal: "
            << mctsc.tickSignal() << "/" << mctsc.hitSignal() << " MeV:" << endl;
       mctsc.print(cout,  0, myname + "  ");
        mctsc.print(cout, 12, myname + "  ");
-      cout << myname << "Dumping McTpcSignalMap MC hits for event " << fevent
-           << " track " << mctmc.mcinfo()->trackID
-           << "\n" << myname << "  Total tick/hit signal: "
-           << mctmc.tickSignal() << "/" << mctmc.hitSignal() << " MeV:" << endl;
-      mctmc.print(cout,  0, myname + "  ");
-      mctmc.print(cout, 11, myname + "  ");
+      if ( selectedMcTpcSignalMapsMC.size() == selectedMcTpcSignalMapsSC.size() ) {
+        const auto mctmc = *selectedMcTpcSignalMapsMC.at(imcs);
+        cout << myname << "Dumping McTpcSignalMap MC hits for event " << fevent
+             << " track " << mctmc.mcinfo()->trackID
+             << "\n" << myname << "  Total tick/hit signal: "
+             << mctmc.tickSignal() << "/" << mctmc.hitSignal() << " MeV:" << endl;
+        mctmc.print(cout,  0, myname + "  ");
+        mctmc.print(cout, 11, myname + "  ");
+      }
     }  // End loop over selected MC tracks
   }  // end DoMcTpcSignalMaps
 
