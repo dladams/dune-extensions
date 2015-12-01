@@ -11,6 +11,10 @@ TFile* gDXFile = 0;
 // Open a file by name.
 int dxopen(string ifname) {
   const string myname = "dxopen: ";
+  // Do not attempt open if this looks like a macro call.
+  if ( ifname.find("(") != string::npos ) {
+    return 4;
+  }
   TFile* pfile = TFile::Open(ifname.c_str());
   if ( pfile == 0 || ! pfile->IsOpen() ) {
     cout << myname << "Input file not found: " << ifname << endl;
