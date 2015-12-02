@@ -237,7 +237,8 @@ private:
   bool fUseSecondaries;                // Flag to include secondary MC particles for tree and hists.
   bool fUseSimChannelDescendants;      // Use descendants when making SimChannel signal hists
   double fBinSize;                     // For dE/dx work: the value of dx. 
-  double fRawAdcPedestal;              // Pedestal to subtract from raw data.
+  int fRawPedestalOption;              // Option for subtracting pedestals from data (0=no, 1=digit value).
+  double fRawAdcPedestal;              // Additional pedestal to subtract from raw data.
 
   // Derived control parameters.
   bool fDoMcParticles;             // Read MC particles.
@@ -460,6 +461,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fdemaxmcp                      = p.get<double>("HistDEMaxMcParticle");
   fdemax                         = p.get<double>("HistDEMax");
   fhistusede                     = p.get<bool>("HistUseDE");
+  fRawPedestalOption             = p.get<double>("RawPedestalOption");
   fRawAdcPedestal                = p.get<double>("RawAdcPedestal");
 
   // Derived control flags.
@@ -530,6 +532,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "HistDEMaxMcParticle" << sep << fdemaxmcp << endl;
     cout << prefix << setw(wlab) << "HistDEMax" << sep << fdemax << endl;
     cout << prefix << setw(wlab) << "HistUseDE" << sep << fhistusede << endl;
+    cout << prefix << setw(wlab) << "RawPedestalOption" << sep << fRawPedestalOption << endl;
     cout << prefix << setw(wlab) << "RawAdcPedestal" << sep << fRawAdcPedestal << endl;
   }
 
@@ -1219,8 +1222,10 @@ void DXDisplay::analyze(const art::Event& event) {
                               << ") has " << nadc << " ADCs and "
                               << digit.Samples() << " samples. Uncompressed size is " << adcs.size()
                               << ". Number filled is " << adcs.size()-nzero << endl;
+          float pedestal = fRawAdcPedestal;
+          if ( fRawPedestalOption == 1 ) pedestal += digit.GetPedestal();
           for ( unsigned int tick=0; tick<adcs.size(); ++tick ) {
-            double wt = adcs[tick] - fRawAdcPedestal;
+            double wt = adcs[tick] - pedestal;
             if ( wt == 0 ) continue;
             if ( fhistusede ) wt *= adc2de(ichan);
             ph->Fill(tick, iropchan, wt);

@@ -177,7 +177,12 @@ physics:
       # Maximum step size [cm] for filling the MC Particle trajectory histograms
       McParticleDsMax: 0.05
 
-      # Pedestal to subtract from raw ADC counts.
+      # Pedestal option.
+      #   0 - no pedestal subtraction
+      #   1 - Take pedestal from digit.
+      RawPedestalOption:  1
+
+      # Extra pedestal to subtract from raw ADC counts.
       RawAdcPedestal:  0.0
 
       # ADC count to MeV energy deposit conversion factors.
