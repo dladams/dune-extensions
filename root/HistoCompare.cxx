@@ -98,6 +98,9 @@ int HistoCompare::compare(string hname) {
     cout << myname << "Histograms have different binning." << endl;
     return nhstbad = nbinbad = -5;
   }
+  string title = fname1 + " - " + fname2;
+  TFile::Open("HistoCompare.root", "RECREATE");
+  m_phdiff = new TH1F("hdiff", "New - old", 200, -100, 100);
   for ( int iy=0; iy<=ny; ++iy ) {
     for ( int ix=0; ix<=nx; ++ix ) {
       float val1 = ph1->GetBinContent(ix, iy);
@@ -106,8 +109,10 @@ int HistoCompare::compare(string hname) {
       bool same = val1 == val2;
       if ( ! same ) ++nbinbad;
       ++nbin;
+      m_phdiff->Fill(val1-val2);
     }
   }
+  m_phdiff->Write();
   ++nhst;
   if ( nbinbad ) {
     ++nhstbad;

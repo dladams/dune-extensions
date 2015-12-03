@@ -40,6 +40,9 @@ public:
   int nhst; 
   int nhstbad; 
 
+  // Histogram with differences.
+  TH1* m_phdiff;
+
 };
 
 #endif
