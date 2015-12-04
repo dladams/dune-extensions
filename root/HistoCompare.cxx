@@ -3,12 +3,14 @@
 #include "HistoCompare.h"
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 using std::string;
 using std::cout;
 using std::endl;
 using std::vector;
 using std::ostringstream;
+using std::setw;
 
 namespace {
 
@@ -58,11 +60,43 @@ TH1* getHist(TDirectory* apdir, string name, int dbg) {
 
 //**********************************************************************
 
-HistoCompare::HistoCompare(string afname1, string afname2, int adbg)
+HistoCompare::HistoCompare(string afname1, string afname2, int adbg, TFile* pfile)
 : fname1(afname1),
   fname2(afname2),
   dbg(adbg),
-  nbin(0), nbinbad(0), nhst(0), nhstbad(0) { }
+  nbin(0), nbinbad(0), nhst(0), nhstbad(0),
+  m_pfile(pfile), m_closefile(false), m_phdiff(0) {
+  string myname = "HistoCompare::ctor: ";
+  if ( m_pfile == 0 ) {
+    m_pfile = TFile::Open("HistoCompare.root", "RECREATE");
+    m_closefile = true;
+  }
+  if ( m_pfile == 0 || ! m_pfile->IsOpen() ) {
+    cout << myname << "Unable to open output histogram file." << endl;
+    return;
+  }
+  string title = fname1 + " - " + fname2;
+  m_phdiff = dynamic_cast<TH1*>(m_pfile->Get("hdiff"));
+  if ( m_phdiff != 0 ) {
+    string oldtitle = m_phdiff->GetTitle();
+    if ( oldtitle != title ) {
+      cout << myname << "Old histogram is not consistent and will be removed." << endl;
+      cout << myname << "Old: " << oldtitle << endl;
+      cout << myname << "New: " << title << endl;
+      m_pfile->Delete("hdiff");
+      m_phdiff = 0;
+    }
+  }
+  if ( m_phdiff == 0 ) {
+    m_phdiff = new TH1F("hdiff", title.c_str(), 200, -100, 100);
+  }
+}
+
+//**********************************************************************
+
+HistoCompare::~HistoCompare() {
+  if ( m_closefile && m_pfile!=0 ) m_pfile->Close();
+}
 
 //**********************************************************************
 
@@ -92,15 +126,19 @@ int HistoCompare::compare(string hname) {
     cout << myname << "Unable to find " << hname << " in file " << fname2 << endl;
     return nhstbad = nbinbad = -4;
   }
+  if ( m_pfile == 0 || !m_pfile->IsOpen() ) {
+    cout << myname << "Output histogram file is not open." << endl;
+    return nhstbad = nbinbad = -5;
+  }
   int nx = ph1->GetNbinsX();
   int ny = ph1->GetNbinsY();
   if ( ph2->GetNbinsX() != nx || ph2->GetNbinsY() != ny ) {
     cout << myname << "Histograms have different binning." << endl;
     return nhstbad = nbinbad = -5;
   }
-  string title = fname1 + " - " + fname2;
-  TFile::Open("HistoCompare.root", "RECREATE");
-  m_phdiff = new TH1F("hdiff", "New - old", 200, -100, 100);
+  m_pfile->cd();
+  TH1* phd = dynamic_cast<TH1*>(ph1->Clone());
+  phd->Add(ph2, -1.0);
   for ( int iy=0; iy<=ny; ++iy ) {
     for ( int ix=0; ix<=nx; ++ix ) {
       float val1 = ph1->GetBinContent(ix, iy);
@@ -113,12 +151,16 @@ int HistoCompare::compare(string hname) {
     }
   }
   m_phdiff->Write();
+  phd->SetMinimum(-20);
+  phd->SetMaximum(20);
+  phd->Write();
+  m_pfile->Purge();
   ++nhst;
   if ( nbinbad ) {
     ++nhstbad;
-    cout << "Histograms " << hname << " differ in " << nbinbad << "/" << nbin << " bins." << endl;
+    cout << "Histograms " << setw(16) << hname << " differ in " << setw(10) << nbinbad << "/" << setw(10) << nbin << " bins." << endl;
   } else {
-    cout << "Histograms " << hname << " match in " << nbin << " bins." << endl;
+    cout << "Histograms " << setw(16) << hname << "  match in " << setw(21) << nbin << " bins." << endl;
   }
   return nbinbad;
 }
@@ -135,7 +177,7 @@ int HistoCompare::compare35t(string hpre, int evt1, int evt2) {
     for ( int evt=evt1; evt<=evt2; ++evt ) {
       ostringstream sspre;
       sspre << "h" << evt << "_" << hpre;
-      HistoCompare hc(fname1, fname2, dbg);
+      HistoCompare hc(fname1, fname2, dbg, m_pfile);
       hc.compare35t(sspre.str());
       if ( hc.nbinbad >= 0 ) {
         nbin += hc.nbin;
@@ -151,7 +193,7 @@ int HistoCompare::compare35t(string hpre, int evt1, int evt2) {
   }
   for ( string sapa : apas35t() ) {
     string hname = hpre + "apa" + sapa;
-    HistoCompare hc(fname1, fname2, dbg);
+    HistoCompare hc(fname1, fname2, dbg, m_pfile);
     int icstat = hc.compare(hname);
     if ( icstat < 0 ) {
       return nhstbad = icstat;
