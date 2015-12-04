@@ -11,6 +11,7 @@
 #include <string>
 #include "TFile.h"
 #include "TH1.h"
+#include "TFile.h"
 
 class HistoCompare {
 
@@ -19,7 +20,12 @@ public:
   // Ctor from the two input files.
   // dbg = 1 shows values for differing channels
   // dbg = 2 shows values for all channels
-  HistoCompare(std::string afname1, std::string afname2, int adbg =0);
+  // If pfile is not null, results are added to that file.
+  // If it is null, a file is opened in ctor and closed in dtor.
+  HistoCompare(std::string afname1, std::string afname2, int adbg =0, TFile* pfile =0);
+
+  // Dtor.
+  ~HistoCompare();
 
   // Compare histogram with same name in the two files.
   // Returns the number of differing bins (nbad).
@@ -41,6 +47,8 @@ public:
   int nhstbad; 
 
   // Histogram with differences.
+  TFile* m_pfile;
+  bool m_closefile;
   TH1* m_phdiff;
 
 };
