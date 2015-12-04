@@ -151,6 +151,10 @@ int HistoCompare::compare(string hname) {
     }
   }
   m_phdiff->Write();
+  string oldtitle = phd->GetTitle();
+  if ( oldtitle.substr(0,3) == "Raw" ) oldtitle = "r" + oldtitle.substr(1);
+  string title = "Difference in " + oldtitle;
+  phd->SetTitle(title.c_str());
   phd->SetMinimum(-20);
   phd->SetMaximum(20);
   phd->Write();
