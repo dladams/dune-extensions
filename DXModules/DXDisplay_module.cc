@@ -1226,6 +1226,8 @@ void DXDisplay::analyze(const art::Event& event) {
           if ( fRawPedestalOption == 1 ) pedestal += digit.GetPedestal();
           for ( unsigned int tick=0; tick<adcs.size(); ++tick ) {
             double wt = adcs[tick] - pedestal;
+            if ( fdbg > 5 ) cout << myname << "  Tick " << tick << " raw - ped: " << adcs[tick] << " - " << pedestal
+                                 << " = " << adcs[tick] << endl;
             if ( wt == 0 ) continue;
             if ( fhistusede ) wt *= adc2de(ichan);
             ph->Fill(tick, iropchan, wt);
