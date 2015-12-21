@@ -1,25 +1,20 @@
-# dune_extensions/ups/product_deps.d14
+# dune_extensions/ups/product_deps
 #
 # David Adams
-# October 2015
+# December 2015
 #
-# If this file is product_deps, do not edit it directly!
-# Instead make changes in product_deps.slf6 and/or
-# product_deps.d14 and copy the file to this location.
 
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent	dune_extensions  v00_00_05
+parent	dune_extensions  v00_00_06
 defaultqual	e9
 #
 fcldir product_dir job
 #
 product         version
-dunetpc 	v04_29_01
-art_extensions  v00_00_03
+dunetpc 	v04_30_03
+art_extensions  v00_00_04
 gcc		v4_9_3
-
-cetbuildtools	v4_08_01	-	only_for_build
 end_product_list
 
   
