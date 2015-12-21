@@ -1205,7 +1205,12 @@ void DXDisplay::analyze(const art::Event& event) {
             adcs = digit.ADCs();
           } else {
             if ( fdbg > 4 ) cout << myname << "Uncompressing..." << endl;
-            raw::Uncompress(digit.ADCs(), adcs, digit.Compression());
+            if ( fRawPedestalOption == 2 ) {
+              int iped = digit.GetPedestal();
+              raw::Uncompress(digit.ADCs(), adcs, iped, digit.Compression());
+            } else {
+              raw::Uncompress(digit.ADCs(), adcs, digit.Compression());
+            }
             if ( fdbg > 4 ) cout << myname << "Uncompressed." << endl;
           }
           if ( first ) {
@@ -1223,7 +1228,7 @@ void DXDisplay::analyze(const art::Event& event) {
                               << digit.Samples() << " samples. Uncompressed size is " << adcs.size()
                               << ". Number filled is " << adcs.size()-nzero << endl;
           float pedestal = fRawAdcPedestal;
-          if ( fRawPedestalOption == 1 ) pedestal += digit.GetPedestal();
+          if ( fRawPedestalOption > 0 ) pedestal += digit.GetPedestal();
           for ( unsigned int tick=0; tick<adcs.size(); ++tick ) {
             double wt = adcs[tick] - pedestal;
             if ( fdbg > 5 ) cout << myname << "  Tick " << tick << " raw - ped: " << adcs[tick] << " - " << pedestal
