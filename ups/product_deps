@@ -15,6 +15,7 @@ product         version
 dunetpc 	v04_31_00
 art_extensions  v00_00_05
 gcc		v4_9_3
+cetbuildtools   v4_18_01 - only_for_build
 end_product_list
   
 # e9  - with gcc 4.9.3
