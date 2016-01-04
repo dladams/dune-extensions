@@ -4,7 +4,9 @@
 
 using std::string;
 
+namespace {
 string dxlab("undefined");
+}
 
 TLatex* dxlabel(string slab) {
   if ( slab.size() ) dxlab = slab;

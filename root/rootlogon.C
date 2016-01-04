@@ -42,6 +42,7 @@
   gROOT->ProcessLine(".L addaxis.cxx+");
   gROOT->ProcessLine(".L fix2dcanvas.cxx+");
   gROOT->ProcessLine(".L dxlabel.cxx+");
+  gROOT->ProcessLine(".L dxprint.cxx+");
   gROOT->ProcessLine(".L draw.cxx+");
   gROOT->ProcessLine(".L drawpars.cxx+");
   gROOT->ProcessLine(".L getLabel.cxx+");
