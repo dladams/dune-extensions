@@ -6,6 +6,8 @@
 // Root macro top open a DXDISPLAY file and move to the
 // corresponding directory.
 
+#include "dxlabel.h"
+
 TFile* gDXFile = 0;
 
 // Open a file by name.
@@ -42,6 +44,16 @@ int dxopen(TFile* pfile) {
   gDXFile = pfile;
   if ( mcptree("McParticleTree") ) mcptree()->SetMarkerStyle(2);
   if ( perftree("McPerfTree") ) perftree()->SetMarkerStyle(2);
+  // Set the label name by stripping the directory path and suffix from the file name.
+  string slab = pfile->GetName();
+  string::size_type ipos1 = 0;
+  string::size_type ipos = slab.rfind("/");
+  if ( ipos != string::npos ) ipos1 = ipos + 1;
+  ipos = slab.rfind(".");
+  string::size_type npos = slab.size();
+  if ( ipos != string::npos && ipos > ipos1 ) npos = ipos - ipos1;
+  slab = slab.substr(ipos1, npos);
+  if (slab.size() ) dxlabel(slab);
   return 0;
 }
 
