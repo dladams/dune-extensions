@@ -30,12 +30,22 @@
   gSystem->AddIncludePath("-I$DUNE_EXTENSIONS_INC");
 
   gSystem->AddDynamicPath("-L$FHICLCPP_LIB -lfhiclcpp");
-  gSystem->AddLinkedLibs("$CETLIB_LIB/libcetlib.so");
-  gSystem->AddLinkedLibs("$FHICLCPP_LIB/libfhiclcpp.so");
-  gSystem->AddLinkedLibs("$LARCORE_LIB/libGeometry.so");
-  gSystem->AddLinkedLibs("$DUNETPC_LIB/libdune_Geometry.so");
-  gSystem->AddLinkedLibs("$DUNE_EXTENSIONS_LIB/libDXUtil.so");
-  gSystem->AddLinkedLibs("$DUNE_EXTENSIONS_LIB/libDXGeometry.so");
+
+  // Add linked libs.
+  vector<string> libs;
+  libs.push_back("$CETLIB_LIB/libcetlib");
+  libs.push_back("$FHICLCPP_LIB/libfhiclcpp");
+  libs.push_back("$LARCORE_LIB/libGeometry");
+  libs.push_back("$DUNETPC_LIB/libdune_Geometry");
+  libs.push_back("$DUNE_EXTENSIONS_LIB/libDXUtil");
+  libs.push_back("$DUNE_EXTENSIONS_LIB/libDXGeometry");
+  string libext = "so";
+  string arch = gSystem->GetBuildArch();
+  if ( arch.substr(0,3) == "mac" ) libext = "dylib";
+  for ( int ilib=0; ilib<libs.size(); ++ilib ) {
+    string lib = libs[ilib] + "." + libext;
+    gSystem->AddLinkedLibs(lib.c_str());
+  }
 
   gROOT->ProcessLine(".L palette.cxx+");
   gROOT->ProcessLine(".L gettree.cxx+");
