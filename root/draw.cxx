@@ -17,6 +17,8 @@
 #include "palette.h"
 #include "addaxis.h"
 #include "fix2dcanvas.h"
+#include "dxlabel.h"
+#include "dxprint.h"
 
 using std::string;
 using std::ostringstream;
@@ -26,6 +28,19 @@ using std::hex;
 using std::dec;
 
 int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.0, double zmax =0.0) {
+  // Build label.
+  string plname;
+  TLatex* plab = dxlabel();
+  if ( plab != 0 ) {
+    ostringstream sslab;
+    string sep = "_";
+    sslab << plab->GetTitle() << sep << name;
+    if ( xmax > xmin ) sslab << sep << xmin << sep << xmax;
+    if ( zmax > 0.0 ) sslab << sep << zmax;
+    plname += "_";
+    dxprint(sslab.str());
+    delete plab;
+  }
   const string myname = "draw: ";
   if ( name == "help" ) {
     cout << myname << endl;
