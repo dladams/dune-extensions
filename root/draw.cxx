@@ -89,7 +89,7 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
   }
   // Early draw to make palette available
   double zmin = phnew->GetMinimum();
-  if ( zmin < 0.0 ) palette(2);
+  if ( zmin < 0.0 ) palette(3);
   else palette(1);
   // Draw canvas and determine set palette parameters.
   double palx1 = 0.865;
