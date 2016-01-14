@@ -1,0 +1,56 @@
+#include "services_dune.fcl"
+#include "TpcDAQToOffline.fcl"
+#include "SSPToOffline.fcl"
+#include "dxdisplay_module.fcl"
+
+# Mar 2015, M Wallbank
+# Module to run both TPC and SSP to offline to reformulate daq data to LArSoft data types
+
+process_name: RunDaqToOffline
+
+services: {
+  user:         @local::dune35t_services
+  TimeTracker:       {}
+
+}
+
+physics:
+{
+  producers:
+  {
+    daq: @local::tpc_daq_to_offline
+  }
+
+  analyzers: {
+    mydxd: @local::dxdisplay_default
+  }
+
+  # Create path to run module
+  produce: [ daq ]
+  analysis: [ mydxd ]
+
+  output: [ out1 ]
+  trigger_paths: [ produce ]
+  end_paths: [ output, analysis ]
+}
+
+outputs:
+{
+  out1:
+  {
+    module_type: RootOutput
+    fileName: "convertraw35t-event.root"
+  }
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents: 1000
+  fileNames: [ "/Users/davidadams/dune/data/lbne_r006837_sr01_20160112T213253.root" ]
+}
+
+physics.producers.daq.OutputDataLabel: ""
+
+physics.analyzers.mydxd.DoRawSignalHists: true
+physics.analyzers.mydxd.DebugLevel: 3

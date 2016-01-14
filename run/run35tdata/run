@@ -1,0 +1,1 @@
+lar -c run.fcl -n 1 -T run.root 2>&1 | tee run.log
