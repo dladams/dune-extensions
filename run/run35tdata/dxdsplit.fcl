@@ -9,6 +9,7 @@
 #include "services_dune.fcl"
 #include "clusteralgorithms.fcl"
 #include "dxdisplay_module.fcl"
+#include "SSPToOffline.fcl"
 
 process_name: ctreeraw35t
 
@@ -61,6 +62,8 @@ source:
 
   NOvAClockFrequency : 64.0 # MHz
 
+  # DLA hack
+  SSPReformatter:      @local::ssp_reformatter
 }
 
 
@@ -95,4 +98,5 @@ physics.analyzers.mydxd.DoRawSignalHists: true
 physics.analyzers.mydxd.RawDigitLabel: "SplitterInput_TPC_ctreeraw35t"
 physics.analyzers.mydxd.RawDigitLabel: "TPC_ctreeraw35t"
 physics.analyzers.mydxd.RawDigitLabel: "SplitterInput:TPC"
-physics.analyzers.mydxd.DebugLevel: 3
+physics.analyzers.mydxd.TdcTickMax: 10000
+physics.analyzers.mydxd.DebugLevel: 5
