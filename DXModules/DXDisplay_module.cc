@@ -68,6 +68,8 @@
 #include "SimpleTypesAndConstants/geo_types.h"
 #include "RawData/raw.h"
 #include "RawData/RawDigit.h"
+#include "CalibrationDBI/Interface/IDetPedestalService.h"
+#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
 
 // Framework includes
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -315,6 +317,9 @@ private:
   // Vector of event hists that should be removed at the end of the event.
   mutable vector<TH1*> m_eventhists;
 
+  // Pedestal provider.
+  const lariov::IDetPedestalProvider* m_pPedProv;
+
 }; // class DXDisplay
 
 
@@ -559,6 +564,11 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fgeohelp->print(cout, 0, myname);
   // Geometry dump from Michelle.
   if ( fdbg > 4 ) fgeohelp->dump(cout);
+  // Pedestals.
+  m_pPedProv = nullptr;
+  if ( fRawPedestalOption == 3 ) {
+    m_pPedProv = &art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
+  }
   return;
 }
 
@@ -1228,7 +1238,13 @@ void DXDisplay::analyze(const art::Event& event) {
                               << digit.Samples() << " samples. Uncompressed size is " << adcs.size()
                               << ". Number filled is " << adcs.size()-nzero << endl;
           float pedestal = fRawAdcPedestal;
-          if ( fRawPedestalOption > 0 ) pedestal += digit.GetPedestal();
+          if ( fRawPedestalOption == 3 ) {
+            float dbped = m_pPedProv->PedMean(ichan);
+            if ( fdbg > 4 ) cout << myname << "DB Pedestal: " << dbped << endl;
+            pedestal += dbped;
+          } else if ( fRawPedestalOption > 0 ) {
+            pedestal += digit.GetPedestal();
+          }
           for ( unsigned int tick=0; tick<adcs.size(); ++tick ) {
             double wt = adcs[tick] - pedestal;
             if ( fdbg > 5 || ( fdbg > 4 && tick<20 ) )

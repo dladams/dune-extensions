@@ -74,10 +74,10 @@ physics:
   stream1:  [ out1 ]
 
   analyzers: {
-    mydxd: @local::dxdisplay_default
+    DXDisplay: @local::dxdisplay_default
   }
 
-  analysis: [ mydxd ]
+  analysis: [ DXDisplay ]
 
   end_paths: [ output, analysis ]
   end_paths: [ stream1, analysis ]
@@ -94,9 +94,16 @@ outputs:{
 
 }
 
-physics.analyzers.mydxd.DoRawSignalHists: true
-physics.analyzers.mydxd.RawDigitLabel: "SplitterInput_TPC_ctreeraw35t"
-physics.analyzers.mydxd.RawDigitLabel: "TPC_ctreeraw35t"
-physics.analyzers.mydxd.RawDigitLabel: "SplitterInput:TPC"
-physics.analyzers.mydxd.TdcTickMax: 10000
-physics.analyzers.mydxd.DebugLevel: 5
+physics.analyzers.DXDisplay.DoRawSignalHists: true
+physics.analyzers.DXDisplay.RawDigitLabel: "SplitterInput_TPC_ctreeraw35t"
+physics.analyzers.DXDisplay.RawDigitLabel: "TPC_ctreeraw35t"
+physics.analyzers.DXDisplay.RawDigitLabel: "SplitterInput:TPC"
+physics.analyzers.DXDisplay.TdcTickMax: 10000
+physics.analyzers.DXDisplay.RawPedestalOption: 3
+physics.analyzers.DXDisplay.DebugLevel: 5
+
+
+services.user.IDetPedestalService.DetPedestalDUNE.UseDB:   false
+services.user.IDetPedestalService.DetPedestalDUNE.UseFile: true
+services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: "peds_michelle_20160115.csv"
+services.user.IDetPedestalService.DetPedestalDUNE.Run:     true
