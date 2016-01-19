@@ -1,5 +1,7 @@
-#INFILE=/Users/davidadams/dune/data/lbne_r006837_sr01_20160112T213253.root
-INFILE=/Users/davidadams/dune/data/lbne_r006700_sr01_20160107T181453.root
+DATADIR=/Users/davidadams/dune/data
+DATADIR=/home/dladams/data/dune
+#INFILE=$DATADIR/lbne_r006837_sr01_20160112T213253.root
+INFILE=$DATADIR/lbne_r006700_sr01_20160107T181453.root
 OUTFILE=dxdsplit.root
 NEVT=2
 lar -c dxdsplit.fcl -n $NEVT -s $INFILE -T $OUTFILE 2>&1 | tee dxdsplit.log

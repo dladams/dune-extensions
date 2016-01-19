@@ -63,7 +63,7 @@ source:
   NOvAClockFrequency : 64.0 # MHz
 
   # DLA hack
-  SSPReformatter:      @local::ssp_reformatter
+  #SSPReformatter:      @local::ssp_reformatter
 }
 
 
@@ -105,5 +105,6 @@ physics.analyzers.DXDisplay.DebugLevel: 5
 
 services.user.IDetPedestalService.DetPedestalDUNE.UseDB:   false
 services.user.IDetPedestalService.DetPedestalDUNE.UseFile: true
-services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: "peds_michelle_20160115.csv"
 services.user.IDetPedestalService.DetPedestalDUNE.Run:     true
+services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: "peds_michelle_20160115.csv"
+services.user.IDetPedestalService.DetPedestalDUNE.CSVFileName: "peds_michelle_20160115.csv"
