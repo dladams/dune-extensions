@@ -33,6 +33,17 @@ int palette(int ipal) {
     TColor::CreateGradientColorTable(nRGBs, stops, red, green, blue, 255, alpha);
     cout << TColor::GetColorPalette(0) << endl;
     return colout;
+  } else if ( ipal == 3 ) {
+    // blue->white->yellow->red->black
+    const int nRGBs = 8;
+    Double_t stops[nRGBs] = { 0.00, 0.51, 0.52, 0.53, 0.56, 0.62, 0.80, 1.00};
+    Double_t red[nRGBs]   = { 0.09, 0.75, 1.00, 1.00, 1.00, 1.00, 0.70, 0.00};
+    Double_t green[nRGBs] = { 0.60, 0.80, 1.00, 1.00, 0.75, 0.55, 0.20, 0.00};
+    Double_t blue[nRGBs]  = { 0.48, 0.93, 1.00, 1.00, 0.00, 0.00, 0.10, 0.00};
+    colout = 40;
+    TColor::CreateGradientColorTable(nRGBs, stops, red, green, blue, 255, alpha);
+    cout << TColor::GetColorPalette(0) << endl;
+    return colout;
   } else if ( ipal == 11 ) {
     // white->yellow->red->black
     const int nRGBs = 6;

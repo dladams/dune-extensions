@@ -181,6 +181,7 @@ physics:
       #   0 - no pedestal subtraction
       #   1 - Take pedestal from digit.
       #   2 - Pass pedestal to uncompression.
+      #   3 - Take pedestal from pedestal service.
       RawPedestalOption:  2
 
       # Extra pedestal to subtract from raw ADC counts.
