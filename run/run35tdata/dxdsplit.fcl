@@ -63,7 +63,7 @@ source:
   NOvAClockFrequency : 64.0 # MHz
 
   # DLA hack
-  #SSPReformatter:      @local::ssp_reformatter
+  SSPReformatter:      @local::ssp_reformatter
 }
 
 
