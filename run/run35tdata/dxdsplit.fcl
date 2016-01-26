@@ -103,8 +103,9 @@ physics.analyzers.DXDisplay.RawPedestalOption: 3
 physics.analyzers.DXDisplay.DebugLevel: 5
 
 
-services.user.IDetPedestalService.DetPedestalDUNE.UseDB:   false
+services.user.IDetPedestalService.DetPedestalDUNE.UseDB:   true
 services.user.IDetPedestalService.DetPedestalDUNE.UseFile: true
 services.user.IDetPedestalService.DetPedestalDUNE.Run:     true
 services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: "peds_michelle_20160115.csv"
-services.user.IDetPedestalService.DetPedestalDUNE.CSVFileName: "peds_michelle_20160115.csv"
+#services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: ""
+#services.user.IDetPedestalService.DetPedestalDUNE.CSVFileName: "peds_michelle_20160115.csv"

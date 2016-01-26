@@ -568,6 +568,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   m_pPedProv = nullptr;
   if ( fRawPedestalOption == 3 ) {
     m_pPedProv = &art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
+    cout << myname << "Pedestal provider: @" <<  m_pPedProv << endl;
   }
   return;
 }
@@ -1200,16 +1201,16 @@ void DXDisplay::analyze(const art::Event& event) {
         for ( auto const& digit : (*rawDigitHandle) ) {
           if ( fdbg > 4 ) cout << myname << "----------" << endl;
           int ichan = digit.Channel();
-          if ( fdbg > 4 ) cout << myname << "    Channel: " << ichan << endl;
+          if ( fdbg > 4 ) cout << myname << "        Channel: " << ichan << endl;
           unsigned int irop = geohelp.channelRop(ichan);
-          if ( fdbg > 4 ) cout << myname << "        ROP: " << irop << endl;
+          if ( fdbg > 4 ) cout << myname << "            ROP: " << irop << endl;
           TH2* ph = rawhists[irop];
           unsigned int iropchan = ichan - geohelp.ropFirstChannel(irop);
-          if ( fdbg > 4 ) cout << myname << "ROP channel: " << iropchan << endl;
+          if ( fdbg > 4 ) cout << myname << "    ROP channel: " << iropchan << endl;
           int nadc = digit.NADC();
           vector<short> adcs;
-          if ( fdbg > 4 ) cout << myname << "Compression: " << digit.Compression() << endl;
-          if ( fdbg > 4 ) cout << myname << "   Pedestal: " << digit.GetPedestal() << endl;
+          if ( fdbg > 4 ) cout << myname << "    Compression: " << digit.Compression() << endl;
+          if ( fdbg > 4 ) cout << myname << " Digit pedestal: " << digit.GetPedestal() << endl;
           if ( digit.Compression() == raw::kNone ) {
             if ( fdbg > 4 ) cout << myname << "Copying uncompressed..." << endl;
             adcs = digit.ADCs();
