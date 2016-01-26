@@ -1,18 +1,18 @@
 # dune_extensions/ups/product_deps
 #
 # David Adams
-# December 2015
+# January 2016
 #
 
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent	dune_extensions  v00_00_09
+parent	dune_extensions  v00_00_10
 defaultqual	e9
 #
 fcldir product_dir job
 #
 product         version
-dunetpc 	v04_33_00
+dunetpc 	v04_34_00
 art_extensions  v00_00_06
 gcc		v4_9_3
 cetbuildtools   v4_18_01 - only_for_build
