@@ -10,11 +10,11 @@
 #include "clusteralgorithms.fcl"
 #include "dxdisplay_module.fcl"
 #include "SSPToOffline.fcl"
+#include "SplitterInput.fcl"
 
 process_name: ctreeraw35t
 
-services:
-{
+services: {
   # TFileService: { fileName: "test.root" }
   TimeTracker:       {}
   RandomNumberGenerator: {} 
@@ -24,53 +24,12 @@ services:
   user:         @local::dune35t_services
 }
 
+source: @local::split_events
+source.ADCsOverThreshold: 100
 
-source:
-{
-  module_type: SplitterInput
-  firstEvent : 1
-  maxEvents:  100
-  posttriggerticks:  10000
-  pretriggerticks:   0
-# should be 0.5 for MC and 32 for data.
-  novatickspertpctick: 32
-  TimeStampThreshold:  5.
+physics: {
 
-# trigger below is to start window when TPC payload appears (not just headers from RCEs.)
-  MCTrigLevel:  0
-  whichTrigger: 5
-#  MCTrigLevel:  0
-#  whichTrigger: 0
-
-  ADCdiffThreshold:  50
-  ADCsOverThreshold: 100
-
-  TrigSeparation:   0
-  TPCInputTag : "daq:TPC:DAQ" 
-  TPCInputDataProduct : "artdaq::Fragment"
-
-  SSPInputTag : "daq:PHOTON:DAQ"
-  SSPInputDataProduct : "artdaq::Fragment"
-
-#### If the Penn stuff is in the data record.... ####
-  PennInputTag : "daq:TRIGGER:DAQ"
-  PennInputDataProduct : "artdaq::Fragment"
-
-#### If the Penn stuff isn't in the data record.... ####
-#  PennInputDataProduct:  "raw::RawDigit"
-#  PennInputTag:  "daq::Detsim"
-
-  NOvAClockFrequency : 64.0 # MHz
-
-  # DLA hack
-  SSPReformatter:      @local::ssp_reformatter
-}
-
-
-physics:
-{
-
-#define the output stream, there could be more than one if using filters 
+  #define the output stream, there could be more than one if using filters 
   stream1:  [ out1 ]
 
   analyzers: {
@@ -83,15 +42,13 @@ physics:
   end_paths: [ stream1, analysis ]
 }
 
-outputs:{
-  out1: 
- {
-   dataTier: "raw"
-   module_type: RootOutput
-   fileName:    "sliced_pedestal.root" 
+outputs: {
+  out1: {
+    dataTier: "raw"
+    module_type: RootOutput
+    fileName:    "sliced_pedestal.root" 
     #default file name, can override from command line with -o or --output
- }
-
+  }
 }
 
 physics.analyzers.DXDisplay.DoRawSignalHists: true
@@ -103,8 +60,9 @@ physics.analyzers.DXDisplay.RawPedestalOption: 3
 physics.analyzers.DXDisplay.DebugLevel: 5
 
 
-services.user.IDetPedestalService.DetPedestalDUNE.UseDB:   false
+services.user.IDetPedestalService.DetPedestalDUNE.UseDB:   true
 services.user.IDetPedestalService.DetPedestalDUNE.UseFile: true
 services.user.IDetPedestalService.DetPedestalDUNE.Run:     true
 services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: "peds_michelle_20160115.csv"
-services.user.IDetPedestalService.DetPedestalDUNE.CSVFileName: "peds_michelle_20160115.csv"
+#services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: ""
+#services.user.IDetPedestalService.DetPedestalDUNE.CSVFileName: "peds_michelle_20160115.csv"
