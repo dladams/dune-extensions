@@ -90,7 +90,7 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
   // Early draw to make palette available
   double zmin = phnew->GetMinimum();
   if ( zmin < 0.0 ) {
-    if ( (name.find("raw") != string::npos)  && zmax <=20 ) palette(3);
+    if ( (name.find("raw") != string::npos)  && zmax > 0 && zmax <=20 ) palette(3);
     else palette(2);
   }
   else palette(1);
