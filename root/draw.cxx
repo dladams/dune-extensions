@@ -17,6 +17,7 @@
 #include "palette.h"
 #include "addaxis.h"
 #include "fix2dcanvas.h"
+#include "dxhist.h"
 #include "dxlabel.h"
 #include "dxprint.h"
 
@@ -28,6 +29,8 @@ using std::hex;
 using std::dec;
 
 int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.0, double zmax =0.0) {
+  // Record the histogram name.
+  dxhist(name);
   // Build label.
   string plname;
   TLatex* plab = dxlabel();
@@ -217,7 +220,8 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
     TH1* hpry = phdraw->ProjectionY(hpry_name.c_str(), xbin1, xbin2);
     hpry->GetYaxis()->SetTitle(ylabpry.c_str());
     ostringstream sstpry;
-    sstpry << hpry->GetTitle() << " ticks " << xmin << "-" << xmax-1;
+    sstpry << hpry->GetTitle();
+    if ( xmax > xmin ) sstpry << " ticks " << xmin << "-" << xmax-1;
     hpry->SetTitle(sstpry.str().c_str());
     cout << "Channel projection histogram: " << hpry_name << endl;
     cout << "Time projection histogram: " << hprx_name << endl;

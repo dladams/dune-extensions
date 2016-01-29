@@ -51,9 +51,11 @@
   gROOT->ProcessLine(".L gettree.cxx+");
   gROOT->ProcessLine(".L addaxis.cxx+");
   gROOT->ProcessLine(".L fix2dcanvas.cxx+");
+  gROOT->ProcessLine(".L dxhist.cxx+");
   gROOT->ProcessLine(".L dxlabel.cxx+");
   gROOT->ProcessLine(".L dxprint.cxx+");
   gROOT->ProcessLine(".L draw.cxx+");
+  gROOT->ProcessLine(".L draw1d.cxx+");
   gROOT->ProcessLine(".L drawpars.cxx+");
   gROOT->ProcessLine(".L getLabel.cxx+");
   gROOT->ProcessLine(".L HistoCompare.cxx+");
