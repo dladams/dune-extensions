@@ -13,6 +13,7 @@
 #include "TDirectory.h"
 #include "TH2.h"
 #include "TCanvas.h"
+#include "DrawResult.h"
 #include "TPaletteAxis.h"
 #include "palette.h"
 #include "addaxis.h"
@@ -28,7 +29,8 @@ using std::endl;
 using std::hex;
 using std::dec;
 
-int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.0, double zmax =0.0) {
+DrawResult draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.0, double zmax =0.0) {
+  DrawResult res;
   // Record the histogram name.
   dxhist(name);
   // Build label.
@@ -52,7 +54,7 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
     cout << myname << "      1 - new stretched canvas" << endl;
     cout << myname << "     -1 - add to existing histogram/canvas" << endl;
     cout << myname << "      * - draw on current canvas" << endl;
-    return 0;
+    return res;
   }
   double xh1 = 0.05;
   double xh2 = 0.94;
@@ -76,7 +78,8 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
   }
   if ( pobj == 0 ) {
     cout << myname << "Object not found: " << name << endl;
-    return 1;
+    res.status = 1;
+    return res;
   }
   static TCanvas* pcan = 0;
   static TH2* phdraw;
@@ -84,11 +87,13 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
   TH2* phnew = dynamic_cast<TH2*>(pobj);
   if ( phnew == 0 ) {
     cout << myname << "Object is not TH2: " << name << endl;
-    return 2;
+    res.status = 2;
+    return res;
   }
   if ( phnew->GetEntries() == 0 ) {
     cout << myname << "Histogram is empty: " << name << endl;
-    return 3;
+    res.status = 3;
+    return res;
   }
   // Early draw to make palette available
   double zmin = phnew->GetMinimum();
@@ -122,7 +127,8 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
   } else if ( how == -1 ) {
     if ( pcan == 0 || phdraw == 0 ) {
       cout << "There is no existing histogram!" << endl;
-      return 1;
+      res.status = 4;
+      return res;
     }
     add = true;
   } else {
@@ -162,7 +168,8 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
     TPaletteAxis* ppalax = dynamic_cast<TPaletteAxis*>(phdraw->GetListOfFunctions()->FindObject("palette")); 
     if ( ppalax == 0 ) {
       cout << myname << "Unable to retrieve palette." << endl;
-      return 4;
+      res.status = 5;
+      return res;
     }
     //cout << "Palette axis: " << hex << long(ppalax) << dec << endl;
     ppalax->SetX1NDC(palx1);
@@ -196,6 +203,7 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
     hprx->GetXaxis()->SetRangeUser(xbin1, xbin2);
     string ytitle;
     hprx->GetYaxis()->SetTitle(ylabprx.c_str());
+    res.hdrawx = hprx;
     // Make a tick-projection histogram for each channel.
     string hname1;
     string hname2;
@@ -215,6 +223,7 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
       hprx->SetTitle(sstitle.str().c_str());
       hprx->GetXaxis()->SetRangeUser(xbin1, xbin2);
       hprx->GetYaxis()->SetTitle(ylabprx.c_str());
+      res.hdrawxChan.push_back(hprx);
     }
     // Make a channel-projection histogram.
     TH1* hpry = phdraw->ProjectionY(hpry_name.c_str(), xbin1, xbin2);
@@ -223,6 +232,7 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
     sstpry << hpry->GetTitle();
     if ( xmax > xmin ) sstpry << " ticks " << xmin << "-" << xmax-1;
     hpry->SetTitle(sstpry.str().c_str());
+    res.hdrawy = hpry;
     cout << "Channel projection histogram: " << hpry_name << endl;
     cout << "Time projection histogram: " << hprx_name << endl;
     cout << "Time projection histogram for each channel: " << hname1 << ", ..., " << hname2 << endl;
@@ -247,5 +257,6 @@ int draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.
   }
   gPad->Update();
   addaxis(phdraw);
-  return 0;
+  res.hdraw = phdraw;
+  return res;
 }

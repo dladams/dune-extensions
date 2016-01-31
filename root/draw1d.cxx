@@ -58,6 +58,9 @@ int draw1d(TH1* phin, float xmin, float xmax, float ymin, float ymax, int rebin)
   if ( rebin > 1 ) {
     ph->Rebin(rebin);
     ph->Scale(1.0/rebin);
+    ostringstream sshtit;
+    sshtit << phin->GetTitle() << " (rebin=" << rebin << ")";
+    ph->SetTitle(sshtit.str().c_str());
   }
   ph->SetStats(0);
   if ( xmax > xmin ) {
@@ -69,9 +72,9 @@ int draw1d(TH1* phin, float xmin, float xmax, float ymin, float ymax, int rebin)
   }
   // Draw the histo.
   TCanvas* pcan = new TCanvas;
-  pcan->SetLeftMargin(0.11);
+  pcan->SetLeftMargin(0.12);
   pcan->SetRightMargin(0.03);
-  ph->GetYaxis()->SetTitleOffset(1.3);
+  ph->GetYaxis()->SetTitleOffset(1.4);
   ph->Draw();
   // Add a line at y=0.
   if ( ph->GetMaximum()*ph->GetMinimum() < 0.0 ) {

@@ -54,6 +54,7 @@
   gROOT->ProcessLine(".L dxhist.cxx+");
   gROOT->ProcessLine(".L dxlabel.cxx+");
   gROOT->ProcessLine(".L dxprint.cxx+");
+  gROOT->ProcessLine(".L DrawResult.cxx+");
   gROOT->ProcessLine(".L draw.cxx+");
   gROOT->ProcessLine(".L draw1d.cxx+");
   gROOT->ProcessLine(".L drawpars.cxx+");
