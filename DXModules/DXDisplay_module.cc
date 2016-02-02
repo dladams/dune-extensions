@@ -1216,6 +1216,8 @@ void DXDisplay::analyze(const art::Event& event) {
             adcs = digit.ADCs();
           } else {
             if ( fdbg > 4 ) cout << myname << "Uncompressing..." << endl;
+            // Following is to avoid crash. See https://cdcvs.fnal.gov/redmine/issues/11572.
+            adcs.resize(digit.ADCs().size(), 0.0);
             if ( fRawPedestalOption == 2 ) {
               int iped = digit.GetPedestal();
               raw::Uncompress(digit.ADCs(), adcs, iped, digit.Compression());
