@@ -1198,26 +1198,40 @@ void DXDisplay::analyze(const art::Event& event) {
         }
         if ( fdbg > 2 ) cout << myname << "Uncompressing data." << endl;
         bool first = true;
+        unsigned int maxdbgchan = 50;
+        unsigned int maxdbgtick = 50;
         for ( auto const& digit : (*rawDigitHandle) ) {
           if ( fdbg > 4 ) cout << myname << "----------" << endl;
-          int ichan = digit.Channel();
-          if ( fdbg > 4 ) cout << myname << "        Channel: " << ichan << endl;
+          unsigned int ichan = digit.Channel();
+          if ( fdbg > 4 ) cout << myname << "          Channel: " << ichan << endl;
           unsigned int irop = geohelp.channelRop(ichan);
-          if ( fdbg > 4 ) cout << myname << "            ROP: " << irop << endl;
+          if ( fdbg > 4 ) cout << myname << "              ROP: " << irop << endl;
           TH2* ph = rawhists[irop];
           unsigned int iropchan = ichan - geohelp.ropFirstChannel(irop);
-          if ( fdbg > 4 ) cout << myname << "    ROP channel: " << iropchan << endl;
+          if ( fdbg > 4 ) cout << myname << "      ROP channel: " << iropchan << endl;
           int nadc = digit.NADC();
           vector<short> adcs;
-          if ( fdbg > 4 ) cout << myname << "    Compression: " << digit.Compression() << endl;
-          if ( fdbg > 4 ) cout << myname << " Digit pedestal: " << digit.GetPedestal() << endl;
+          if ( fdbg > 4 ) cout << myname << "      Compression: " << digit.Compression() << endl;
+          if ( fdbg > 4 ) cout << myname << "  Compressed size: " << digit.ADCs().size() << endl;
+          if ( fdbg > 4 ) cout << myname << "Uncompressed size: " << digit.Samples() << endl;
+          if ( fdbg > 4 ) cout << myname << "   Digit pedestal: " << digit.GetPedestal() << endl;
           if ( digit.Compression() == raw::kNone ) {
             if ( fdbg > 4 ) cout << myname << "Copying uncompressed..." << endl;
             adcs = digit.ADCs();
           } else {
+            if ( fdbg > 5 || (fdbg > 4 && ichan<maxdbgchan) ) {
+              cout << myname << "Uncompressed data:" << endl;
+              for ( unsigned int tick=0; tick<digit.ADCs().size(); ++tick ) {
+                cout << myname << "  Raw ADC entry " << tick << ": " << digit.ADCs()[tick] << endl;
+                if ( fdbg < 5 && tick >= maxdbgtick ) {
+                  cout << myname << "..." << endl;
+                  break;
+                }
+              }
+            }
             if ( fdbg > 4 ) cout << myname << "Uncompressing..." << endl;
             // Following is to avoid crash. See https://cdcvs.fnal.gov/redmine/issues/11572.
-            adcs.resize(digit.ADCs().size(), 0.0);
+            adcs.resize(digit.Samples());
             if ( fRawPedestalOption == 2 ) {
               int iped = digit.GetPedestal();
               raw::Uncompress(digit.ADCs(), adcs, iped, digit.Compression());
@@ -1227,7 +1241,7 @@ void DXDisplay::analyze(const art::Event& event) {
             if ( fdbg > 4 ) cout << myname << "Uncompressed." << endl;
           }
           if ( first ) {
-            if ( fdbg > 1 ) {
+            if ( fdbg > 1 && fdbg<5 ) {
               cout << myname << " Compression level for first digit: " << digit.Compression() << endl;
               cout << myname << "      # TDC slices for first digit: " << adcs.size() << endl;
             }
@@ -1250,7 +1264,7 @@ void DXDisplay::analyze(const art::Event& event) {
           }
           for ( unsigned int tick=0; tick<adcs.size(); ++tick ) {
             double wt = adcs[tick] - pedestal;
-            if ( fdbg > 5 || ( fdbg > 4 && tick<20 ) )
+            if ( fdbg > 5 || ( fdbg > 4 && ichan<maxdbgchan && tick<maxdbgtick ) )
               cout << myname << "  Tick " << tick << " raw - ped: " << adcs[tick] << " - " << pedestal
                                  << " = " << wt << endl;
             if ( wt == 0 ) continue;
