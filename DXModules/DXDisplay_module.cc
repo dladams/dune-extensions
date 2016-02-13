@@ -628,7 +628,7 @@ void DXDisplay::analyze(const art::Event& event) {
     allname = "|" + allname + "|";
     allzmin = 0.0;
   }
-  ChannelTickHistCreator hcreateRawAll(htfs, sevt, fTdcTickMin, fTdcTickMax, allname, allzmin, zmax, ncontour, fNTickPerBinForAll, fNChanPerBinForAll);
+  ChannelTickHistCreator hcreateRawAll(htfs, sevt, fTdcTickMin, fTdcTickMax, allname, allzmin, zmax, 2*ncontour, fNTickPerBinForAll, fNChanPerBinForAll);
 
   // Formatting.
   int wnam = 12 + sevtf.size();                  // Base width for a histogram name.
