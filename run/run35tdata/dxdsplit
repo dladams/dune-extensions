@@ -7,5 +7,12 @@ INFILE=$DATADIR/lbne_r010895_sr01_20160212T170319.root
 OUTFILE=dxdsplit.root
 FCLFILE=dxdsplit.fcl
 NEVT=2
-lar -c $FCLFILE -n $NEVT -s $INFILE -T $OUTFILE 2>&1 | tee dxdsplit.log
+if [ -n "$1" ]; then
+  NEVT=$1
+fi
+SKIPARG=
+if [ -n "$2" ]; then
+  SKIPARG="--nskip $2"
+fi
+lar -c $FCLFILE $SKIPARG -n $NEVT -s $INFILE -T $OUTFILE 2>&1 | tee dxdsplit.log
 fcldump $FCLFILE 5 >${FCLFILE}dump
