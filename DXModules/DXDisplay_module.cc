@@ -627,7 +627,14 @@ void DXDisplay::analyze(const art::Event& event) {
   ChannelTickHistCreator hcreateDco(htfs, sevt, fTdcTickMin, fTdcTickMax, ztitleDco, -zmaxDco, zmaxDco, 2*ncontour, fNTickPerBin);
   // Hist creators for all channels.
   ChannelTickHistCreator hcreateMcsAll(htfs, sevt, fTdcTickMin, fTdcTickMax, "Energy [MeV]", 0, zmax, ncontour, fNTickPerBinForAll, fNChanPerBinForAll);
-  ChannelTickHistCreator hcreateRawAll(htfs, sevt, fTdcTickMin, fTdcTickMax, "|ADC counts|", 0, zmax, ncontour, fNTickPerBinForAll, fNChanPerBinForAll);
+  bool fAbsAll = false;
+  string allname = "ADC counts";
+  double allzmin = -zmax;
+  if ( fAbsAll ) {
+    allname = "|" + allname + "|";
+    allzmin = 0.0;
+  }
+  ChannelTickHistCreator hcreateRawAll(htfs, sevt, fTdcTickMin, fTdcTickMax, allname, allzmin, zmax, 2*ncontour, fNTickPerBinForAll, fNChanPerBinForAll);
 
   // Formatting.
   int wnam = 12 + sevtf.size();                  // Base width for a histogram name.
@@ -1196,11 +1203,15 @@ void DXDisplay::analyze(const art::Event& event) {
           rawhists.push_back(ph);
           m_eventhists.push_back(ph);
         }
-        TH2* phall = nullptr;
+        TH2* phallraw = nullptr;
+        TH2* phallrawon = nullptr;
         if ( fNTickPerBinForAll > 0 && fNChanPerBinForAll > 0 ) {
-          phall = hcreateRawAll.create("rawall", 0, geohelp.geometry()->Nchannels(),
+          phallraw = hcreateRawAll.create("rawall", 0, geohelp.geometry()->Nchannels(),
                                        "Raw signals for full detector");
-          m_eventhists.push_back(phall);
+          phallrawon = hcreateRawAll.create("rawallon", 0, geohelp.geometry()->Nchannels(),
+                                       "Online-ordered raw signals for full detector");
+          m_eventhists.push_back(phallraw);
+          m_eventhists.push_back(phallrawon);
         }
         if ( fdbg > 2 ) cout << myname << "Uncompressing data." << endl;
         bool first = true;
@@ -1208,8 +1219,8 @@ void DXDisplay::analyze(const art::Event& event) {
         unsigned int maxdbgtick = 50;
         unsigned int idig = 0;
         // Flags that record how the digits are ordered.
-        bool isOnlineOrdered;
-        bool isOfflineOrdered;
+        bool isOnlineOrdered = true;
+        bool isOfflineOrdered = true;
         for ( auto const& digit : (*rawDigitHandle) ) {
           if ( fdbg > 4 ) cout << myname << "----------" << endl;
           unsigned int ichan = digit.Channel();
@@ -1283,9 +1294,13 @@ void DXDisplay::analyze(const art::Event& event) {
             if ( wt == 0 ) continue;
             if ( fhistusede ) wt *= adc2de(ichan);
             ph->Fill(tick, iropchan, wt);
-            if ( phall != nullptr ) phall->Fill(tick, ichan, fabs(wt));
-          }
-        }  // end loop over digits
+            double allwt = wt;
+            if ( fAbsAll ) allwt = fabs(allwt);
+            if ( phallraw != nullptr ) phallraw->Fill(tick, ichan, allwt);
+            if ( phallrawon != nullptr ) phallrawon->Fill(tick, idig, allwt);
+          }  // end loop over ticks
+          ++idig;
+        }  // end loop over digits.
         if ( fdbg > 4 ) cout << myname << "----------" << endl;
         if ( fdbg > 1 ) {
           if ( isOnlineOrdered )   cout << myname << "Digit order is online." << endl;
@@ -1299,7 +1314,8 @@ void DXDisplay::analyze(const art::Event& event) {
           for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
             summarize2dHist(rawhists[irop], myname, wnam, 4, 7);
           }
-          if ( phall != nullptr ) summarize2dHist(phall, myname, wnam, 4, 7);
+          if ( phallraw != nullptr ) summarize2dHist(phallraw, myname, wnam, 4, 7);
+          if ( phallrawon != nullptr ) summarize2dHist(phallrawon, myname, wnam, 4, 7);
         }
       }  // end DoRawSignalHists
 

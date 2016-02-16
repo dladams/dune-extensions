@@ -11,7 +11,6 @@
 #include "dxdisplay_module.fcl"
 #include "SSPToOffline.fcl"
 #include "SplitterInput.fcl"
-#include "dune_daq.fcl"
 
 process_name: ctreeraw35t
 
@@ -58,15 +57,18 @@ physics.analyzers.DXDisplay.RawDigitLabel: "TPC_ctreeraw35t"
 physics.analyzers.DXDisplay.RawDigitLabel: "SplitterInput:TPC"
 physics.analyzers.DXDisplay.TdcTickMax: 10000
 physics.analyzers.DXDisplay.RawPedestalOption: 3
-physics.analyzers.DXDisplay.DebugLevel: 5
+physics.analyzers.DXDisplay.NTickPerBinForAll:  1
+physics.analyzers.DXDisplay.NChanPerBinForAll:  1
+physics.analyzers.DXDisplay.DebugLevel: 2
 
 
 services.user.IDetPedestalService.DetPedestalDUNE.UseDB:   true
-services.user.IDetPedestalService.DetPedestalDUNE.UseFile: true
-services.user.IDetPedestalService.DetPedestalDUNE.Run:     true
+services.user.IDetPedestalService.DetPedestalDUNE.UseFile: false
+services.user.IDetPedestalService.DetPedestalDUNE.Run:     false
 services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: "peds_michelle_20160115.csv"
 services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: "tingjun_offline_databaseRun_9754_fixed.csv"
-#services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: ""
+services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: "offline_databaseRun_9754.csv"
+services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: ""
 #services.user.IDetPedestalService.DetPedestalDUNE.CSVFileName: "peds_michelle_20160115.csv"
 
-services.ChannelMappingService: chmap35t
+services.ChannelMappingService: @local::chmap35t
