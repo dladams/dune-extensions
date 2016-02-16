@@ -11,6 +11,7 @@
 #include "dxdisplay_module.fcl"
 #include "SSPToOffline.fcl"
 #include "SplitterInput.fcl"
+#include "dune_daq.fcl"
 
 process_name: ctreeraw35t
 
@@ -67,3 +68,5 @@ services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: "peds_michelle_201601
 services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: "tingjun_offline_databaseRun_9754_fixed.csv"
 #services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: ""
 #services.user.IDetPedestalService.DetPedestalDUNE.CSVFileName: "peds_michelle_20160115.csv"
+
+services.ChannelMappingService: chmap35t

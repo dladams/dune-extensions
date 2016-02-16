@@ -71,6 +71,9 @@
 #include "CalibrationDBI/Interface/IDetPedestalService.h"
 #include "CalibrationDBI/Interface/IDetPedestalProvider.h"
 
+// Dune includes.
+#include "dune/DuneInterface/ChannelMappingService.h"
+
 // Framework includes
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
@@ -313,6 +316,9 @@ private:
 
   // LArProperties service (for drift speed)
   art::ServiceHandle<util::DetectorProperties> fdetprop;
+
+  // Channel mapping service.
+  art::ServiceHandle<ChannelMappingService> fchanmap;
 
   // Vector of event hists that should be removed at the end of the event.
   mutable vector<TH1*> m_eventhists;
@@ -1200,9 +1206,16 @@ void DXDisplay::analyze(const art::Event& event) {
         bool first = true;
         unsigned int maxdbgchan = 50;
         unsigned int maxdbgtick = 50;
+        unsigned int idig = 0;
+        // Flags that record how the digits are ordered.
+        bool isOnlineOrdered;
+        bool isOfflineOrdered;
         for ( auto const& digit : (*rawDigitHandle) ) {
           if ( fdbg > 4 ) cout << myname << "----------" << endl;
           unsigned int ichan = digit.Channel();
+          unsigned int ichanon = fchanmap->online(ichan);
+          isOnlineOrdered &= ichanon == idig;
+          isOfflineOrdered &= ichan == idig;
           if ( fdbg > 4 ) cout << myname << "          Channel: " << ichan << endl;
           unsigned int irop = geohelp.channelRop(ichan);
           if ( fdbg > 4 ) cout << myname << "              ROP: " << irop << endl;
@@ -1272,9 +1285,14 @@ void DXDisplay::analyze(const art::Event& event) {
             ph->Fill(tick, iropchan, wt);
             if ( phall != nullptr ) phall->Fill(tick, ichan, fabs(wt));
           }
-        }
+        }  // end loop over digits
         if ( fdbg > 4 ) cout << myname << "----------" << endl;
-
+        if ( fdbg > 1 ) {
+          if ( isOnlineOrdered )   cout << myname << "Digit order is online." << endl;
+          if ( isOfflineOrdered )  cout << myname << "Digit order is offline." << endl;
+          if ( !isOnlineOrdered &&
+               !isOfflineOrdered ) cout << myname << "Digit order is neither online nor offline." << endl;
+        }
         // Display the contents of each raw data histogram.
         if ( fdbg > 1 ) {
           cout << myname << "Summary of raw data histograms:" << endl;
