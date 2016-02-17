@@ -238,14 +238,14 @@ DrawResult draw(std::string name ="help", int how =0, double xmin =0.0, double x
     cout << "Time projection histogram for each channel: " << hname1 << ", ..., " << hname2 << endl;
   }
   // Draw.
-  phdraw->Draw(dopt.c_str());
-  //ph2->Draw("axis same");
+  //dla phdraw->Draw(dopt.c_str());
+  //phdraw->Draw("axis");
   // Retrieve the palette axis.
   gPad->Update();
   //phdraw->GetListOfFunctions()->Print(); 
   if ( !add &&  xmax > xmin ) {
     phdraw->GetXaxis()->SetRangeUser(xmin, xmax);
-    phdraw->Draw(dopt.c_str());
+    //dla phdraw->Draw(dopt.c_str());
   }
   if ( !add &&  zmax > 0.0 ) {
     cout << "Changing z limits to zmax = " << zmax << "." << endl;
@@ -253,9 +253,9 @@ DrawResult draw(std::string name ="help", int how =0, double xmin =0.0, double x
     if ( phdraw->GetMinimum() < 0.0 ) {
       phdraw->SetMinimum(-zmax);
     }
-    phdraw->Draw(dopt.c_str());
+    //dla phdraw->Draw(dopt.c_str());
   }
-  gPad->Update();
+  phdraw->Draw(dopt.c_str());
   addaxis(phdraw);
   res.hdraw = phdraw;
   return res;
