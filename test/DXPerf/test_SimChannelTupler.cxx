@@ -76,52 +76,17 @@ int main() {
   string line = "-----------------------------";
   int dbg = 1;
 
-  // Geometry name.
-  string gname = "dune35t4apa_v5";
-
   cout << line << endl;
-  cout << myname << "Add TFileService." << endl;
+  cout << myname << "Add services." << endl;
   ArtServiceHelper& ash = ArtServiceHelper::instance();
-  string scfg = "fileName: \"simchannel_test.root\" service_type: \"TFileService\"";
-  assert( ash.addService("TFileService", scfg) == 0 );
-
-  cout << myname << line << endl;
-  cout << myname << "Add the TimeService service (needed for DetectorProperties)." << endl;
-  scfg = "ClockSpeedExternal: 3.125e1 ClockSpeedOptical: 128 ClockSpeedTPC: 2 ClockSpeedTrigger: 16 DefaultBeamTime: 0 DefaultTrigTime: 0 FramePeriod: 1600 G4RefTime: 0 InheritClockConfig: false TrigModuleName: \"\" TriggerOffsetTPC: 0";
-  cout << myname << "Configuration: " << scfg << endl;
-  assert( ash.addService("TimeService", scfg) == 0 );
-
-  cout << myname << line << endl;
-  cout << myname << "Add the DetectorProperties service (used by GeoHelper)." << endl;
-  scfg = "ElectronsToADC: 6.8906513e-3 NumberTimeSamples: 3200 ReadOutWindowSize: 3200 TimeOffsetU: 0 TimeOffsetV: 0 TimeOffsetZ: 0";
-  cout << myname << "Configuration: " << scfg << endl;
-  assert( ash.addService("DetectorProperties", scfg) == 0 );
-
-  cout << myname << line << endl;
-  cout << myname << "Add the LArProperties service (used by DetectorProperties)." << endl;
-  scfg = "prodsingle_dune35t.fcl";
-  cout << myname << "Configuration: " << scfg << endl;
-  assert( ash.addService("LArProperties", scfg, true) == 0 );
-
-  cout << myname << line << endl;
-  cout << myname << "Add the DatabaseUtil service (needed for LArProperties)." << endl;
-  scfg = "DBHostName: \"fnalpgsdev.fnal.gov\" DBName: \"dune_dev\" DBUser: \"dune_reader\" PassFileName: \".lpswd\" Port: 5438 ShouldConnect: false TableName: \"main_run\" ToughErrorTreatment: false";
-  cout << myname << "Configuration: " << scfg << endl;
-  assert( ash.addService("DatabaseUtil", scfg) == 0 );
-
-  cout << myname << line << endl;
-  cout << myname << "Add the Geometry service (used by DetectorProperties)." << endl;
-  scfg = "DisableWiresInG4: true GDML: \"dune35t4apa_v5.gdml\" Name: \"" + gname +
-         "\" ROOT: \"" + gname + "\" SortingParameters: { DetectorVersion: \"" + gname +
-         "\" } SurfaceY: 0";
-  cout << myname << "Configuration: " << scfg << endl;
-  assert( ash.addService("Geometry", scfg) == 0 );
-
-  cout << myname << line << endl;
-  cout << myname << "Add the DUNE geometry helper service (required to load DUNE geometry)." << endl;
-  scfg = "service_provider: \"DUNEGeometryHelper\"";
-  cout << myname << "Configuration: " << scfg << endl;
-  assert( ash.addService("ExptGeoHelperInterface", scfg) == 0 );
+  string scfg = "prodsingle_dune35t.fcl";
+  bool isFile = true;
+  assert( ash.addService("TFileService",              scfg, isFile) == 0 );
+  assert( ash.addService("DetectorClocksService",     scfg, isFile) == 0 );
+  assert( ash.addService("DetectorPropertiesService", scfg, isFile) == 0 );
+  assert( ash.addService("LArPropertiesService",      scfg, isFile) == 0 );
+  assert( ash.addService("Geometry",                  scfg, isFile) == 0 );
+  assert( ash.addService("ExptGeoHelperInterface",    scfg, isFile) == 0 );
 
   cout << line << endl;
   cout << myname << "Load Services." << endl;
@@ -140,7 +105,6 @@ int main() {
   cout << myname << line << endl;
   cout << myname << "Create and check geometry:" << endl;
   GeoHelper gh(hgeo.operator->(), true);
-  //GeoHelper gh(gname", true);
   if ( dbg ) gh.print();
   assert(gh.geometry() != nullptr);
   assert(gh.detectorProperties() != nullptr );
