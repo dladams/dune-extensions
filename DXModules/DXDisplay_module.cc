@@ -51,25 +51,23 @@
 #include <sstream>
 #include <utility>
 
-// LArSoft includes
-#include "SimpleTypesAndConstants/geo_types.h" // geo::View_t, geo::SignalType, geo::WireID
-#include "Geometry/Geometry.h"
-#include "Simulation/SimChannel.h"
-#include "Simulation/LArG4Parameters.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/Wire.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/Track.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/LArProperties.h"
-//#include "HitFinderLBNE/APAGeometryAlg.h"
+// nutuools includes
 #include "SimulationBase/MCParticle.h"
 #include "SimulationBase/MCTruth.h"
-#include "SimpleTypesAndConstants/geo_types.h"
-#include "RawData/raw.h"
-#include "RawData/RawDigit.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+
+// LArSoft includes
+#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t, geo::SignalType, geo::WireID
+#include "larcore/Geometry/Geometry.h"
+#include "larsim/Simulation/SimChannel.h"
+#include "larsim/Simulation/LArG4Parameters.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/RecoBase/Wire.h"
+#include "lardata/RecoBase/Cluster.h"
+#include "lardata/RecoBase/Track.h"
+#include "lardata/RawData/raw.h"
+#include "lardata/RawData/RawDigit.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 
 // Dune includes.
 #include "dune/DuneInterface/ChannelMappingService.h"
@@ -314,9 +312,6 @@ private:
   GeoHelper* fgeohelp;
   art::ServiceHandle<geo::Geometry> fGeometry;       // pointer to Geometry service
 
-  // LArProperties service (for drift speed)
-  art::ServiceHandle<util::DetectorProperties> fdetprop;
-
   // Channel mapping service.
   art::ServiceHandle<ChannelMappingService> fchanmap;
 
@@ -324,7 +319,7 @@ private:
   mutable vector<TH1*> m_eventhists;
 
   // Pedestal provider.
-  const lariov::IDetPedestalProvider* m_pPedProv;
+  const lariov::DetPedestalProvider* m_pPedProv;
 
 }; // class DXDisplay
 
@@ -573,7 +568,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   // Pedestals.
   m_pPedProv = nullptr;
   if ( fRawPedestalOption == 3 ) {
-    m_pPedProv = &art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
+    m_pPedProv = &art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider();
     cout << myname << "Pedestal provider: @" <<  m_pPedProv << endl;
   }
   return;

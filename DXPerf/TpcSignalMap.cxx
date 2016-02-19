@@ -6,9 +6,9 @@
 #include <cmath>
 #include "TH2.h"
 #include "SimulationBase/MCParticle.h"
-#include "Simulation/SimChannel.h"
-#include "RecoBase/Hit.h"
-#include "Geometry/Geometry.h"
+#include "larsim/Simulation/SimChannel.h"
+#include "lardata/RecoBase/Hit.h"
+#include "larcore/Geometry/Geometry.h"
 #include "DXUtil/reducedPDG.h"
 
 using std::string;

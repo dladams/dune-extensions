@@ -2,12 +2,9 @@
 art_make(BASENAME_ONLY
          LIB_LIBRARIES
            dune_Geometry
-           Geometry_service
-           Geometry
-           LArProperties_service
-           DetectorProperties_service
-           RawData
-           RecoBase
+           larcore_Geometry
+           lardata_RawData
+           lardata_RecoBase
            fhiclcpp
            ${SIMULATIONBASE}
            ${ART_FRAMEWORK_CORE}

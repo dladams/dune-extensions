@@ -11,10 +11,10 @@
 #include "TTree.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "Geometry/Geometry.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/LArProperties.h"
-#include "Simulation/SimChannel.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
+#include "larsim/Simulation/SimChannel.h"
 #include "DXGeometry/GeoHelper.h"
 
 #include <string>
@@ -130,8 +130,8 @@ int main() {
 
   cout << myname << line << endl;
   cout << myname << "Check services." << endl;
-  art::ServiceHandle<util::DetectorProperties> hdp;
-  art::ServiceHandle<util::LArProperties> hlp;
+  art::ServiceHandle<detinfo::DetectorPropertiesService> hdp;
+  art::ServiceHandle<detinfo::LArPropertiesService> hlp;
   art::ServiceHandle<geo::Geometry> hgeo;
   assert( hdp.operator->() != nullptr );
   assert( hlp.operator->() != nullptr );

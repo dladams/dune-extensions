@@ -7,7 +7,7 @@
 
 #include "fhiclcpp/ParameterSet.h"
 #include "fhiclcpp/make_ParameterSet.h"
-#include "Geometry/GeometryCore.h"
+#include "larcore/Geometry/GeometryCore.h"
 #include "DXGeometry/GeoHelper.h"
 
 #include <string>

@@ -12,8 +12,8 @@
 #ifndef __CINT__
 #include "fhiclcpp/ParameterSet.h"
 #include "fhiclcpp/make_ParameterSet.h"
-#include "Geometry/GeometryCore.h"
-#include "Geometry/ChannelMapAlg.h"
+#include "larcore/Geometry/GeometryCore.h"
+#include "larcore/Geometry/ChannelMapAlg.h"
 #include "dune/Geometry/ChannelMap35OptAlg.h"
 #endif
 

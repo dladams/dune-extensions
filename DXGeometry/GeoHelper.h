@@ -13,13 +13,13 @@
 #include <vector>
 #include <map>
 // We need the folowing because simple enums cannot be forward declared.
-#include "SimpleTypesAndConstants/geo_types.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
 #include "PlanePosition.h"
 
 namespace geo {
 class GeometryCore;
 }
-namespace util {
+namespace detinfo {
 class LArProperties;
 class DetectorProperties;
 }
@@ -58,10 +58,10 @@ public:
   bool haveChannelMap() const { return m_haveChannelMap; }
 
   // Return the LAr properties.
-  util::LArProperties* larProperties() const;
+  const detinfo::LArProperties* larProperties() const;
 
   // Return the detector properties.
-  util::DetectorProperties* detectorProperties() const;
+  const detinfo::DetectorProperties* detectorProperties() const;
 
   // Return dimensions for a TPC.
   // useActive = true for the "active" dimensions.

@@ -3,7 +3,7 @@
 #include "TpcSignalMapComparison.h"
 #include <iostream>
 #include <iomanip>
-#include "Geometry/Geometry.h"
+#include "larcore/Geometry/Geometry.h"
 #include "DXPerf/TpcSignalMap.h"
 #include "DXGeometry/GeoHelper.h"
 

@@ -6,11 +6,12 @@
 #include <iomanip>
 #include <set>
 #include <memory>
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/LArProperties.h"
-#include "Geometry/GeometryCore.h"
-#include "Geometry/TPCGeo.h"
-#include "Geometry/PlaneGeo.h"
+#include "fhiclcpp/make_ParameterSet.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
+#include "larcore/Geometry/GeometryCore.h"
+#include "larcore/Geometry/TPCGeo.h"
+#include "larcore/Geometry/PlaneGeo.h"
 #include "dune/Geometry/ChannelMap35OptAlg.h"
 #include "dune/Geometry/ChannelMapAPAAlg.h"
 
@@ -25,8 +26,10 @@ using std::vector;
 using std::set;
 using std::string;
 using std::shared_ptr;
-using util::LArProperties;
-using util::DetectorProperties;
+using detinfo::LArProperties;
+using detinfo::LArPropertiesService;
+using detinfo::DetectorProperties;
+using detinfo::DetectorPropertiesService;
 using geo::TPCID;
 using geo::TPCGeo;
 using geo::PlaneID;
@@ -109,12 +112,12 @@ GeoHelper::GeoHelper(std::string gname, bool useChannels, Status dbg)
 
 //**********************************************************************
 
-DetectorProperties* GeoHelper::detectorProperties() const {
+const DetectorProperties* GeoHelper::detectorProperties() const {
   const string myname = "GeoHelper::detectorProperties: ";
-  static DetectorProperties* pref = nullptr;
+  static const DetectorProperties* pref = nullptr;
   if ( pref == nullptr ) {
     try {
-      pref = art::ServiceHandle<DetectorProperties>().operator->();
+      pref = art::ServiceHandle<DetectorPropertiesService>()->provider();
     } catch(...) {
       cout << myname << "Detector properties not found." << endl;
     }
@@ -124,9 +127,9 @@ DetectorProperties* GeoHelper::detectorProperties() const {
 
 //**********************************************************************
 
-LArProperties* GeoHelper::larProperties() const {
+const LArProperties* GeoHelper::larProperties() const {
   try {
-    static LArProperties* pref = art::ServiceHandle<LArProperties>().operator->();
+    static const LArProperties* pref = art::ServiceHandle<LArPropertiesService>()->provider();
     return pref;
   } catch(...) {
     return nullptr;
@@ -434,15 +437,14 @@ ostream& GeoHelper::print(ostream& out, int iopt, std::string prefix) const {
   }
   // Show LAr properties.
   double driftspeed = 0.0;
-  if ( larProperties() == nullptr ) {
-    cout << prefix << "LAr properties not found." << endl;
-  } else {
-    driftspeed = larProperties()->DriftVelocity();
-    cout << prefix << "LAr drift speed = " << driftspeed << " cm/us" << endl;
-  }
   if ( detectorProperties() == nullptr ) {
     cout << prefix << "Detector properties not found." << endl;
   } else {
+    unsigned int planegap = 0;
+    double efield = detectorProperties()->Efield(planegap);
+    double temp = detectorProperties()->Temperature();
+    driftspeed = detectorProperties()->DriftVelocity(efield, temp);
+    cout << prefix << "LAr drift speed = " << driftspeed << " cm/us" << endl;
     double samplingrate = detectorProperties()->SamplingRate();
     cout << prefix << "Sampling period = " << samplingrate << " ns" << endl;
     if ( driftspeed > 0.0 ) {
