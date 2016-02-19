@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# David Adams
+# February 2016
+#
+# Script to run ATLAS event dispaly using the 35t slicer.
+# Command from from Michelle Stancari.
+
+RUN=$1
+FILE=`ls $HOME/data/dune/*${RUN}*`
+if test -n "$FILE" && test -r $FILE; then
+  echo Processing $FILE
+  lar -c evd_dune35t_slicer.fcl $FILE
+else
+  echo Unable to find file for run $RUN
+fi
