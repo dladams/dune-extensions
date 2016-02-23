@@ -32,7 +32,7 @@ public:
   virtual ~RawDigitAnalysisService() =default;
 
   // Process the raw data.
-  virtual int process(std::vector<raw::RawDigit>& digs, const art::Event* pevt =nullptr) const =0;
+  virtual int process(const std::vector<raw::RawDigit>& digs, const art::Event* pevt =nullptr) const =0;
 
 };
 

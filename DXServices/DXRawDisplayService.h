@@ -64,7 +64,7 @@ public:
   ~DXRawDisplayService();
 
   // The histogram filling routine, typically called once per event. 
-  int process(std::vector<raw::RawDigit>& digs, const art::Event* pevt) const override; 
+  int process(const std::vector<raw::RawDigit>& digs, const art::Event* pevt) const override; 
 
 private:
 

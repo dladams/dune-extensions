@@ -94,7 +94,7 @@ DXRawDisplayService::~DXRawDisplayService() { }
    
 //************************************************************************
 
-int DXRawDisplayService::process(vector<RawDigit>& digs, const art::Event* pevt) const {
+int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event* pevt) const {
   const string myname = "DXDisplayService::process: ";
 
   // Access ART's TFileService, which will handle creating and writing

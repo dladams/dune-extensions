@@ -103,6 +103,7 @@
 #include <memory>
 
 // Local includes.
+#include "DXInterface/RawDigitAnalysisService.h"
 #include "DXUtil/reducedPDG.h"
 #include "DXUtil/intProcess.h"
 #include "DXUtil/ChannelTickHistCreator.h"
@@ -320,6 +321,9 @@ private:
 
   // Pedestal provider.
   const lariov::DetPedestalProvider* m_pPedProv;
+
+  // Analysis services.
+  art::ServiceHandle<RawDigitAnalysisService> m_hrawsvc;
 
 }; // class DXDisplay
 
@@ -1182,142 +1186,15 @@ void DXDisplay::analyze(const art::Event& event) {
 
   if ( fDoRaw ) {
     // Get the raw digits for the event.
-    try {
-      art::Handle< vector<raw::RawDigit> > rawDigitHandle;
-      event.getByLabel(fRawDigitProducerLabel, rawDigitHandle);
-      if ( fdbg > 1 ) cout << myname << "Raw channel count: " << rawDigitHandle->size() << endl;
-
-      // Create the Raw digit histograms.
-      if ( fDoRawSignalHists ) {
-        vector<TH2*> rawhists;
-        if ( fdbg > 2 ) cout << myname << "Creating raw data histograms." << endl;
-        for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
-          TH2* ph = hcreateRecoNeg.create("raw" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
-                                          "Raw signals for " + geohelp.ropName(irop));
-          if ( fdbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
-          rawhists.push_back(ph);
-          m_eventhists.push_back(ph);
-        }
-        TH2* phallraw = nullptr;
-        TH2* phallrawon = nullptr;
-        if ( fNTickPerBinForAll > 0 && fNChanPerBinForAll > 0 ) {
-          phallraw = hcreateRawAll.create("rawall", 0, geohelp.geometry()->Nchannels(),
-                                       "Raw signals for full detector");
-          phallrawon = hcreateRawAll.create("rawallon", 0, geohelp.geometry()->Nchannels(),
-                                       "Online-ordered raw signals for full detector");
-          m_eventhists.push_back(phallraw);
-          m_eventhists.push_back(phallrawon);
-        }
-        if ( fdbg > 2 ) cout << myname << "Uncompressing data." << endl;
-        bool first = true;
-        unsigned int maxdbgchan = 50;
-        unsigned int maxdbgtick = 50;
-        unsigned int idig = 0;
-        // Flags that record how the digits are ordered.
-        bool isOnlineOrdered = true;
-        bool isOfflineOrdered = true;
-        for ( auto const& digit : (*rawDigitHandle) ) {
-          if ( fdbg > 4 ) cout << myname << "----------" << endl;
-          unsigned int ichan = digit.Channel();
-          unsigned int ichanon = fchanmap->online(ichan);
-          isOnlineOrdered &= ichanon == idig;
-          isOfflineOrdered &= ichan == idig;
-          if ( fdbg > 4 ) cout << myname << "          Channel: " << ichan << endl;
-          unsigned int irop = geohelp.channelRop(ichan);
-          if ( fdbg > 4 ) cout << myname << "              ROP: " << irop << endl;
-          TH2* ph = rawhists[irop];
-          unsigned int iropchan = ichan - geohelp.ropFirstChannel(irop);
-          if ( fdbg > 4 ) cout << myname << "      ROP channel: " << iropchan << endl;
-          int nadc = digit.NADC();
-          vector<short> adcs;
-          if ( fdbg > 4 ) cout << myname << "      Compression: " << digit.Compression() << endl;
-          if ( fdbg > 4 ) cout << myname << "  Compressed size: " << digit.ADCs().size() << endl;
-          if ( fdbg > 4 ) cout << myname << "Uncompressed size: " << digit.Samples() << endl;
-          if ( fdbg > 4 ) cout << myname << "   Digit pedestal: " << digit.GetPedestal() << endl;
-          if ( digit.Compression() == raw::kNone ) {
-            if ( fdbg > 4 ) cout << myname << "Copying uncompressed..." << endl;
-            adcs = digit.ADCs();
-          } else {
-            if ( fdbg > 5 || (fdbg > 4 && ichan<maxdbgchan) ) {
-              cout << myname << "Uncompressed data:" << endl;
-              for ( unsigned int tick=0; tick<digit.ADCs().size(); ++tick ) {
-                cout << myname << "  Raw ADC entry " << tick << ": " << digit.ADCs()[tick] << endl;
-                if ( fdbg < 5 && tick >= maxdbgtick ) {
-                  cout << myname << "..." << endl;
-                  break;
-                }
-              }
-            }
-            if ( fdbg > 4 ) cout << myname << "Uncompressing..." << endl;
-            // Following is to avoid crash. See https://cdcvs.fnal.gov/redmine/issues/11572.
-            adcs.resize(digit.Samples());
-            if ( fRawPedestalOption == 2 ) {
-              int iped = digit.GetPedestal();
-              raw::Uncompress(digit.ADCs(), adcs, iped, digit.Compression());
-            } else {
-              raw::Uncompress(digit.ADCs(), adcs, digit.Compression());
-            }
-            if ( fdbg > 4 ) cout << myname << "Uncompressed." << endl;
-          }
-          if ( first ) {
-            if ( fdbg > 1 && fdbg<5 ) {
-              cout << myname << " Compression level for first digit: " << digit.Compression() << endl;
-              cout << myname << "      # TDC slices for first digit: " << adcs.size() << endl;
-            }
-            first = false;
-          }
-          unsigned int nzero = 0;
-          for ( auto adc : adcs ) if ( adc == 0.0 ) ++nzero;
-          if ( fdbg > 3 ) cout << myname << "Digit channel " << ichan
-                              << " (ROP-chan = " << irop << "-" << iropchan
-                              << ") has " << nadc << " ADCs and "
-                              << digit.Samples() << " samples. Uncompressed size is " << adcs.size()
-                              << ". Number filled is " << adcs.size()-nzero << endl;
-          float pedestal = fRawAdcPedestal;
-          if ( fRawPedestalOption == 3 ) {
-            float dbped = m_pPedProv->PedMean(ichan);
-            if ( fdbg > 4 ) cout << myname << "DB Pedestal: " << dbped << endl;
-            pedestal += dbped;
-          } else if ( fRawPedestalOption > 0 ) {
-            pedestal += digit.GetPedestal();
-          }
-          for ( unsigned int tick=0; tick<adcs.size(); ++tick ) {
-            double wt = adcs[tick] - pedestal;
-            if ( fdbg > 5 || ( fdbg > 4 && ichan<maxdbgchan && tick<maxdbgtick ) )
-              cout << myname << "  Tick " << tick << " raw - ped: " << adcs[tick] << " - " << pedestal
-                                 << " = " << wt << endl;
-            if ( wt == 0 ) continue;
-            if ( fhistusede ) wt *= adc2de(ichan);
-            ph->Fill(tick, iropchan, wt);
-            double allwt = wt;
-            if ( fAbsAll ) allwt = fabs(allwt);
-            if ( phallraw != nullptr ) phallraw->Fill(tick, ichan, allwt);
-            if ( phallrawon != nullptr ) phallrawon->Fill(tick, idig, allwt);
-          }  // end loop over ticks
-          ++idig;
-        }  // end loop over digits.
-        if ( fdbg > 4 ) cout << myname << "----------" << endl;
-        if ( fdbg > 1 ) {
-          if ( isOnlineOrdered )   cout << myname << "Digit order is online." << endl;
-          if ( isOfflineOrdered )  cout << myname << "Digit order is offline." << endl;
-          if ( !isOnlineOrdered &&
-               !isOfflineOrdered ) cout << myname << "Digit order is neither online nor offline." << endl;
-        }
-        // Display the contents of each raw data histogram.
-        if ( fdbg > 1 ) {
-          cout << myname << "Summary of raw data histograms:" << endl;
-          for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
-            summarize2dHist(rawhists[irop], myname, wnam, 4, 7);
-          }
-          if ( phallraw != nullptr ) summarize2dHist(phallraw, myname, wnam, 4, 7);
-          if ( phallrawon != nullptr ) summarize2dHist(phallrawon, myname, wnam, 4, 7);
-        }
-      }  // end DoRawSignalHists
-
-    } catch(...) {
-      cout << myname << "ERROR: Unable to retrieve raw data container with label " << fRawDigitProducerLabel << endl;
+    art::Handle< vector<raw::RawDigit> > rawDigitHandle;
+    event.getByLabel(fRawDigitProducerLabel, rawDigitHandle);
+    if ( fdbg > 1 ) cout << myname << "Raw channel count: " << rawDigitHandle->size() << endl;
+    const vector<raw::RawDigit>* prawdata = rawDigitHandle.product();
+    if ( prawdata == nullptr ) {
+      cout << myname << "ERROR: Unable to find RawDigit vector data with label " << fRawDigitProducerLabel << endl;
+    } else {
+      m_hrawsvc->process(*prawdata);
     }
-    removeEventHists();
   }  // end DoRawDigit
 
   //************************************************************************
