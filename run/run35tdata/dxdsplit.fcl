@@ -51,24 +51,23 @@ outputs: {
   }
 }
 
-physics.analyzers.DXDisplay.DoRawSignalHists: true
-physics.analyzers.DXDisplay.RawDigitLabel: "SplitterInput_TPC_ctreeraw35t"
-physics.analyzers.DXDisplay.RawDigitLabel: "TPC_ctreeraw35t"
+physics.analyzers.DXDisplay.DoRawDigit: true
 physics.analyzers.DXDisplay.RawDigitLabel: "SplitterInput:TPC"
 physics.analyzers.DXDisplay.TdcTickMax: 10000
-physics.analyzers.DXDisplay.RawPedestalOption: 3
-physics.analyzers.DXDisplay.NTickPerBinForAll:  1
-physics.analyzers.DXDisplay.NChanPerBinForAll:  1
-physics.analyzers.DXDisplay.DebugLevel: 2
+physics.analyzers.DXDisplay.DebugLevel: 1
 
 
-services.user.IDetPedestalService.DetPedestalDUNE.UseDB:   true
-services.user.IDetPedestalService.DetPedestalDUNE.UseFile: false
-services.user.IDetPedestalService.DetPedestalDUNE.Run:     false
-services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: "peds_michelle_20160115.csv"
-services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: "tingjun_offline_databaseRun_9754_fixed.csv"
-services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: "offline_databaseRun_9754.csv"
-services.user.IDetPedestalService.DetPedestalDUNE.CSVFile: ""
-#services.user.IDetPedestalService.DetPedestalDUNE.CSVFileName: "peds_michelle_20160115.csv"
+services.user.DetPedestalService.DetPedestalDUNE.UseDB:   true
+services.user.DetPedestalService.DetPedestalDUNE.UseFile: false
+services.user.DetPedestalService.DetPedestalDUNE.Run:     false
+services.user.DetPedestalService.DetPedestalDUNE.CSVFile: "peds_michelle_20160115.csv"
+services.user.DetPedestalService.DetPedestalDUNE.CSVFile: "tingjun_offline_databaseRun_9754_fixed.csv"
+services.user.DetPedestalService.DetPedestalDUNE.CSVFile: "offline_databaseRun_9754.csv"
+services.user.DetPedestalService.DetPedestalDUNE.CSVFile: ""
+#services.user.DetPedestalService.DetPedestalDUNE.CSVFileName: "peds_michelle_20160115.csv"
 
 services.ChannelMappingService: @local::chmap35t
+services.RawDigitAnalysisService: @local::tools.rda_online
+services.RawDigitAnalysisService.LogLevel:        2
+services.RawDigitAnalysisService.DoMean:       true
+services.RawDigitAnalysisService.PedestalOption:  2

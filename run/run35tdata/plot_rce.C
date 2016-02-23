@@ -1,6 +1,7 @@
-void plot_rce(int rce1=0, int rce2=0, int evt1=1, int evt2=0, double xmin =3000) {
+void plot_rce(int rce1=0, int rce2=0, int evt1=1, int evt2=0,
+              double xmin =3000, double xmax =-10000) {
   if ( evt2 < evt1 ) evt2 = evt1;
-  double xmax = xmin + 500;
+  if ( xmax < xmin ) xmax = xmin + 500;
   double zmax = 100.0;
   int rcefac = 128;
   for ( int ievt=evt1; ievt<=evt2; ++ievt ) {

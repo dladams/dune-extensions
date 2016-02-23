@@ -18,9 +18,10 @@
 //   TdcTickMax  - Upper limit for the tick axis.
 //   NTickPerBin - Rebin factor for the tick axis.
 //   NChanPerBin - Rebin factor for the channel axis.
-//   DoROPs      - Make a histogram for each readout plane.
-//   DoAll       - Make a histogram for the full detector.
-//   DoAllOnline - Make a histogram for the full detector with online channel ordering.
+//   DoROPs      - Make a channel-tick histogram for each readout plane for each event.
+//   DoAll       - Make a channel-tick histogram for the full detector for each event.
+//   DoAllOnline - Make a channel-tick histogram for the full detector with online channel ordering for each event.
+//   DoMean      - Make a channel mean +/- RMS histogram for each event.
 //   PedestalOption - 1=take from digit, 2=take from service, otherwise none
 //   AdcOffset   - Offset added to all bins.
 //   DecompressWithPedestal - Include pedestal when decompressing data.
@@ -87,6 +88,7 @@ private:
   bool m_DoROPs;
   bool m_DoAll;
   bool m_DoAllOnline;
+  bool m_DoMean;
   int m_PedestalOption;
   float m_AdcOffset;
   bool m_DecompressWithPedestal;

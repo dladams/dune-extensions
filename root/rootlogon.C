@@ -35,7 +35,7 @@
   vector<string> libs;
   libs.push_back("$CETLIB_LIB/libcetlib");
   libs.push_back("$FHICLCPP_LIB/libfhiclcpp");
-  libs.push_back("$LARCORE_LIB/libGeometry");
+  libs.push_back("$LARCORE_LIB/liblarcore_Geometry");
   libs.push_back("$DUNETPC_LIB/libdune_Geometry");
   libs.push_back("$DUNE_EXTENSIONS_LIB/libDXUtil");
   libs.push_back("$DUNE_EXTENSIONS_LIB/libDXGeometry");
@@ -61,6 +61,7 @@
   gROOT->ProcessLine(".L getLabel.cxx+");
   gROOT->ProcessLine(".L HistoCompare.cxx+");
   gROOT->ProcessLine(".L slidingWindow.cxx+");
+  gROOT->ProcessLine(".L corrHist.cxx+");
 
   draw::set35t();
   draw::set10ktw();

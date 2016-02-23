@@ -218,7 +218,7 @@ private:
   bool fDoMcDescendantSignalAllHists;  // Create signal histograms for McParticle descendants all tracks
   bool fDoMcDescendantSignalHists;     // Create signal histograms for McParticle descendants
   bool fDoSimChannelSignalHists;       // Create signal histograms for SimChannels
-  bool fDoRawSignalHists;              // Create signal histograms for the RawDigits
+  bool fDoRawDigit;                    // Create signal histograms for the RawDigits
   bool fDoDeconvolutedSignalHists;     // Create signal histograms for the Wires (deconvoluted signals)
   bool fDoHitSignalHists;              // Create signal histograms for the the Hits.
   bool fDoClusterSignalHists;          // Create signal histograms for the Clusters.
@@ -236,18 +236,15 @@ private:
   string fClusterProducerLabel;        // The name of the producer that created clusters
   string fRefClusterProducerLabel;     // The name of the producer that created reference clusters
   string fTrackProducerLabel;          // The name of the producer that created tracks
-  string fRawDigitProducerLabel;       // The name of the producer that created the raw digits.
+  string fRawDigitLabel;               // The name of the producer that created the raw digits.
   bool fUseGammaNotPi0;                // Flag to select MCParticle gamma from pi0 instead of pi0
   bool fUseSecondaries;                // Flag to include secondary MC particles for tree and hists.
   bool fUseSimChannelDescendants;      // Use descendants when making SimChannel signal hists
   double fBinSize;                     // For dE/dx work: the value of dx. 
-  int fRawPedestalOption;              // Option for subtracting pedestals from data (0=no, 1=digit value).
-  double fRawAdcPedestal;              // Additional pedestal to subtract from raw data.
 
   // Derived control parameters.
   bool fDoMcParticles;             // Read MC particles.
   bool fDoSimChannels;             // Read SimChannels
-  bool fDoRaw;                     // Read raw data
   bool fDoWires;                   // Read wire (deconvoluted) data
   bool fDoHits;                    // Read hit data
   bool fDoClusters;                // Read cluster data
@@ -320,7 +317,7 @@ private:
   mutable vector<TH1*> m_eventhists;
 
   // Pedestal provider.
-  const lariov::DetPedestalProvider* m_pPedProv;
+  //const lariov::DetPedestalProvider* m_pPedProv;
 
   // Analysis services.
   art::ServiceHandle<RawDigitAnalysisService> m_hrawsvc;
@@ -433,7 +430,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fDoMcDescendantSignalAllHists  = p.get<bool>("DoMcDescendantSignalAllHists");
   fDoMcDescendantSignalHists     = p.get<bool>("DoMcDescendantSignalHists");
   fDoSimChannelSignalHists       = p.get<bool>("DoSimChannelSignalHists");
-  fDoRawSignalHists              = p.get<bool>("DoRawSignalHists");
+  fDoRawDigit                    = p.get<bool>("DoRawDigit");
   fDoDeconvolutedSignalHists     = p.get<bool>("DoDeconvolutedSignalHists");
   fDoHitSignalHists              = p.get<bool>("DoHitSignalHists");
   fDoClusterSignalHists          = p.get<bool>("DoClusterSignalHists");
@@ -447,7 +444,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fTruthProducerLabel            = p.get<string>("TruthLabel");
   fParticleProducerLabel         = p.get<string>("ParticleLabel");
   fSimulationProducerLabel       = p.get<string>("SimulationLabel");
-  fRawDigitProducerLabel         = p.get<string>("RawDigitLabel");
+  fRawDigitLabel                 = p.get<string>("RawDigitLabel");
   fHitProducerLabel              = p.get<string>("HitLabel");
   fWireProducerLabel             = p.get<string>("WireLabel");
   fClusterProducerLabel          = p.get<string>("ClusterLabel");
@@ -471,8 +468,6 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fdemaxmcp                      = p.get<double>("HistDEMaxMcParticle");
   fdemax                         = p.get<double>("HistDEMax");
   fhistusede                     = p.get<bool>("HistUseDE");
-  fRawPedestalOption             = p.get<double>("RawPedestalOption");
-  fRawAdcPedestal                = p.get<double>("RawAdcPedestal");
 
   // Derived control flags.
   fDoMcParticleSignalMaps   = fDoMcParticleSignalHists   || fDoMcParticleClusterMatching;
@@ -487,7 +482,6 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
                            fDoMcParticleTree || fDoMcPerfTree;
   fDoMcParticles = fDoMcParticleSelection;
   fDoSimChannels = fDoSimChannelSignalMaps || fDoSimChannelTree || fDoMcPerfTree;
-  fDoRaw = fDoRawSignalHists;
   fDoWires = fDoDeconvolutedSignalHists;
   fDoHits = fDoHitSignalHists;
   fDoClusters = fDoClusterSignalMaps;
@@ -508,7 +502,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "DoMcDescendantSignalHists" << sep << fDoMcDescendantSignalHists << endl;
     cout << prefix << setw(wlab) << "DoSimChannelSignalHists" << sep << fDoSimChannelSignalHists << endl;
     cout << prefix << setw(wlab) << "DoDeconvolutedSignalHists" << sep << fDoDeconvolutedSignalHists << endl;
-    cout << prefix << setw(wlab) << "DoRawSignalHists" << sep << fDoRawSignalHists << endl;
+    cout << prefix << setw(wlab) << "DoRawDigit" << sep << fDoRawDigit << endl;
     cout << prefix << setw(wlab) << "DoHitSignalHists" << sep << fDoHitSignalHists << endl;
     cout << prefix << setw(wlab) << "DoClusterSignalHists" << sep << fDoClusterSignalHists << endl;
     cout << prefix << setw(wlab) << "DoRefClusterSignalHists" << sep << fDoRefClusterSignalHists << endl;
@@ -519,7 +513,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "TruthLabel" << sep << fTruthProducerLabel << endl;
     cout << prefix << setw(wlab) << "ParticleLabel" << sep << fParticleProducerLabel << endl;
     cout << prefix << setw(wlab) << "SimulationLabel" << sep << fSimulationProducerLabel << endl;
-    cout << prefix << setw(wlab) << "RawDigitLabel" << sep << fRawDigitProducerLabel << endl;
+    cout << prefix << setw(wlab) << "RawDigitLabel" << sep << fRawDigitLabel << endl;
     cout << prefix << setw(wlab) << "HitLabel" << sep << fHitProducerLabel << endl;
     cout << prefix << setw(wlab) << "WireLabel" << sep << fWireProducerLabel << endl;
     cout << prefix << setw(wlab) << "ClusterLabel" << sep << fClusterProducerLabel << endl;
@@ -542,8 +536,6 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "HistDEMaxMcParticle" << sep << fdemaxmcp << endl;
     cout << prefix << setw(wlab) << "HistDEMax" << sep << fdemax << endl;
     cout << prefix << setw(wlab) << "HistUseDE" << sep << fhistusede << endl;
-    cout << prefix << setw(wlab) << "RawPedestalOption" << sep << fRawPedestalOption << endl;
-    cout << prefix << setw(wlab) << "RawAdcPedestal" << sep << fRawAdcPedestal << endl;
   }
 
   if ( fdbg > 1 ) {
@@ -552,7 +544,6 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << myname << "Derived properties:" << endl;
     cout << prefix << setw(wlab) << "DoMcParticles" << sep << fDoMcParticles << endl;
     cout << prefix << setw(wlab) << "DoSimChannels" << sep << fDoSimChannels << endl;
-    cout << prefix << setw(wlab) << "DoRaw" << sep << fDoRaw << endl;
     cout << prefix << setw(wlab) << "DoWires" << sep << fDoWires << endl;
     cout << prefix << setw(wlab) << "DoHits" << sep << fDoHits << endl;
     cout << prefix << setw(wlab) << "DoClusters" << sep << fDoClusters << endl;
@@ -570,11 +561,11 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   // Geometry dump from Michelle.
   if ( fdbg > 4 ) fgeohelp->dump(cout);
   // Pedestals.
-  m_pPedProv = nullptr;
-  if ( fRawPedestalOption == 3 ) {
-    m_pPedProv = &art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider();
-    cout << myname << "Pedestal provider: @" <<  m_pPedProv << endl;
-  }
+  //m_pPedProv = nullptr;
+  //if ( fRawPedestalOption == 3 ) {
+  //  m_pPedProv = &art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider();
+  //  cout << myname << "Pedestal provider: @" <<  m_pPedProv << endl;
+  //}
   return;
 }
 
@@ -1184,16 +1175,16 @@ void DXDisplay::analyze(const art::Event& event) {
   // Raw digits.
   //************************************************************************
 
-  if ( fDoRaw ) {
+  if ( fDoRawDigit ) {
     // Get the raw digits for the event.
     art::Handle< vector<raw::RawDigit> > rawDigitHandle;
-    event.getByLabel(fRawDigitProducerLabel, rawDigitHandle);
+    event.getByLabel(fRawDigitLabel, rawDigitHandle);
     if ( fdbg > 1 ) cout << myname << "Raw channel count: " << rawDigitHandle->size() << endl;
     const vector<raw::RawDigit>* prawdata = rawDigitHandle.product();
     if ( prawdata == nullptr ) {
-      cout << myname << "ERROR: Unable to find RawDigit vector data with label " << fRawDigitProducerLabel << endl;
+      cout << myname << "ERROR: Unable to find RawDigit vector data with label " << fRawDigitLabel << endl;
     } else {
-      m_hrawsvc->process(*prawdata);
+      m_hrawsvc->process(*prawdata, &event);
     }
   }  // end DoRawDigit
 
