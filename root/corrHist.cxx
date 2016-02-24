@@ -8,29 +8,37 @@
 #include "TH2F.h"
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 using std::vector;
 using std::cout;
 using std::endl;
+using std::ostringstream;
 
 typedef vector<double> FloatVec;
 typedef vector<FloatVec> SignalVec;
 
 TH2* corrHist(TH2* phin, int a_chanmin =0, int a_chanmax =0, int dbg =1) {
   unsigned int ntick = phin->GetNbinsX();
-  unsigned int nchan = phin->GetNbinsY();
-  if ( dbg ) cout << "nchan: " << nchan << endl;
-  if ( dbg ) cout << "ntick: " << ntick << endl;
+  unsigned int nchanin = phin->GetNbinsY();
   float cmin = a_chanmin;
   float cmax = a_chanmax;
-  if ( chanmin < 0 ) {
-    float cmin = phin->GetYaxis()->GetXmin();
-    float cmax = phin->GetYaxis()->GetXmax();
+  string schans;
+  if ( cmin < 0 ) {
+    cmin = phin->GetYaxis()->GetXmin();
+    cmax = phin->GetYaxis()->GetXmax();
+  } else {
+    ostringstream sschans;
+    sschans << "_" << cmin << "_" << cmax;
+    schans = sschans.str();
   }
-  int
+  int nchanout = cmax - cmin;
+  if ( dbg ) cout << "ntick: " << ntick << endl;
+  if ( dbg ) cout << "nchanin: " << nchanin << endl;
+  if ( dbg ) cout << "nchanout: " << nchanout << endl;
   string haxlab = phin->GetYaxis()->GetTitle();
   string hname = phin->GetName();
-  hname += "corr";
+  hname += "_corr" + schans;
   string htitle = phin->GetTitle();
   htitle += ";" + haxlab;
   htitle += ";" + haxlab;
@@ -40,7 +48,6 @@ TH2* corrHist(TH2* phin, int a_chanmin =0, int a_chanmax =0, int dbg =1) {
   } else {
     htitle = "Correlations for " + htitle;
   }
-  int nchanout = cmax - cmin;
   TH2* ph = new TH2F(hname.c_str(), htitle.c_str(), nchanout, cmin, cmax, nchanout, cmin, cmax);
   ph->SetStats(0);
   ph->SetContour(40);
@@ -48,8 +55,8 @@ TH2* corrHist(TH2* phin, int a_chanmin =0, int a_chanmax =0, int dbg =1) {
   ph->SetMaximum(1.0);
   // Build the mean and RMS for each channel.
   if ( dbg ) cout << "Building means..." << endl;
-  FloatVec mean(nchan, 0.0);
-  FloatVec rms(nchan, 0.0);
+  FloatVec mean(nchanin, 0.0);
+  FloatVec rms(nchanin, 0.0);
   for ( unsigned int ichan=cmin; ichan<cmax; ++ichan ) {
     unsigned int ibin = (ichan+1)*(ntick+2);
     double sum = 0.0;
