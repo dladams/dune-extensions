@@ -1,5 +1,4 @@
-DATADIR=/Users/davidadams/dune/data
-DATADIR=/home/dladams/data/dune
+DATADIR=$HOME/data/dune
 INFILE=$DATADIR/lbne_r006837_sr01_20160112T213253.root
 #INFILE=$DATADIR/lbne_r006700_sr01_20160107T181453.root
 INFILE=$DATADIR/lbne_r009754_sr01_20160201T211525.root
