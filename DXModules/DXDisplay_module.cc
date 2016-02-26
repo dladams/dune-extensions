@@ -103,6 +103,7 @@
 #include <memory>
 
 // Local includes.
+#include "DXInterface/RawDigitAnalysisService.h"
 #include "DXUtil/reducedPDG.h"
 #include "DXUtil/intProcess.h"
 #include "DXUtil/ChannelTickHistCreator.h"
@@ -217,7 +218,7 @@ private:
   bool fDoMcDescendantSignalAllHists;  // Create signal histograms for McParticle descendants all tracks
   bool fDoMcDescendantSignalHists;     // Create signal histograms for McParticle descendants
   bool fDoSimChannelSignalHists;       // Create signal histograms for SimChannels
-  bool fDoRawSignalHists;              // Create signal histograms for the RawDigits
+  bool fDoRawDigit;                    // Create signal histograms for the RawDigits
   bool fDoDeconvolutedSignalHists;     // Create signal histograms for the Wires (deconvoluted signals)
   bool fDoHitSignalHists;              // Create signal histograms for the the Hits.
   bool fDoClusterSignalHists;          // Create signal histograms for the Clusters.
@@ -235,18 +236,15 @@ private:
   string fClusterProducerLabel;        // The name of the producer that created clusters
   string fRefClusterProducerLabel;     // The name of the producer that created reference clusters
   string fTrackProducerLabel;          // The name of the producer that created tracks
-  string fRawDigitProducerLabel;       // The name of the producer that created the raw digits.
+  string fRawDigitLabel;               // The name of the producer that created the raw digits.
   bool fUseGammaNotPi0;                // Flag to select MCParticle gamma from pi0 instead of pi0
   bool fUseSecondaries;                // Flag to include secondary MC particles for tree and hists.
   bool fUseSimChannelDescendants;      // Use descendants when making SimChannel signal hists
   double fBinSize;                     // For dE/dx work: the value of dx. 
-  int fRawPedestalOption;              // Option for subtracting pedestals from data (0=no, 1=digit value).
-  double fRawAdcPedestal;              // Additional pedestal to subtract from raw data.
 
   // Derived control parameters.
   bool fDoMcParticles;             // Read MC particles.
   bool fDoSimChannels;             // Read SimChannels
-  bool fDoRaw;                     // Read raw data
   bool fDoWires;                   // Read wire (deconvoluted) data
   bool fDoHits;                    // Read hit data
   bool fDoClusters;                // Read cluster data
@@ -319,7 +317,10 @@ private:
   mutable vector<TH1*> m_eventhists;
 
   // Pedestal provider.
-  const lariov::DetPedestalProvider* m_pPedProv;
+  //const lariov::DetPedestalProvider* m_pPedProv;
+
+  // Analysis services.
+  art::ServiceHandle<RawDigitAnalysisService> m_hrawsvc;
 
 }; // class DXDisplay
 
@@ -429,7 +430,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fDoMcDescendantSignalAllHists  = p.get<bool>("DoMcDescendantSignalAllHists");
   fDoMcDescendantSignalHists     = p.get<bool>("DoMcDescendantSignalHists");
   fDoSimChannelSignalHists       = p.get<bool>("DoSimChannelSignalHists");
-  fDoRawSignalHists              = p.get<bool>("DoRawSignalHists");
+  fDoRawDigit                    = p.get<bool>("DoRawDigit");
   fDoDeconvolutedSignalHists     = p.get<bool>("DoDeconvolutedSignalHists");
   fDoHitSignalHists              = p.get<bool>("DoHitSignalHists");
   fDoClusterSignalHists          = p.get<bool>("DoClusterSignalHists");
@@ -443,7 +444,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fTruthProducerLabel            = p.get<string>("TruthLabel");
   fParticleProducerLabel         = p.get<string>("ParticleLabel");
   fSimulationProducerLabel       = p.get<string>("SimulationLabel");
-  fRawDigitProducerLabel         = p.get<string>("RawDigitLabel");
+  fRawDigitLabel                 = p.get<string>("RawDigitLabel");
   fHitProducerLabel              = p.get<string>("HitLabel");
   fWireProducerLabel             = p.get<string>("WireLabel");
   fClusterProducerLabel          = p.get<string>("ClusterLabel");
@@ -467,8 +468,6 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fdemaxmcp                      = p.get<double>("HistDEMaxMcParticle");
   fdemax                         = p.get<double>("HistDEMax");
   fhistusede                     = p.get<bool>("HistUseDE");
-  fRawPedestalOption             = p.get<double>("RawPedestalOption");
-  fRawAdcPedestal                = p.get<double>("RawAdcPedestal");
 
   // Derived control flags.
   fDoMcParticleSignalMaps   = fDoMcParticleSignalHists   || fDoMcParticleClusterMatching;
@@ -483,7 +482,6 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
                            fDoMcParticleTree || fDoMcPerfTree;
   fDoMcParticles = fDoMcParticleSelection;
   fDoSimChannels = fDoSimChannelSignalMaps || fDoSimChannelTree || fDoMcPerfTree;
-  fDoRaw = fDoRawSignalHists;
   fDoWires = fDoDeconvolutedSignalHists;
   fDoHits = fDoHitSignalHists;
   fDoClusters = fDoClusterSignalMaps;
@@ -504,7 +502,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "DoMcDescendantSignalHists" << sep << fDoMcDescendantSignalHists << endl;
     cout << prefix << setw(wlab) << "DoSimChannelSignalHists" << sep << fDoSimChannelSignalHists << endl;
     cout << prefix << setw(wlab) << "DoDeconvolutedSignalHists" << sep << fDoDeconvolutedSignalHists << endl;
-    cout << prefix << setw(wlab) << "DoRawSignalHists" << sep << fDoRawSignalHists << endl;
+    cout << prefix << setw(wlab) << "DoRawDigit" << sep << fDoRawDigit << endl;
     cout << prefix << setw(wlab) << "DoHitSignalHists" << sep << fDoHitSignalHists << endl;
     cout << prefix << setw(wlab) << "DoClusterSignalHists" << sep << fDoClusterSignalHists << endl;
     cout << prefix << setw(wlab) << "DoRefClusterSignalHists" << sep << fDoRefClusterSignalHists << endl;
@@ -515,7 +513,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "TruthLabel" << sep << fTruthProducerLabel << endl;
     cout << prefix << setw(wlab) << "ParticleLabel" << sep << fParticleProducerLabel << endl;
     cout << prefix << setw(wlab) << "SimulationLabel" << sep << fSimulationProducerLabel << endl;
-    cout << prefix << setw(wlab) << "RawDigitLabel" << sep << fRawDigitProducerLabel << endl;
+    cout << prefix << setw(wlab) << "RawDigitLabel" << sep << fRawDigitLabel << endl;
     cout << prefix << setw(wlab) << "HitLabel" << sep << fHitProducerLabel << endl;
     cout << prefix << setw(wlab) << "WireLabel" << sep << fWireProducerLabel << endl;
     cout << prefix << setw(wlab) << "ClusterLabel" << sep << fClusterProducerLabel << endl;
@@ -538,8 +536,6 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "HistDEMaxMcParticle" << sep << fdemaxmcp << endl;
     cout << prefix << setw(wlab) << "HistDEMax" << sep << fdemax << endl;
     cout << prefix << setw(wlab) << "HistUseDE" << sep << fhistusede << endl;
-    cout << prefix << setw(wlab) << "RawPedestalOption" << sep << fRawPedestalOption << endl;
-    cout << prefix << setw(wlab) << "RawAdcPedestal" << sep << fRawAdcPedestal << endl;
   }
 
   if ( fdbg > 1 ) {
@@ -548,7 +544,6 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << myname << "Derived properties:" << endl;
     cout << prefix << setw(wlab) << "DoMcParticles" << sep << fDoMcParticles << endl;
     cout << prefix << setw(wlab) << "DoSimChannels" << sep << fDoSimChannels << endl;
-    cout << prefix << setw(wlab) << "DoRaw" << sep << fDoRaw << endl;
     cout << prefix << setw(wlab) << "DoWires" << sep << fDoWires << endl;
     cout << prefix << setw(wlab) << "DoHits" << sep << fDoHits << endl;
     cout << prefix << setw(wlab) << "DoClusters" << sep << fDoClusters << endl;
@@ -566,11 +561,11 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   // Geometry dump from Michelle.
   if ( fdbg > 4 ) fgeohelp->dump(cout);
   // Pedestals.
-  m_pPedProv = nullptr;
-  if ( fRawPedestalOption == 3 ) {
-    m_pPedProv = &art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider();
-    cout << myname << "Pedestal provider: @" <<  m_pPedProv << endl;
-  }
+  //m_pPedProv = nullptr;
+  //if ( fRawPedestalOption == 3 ) {
+  //  m_pPedProv = &art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider();
+  //  cout << myname << "Pedestal provider: @" <<  m_pPedProv << endl;
+  //}
   return;
 }
 
@@ -1180,144 +1175,17 @@ void DXDisplay::analyze(const art::Event& event) {
   // Raw digits.
   //************************************************************************
 
-  if ( fDoRaw ) {
+  if ( fDoRawDigit ) {
     // Get the raw digits for the event.
-    try {
-      art::Handle< vector<raw::RawDigit> > rawDigitHandle;
-      event.getByLabel(fRawDigitProducerLabel, rawDigitHandle);
-      if ( fdbg > 1 ) cout << myname << "Raw channel count: " << rawDigitHandle->size() << endl;
-
-      // Create the Raw digit histograms.
-      if ( fDoRawSignalHists ) {
-        vector<TH2*> rawhists;
-        if ( fdbg > 2 ) cout << myname << "Creating raw data histograms." << endl;
-        for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
-          TH2* ph = hcreateRecoNeg.create("raw" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
-                                          "Raw signals for " + geohelp.ropName(irop));
-          if ( fdbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
-          rawhists.push_back(ph);
-          m_eventhists.push_back(ph);
-        }
-        TH2* phallraw = nullptr;
-        TH2* phallrawon = nullptr;
-        if ( fNTickPerBinForAll > 0 && fNChanPerBinForAll > 0 ) {
-          phallraw = hcreateRawAll.create("rawall", 0, geohelp.geometry()->Nchannels(),
-                                       "Raw signals for full detector");
-          phallrawon = hcreateRawAll.create("rawallon", 0, geohelp.geometry()->Nchannels(),
-                                       "Online-ordered raw signals for full detector");
-          m_eventhists.push_back(phallraw);
-          m_eventhists.push_back(phallrawon);
-        }
-        if ( fdbg > 2 ) cout << myname << "Uncompressing data." << endl;
-        bool first = true;
-        unsigned int maxdbgchan = 50;
-        unsigned int maxdbgtick = 50;
-        unsigned int idig = 0;
-        // Flags that record how the digits are ordered.
-        bool isOnlineOrdered = true;
-        bool isOfflineOrdered = true;
-        for ( auto const& digit : (*rawDigitHandle) ) {
-          if ( fdbg > 4 ) cout << myname << "----------" << endl;
-          unsigned int ichan = digit.Channel();
-          unsigned int ichanon = fchanmap->online(ichan);
-          isOnlineOrdered &= ichanon == idig;
-          isOfflineOrdered &= ichan == idig;
-          if ( fdbg > 4 ) cout << myname << "          Channel: " << ichan << endl;
-          unsigned int irop = geohelp.channelRop(ichan);
-          if ( fdbg > 4 ) cout << myname << "              ROP: " << irop << endl;
-          TH2* ph = rawhists[irop];
-          unsigned int iropchan = ichan - geohelp.ropFirstChannel(irop);
-          if ( fdbg > 4 ) cout << myname << "      ROP channel: " << iropchan << endl;
-          int nadc = digit.NADC();
-          vector<short> adcs;
-          if ( fdbg > 4 ) cout << myname << "      Compression: " << digit.Compression() << endl;
-          if ( fdbg > 4 ) cout << myname << "  Compressed size: " << digit.ADCs().size() << endl;
-          if ( fdbg > 4 ) cout << myname << "Uncompressed size: " << digit.Samples() << endl;
-          if ( fdbg > 4 ) cout << myname << "   Digit pedestal: " << digit.GetPedestal() << endl;
-          if ( digit.Compression() == raw::kNone ) {
-            if ( fdbg > 4 ) cout << myname << "Copying uncompressed..." << endl;
-            adcs = digit.ADCs();
-          } else {
-            if ( fdbg > 5 || (fdbg > 4 && ichan<maxdbgchan) ) {
-              cout << myname << "Uncompressed data:" << endl;
-              for ( unsigned int tick=0; tick<digit.ADCs().size(); ++tick ) {
-                cout << myname << "  Raw ADC entry " << tick << ": " << digit.ADCs()[tick] << endl;
-                if ( fdbg < 5 && tick >= maxdbgtick ) {
-                  cout << myname << "..." << endl;
-                  break;
-                }
-              }
-            }
-            if ( fdbg > 4 ) cout << myname << "Uncompressing..." << endl;
-            // Following is to avoid crash. See https://cdcvs.fnal.gov/redmine/issues/11572.
-            adcs.resize(digit.Samples());
-            if ( fRawPedestalOption == 2 ) {
-              int iped = digit.GetPedestal();
-              raw::Uncompress(digit.ADCs(), adcs, iped, digit.Compression());
-            } else {
-              raw::Uncompress(digit.ADCs(), adcs, digit.Compression());
-            }
-            if ( fdbg > 4 ) cout << myname << "Uncompressed." << endl;
-          }
-          if ( first ) {
-            if ( fdbg > 1 && fdbg<5 ) {
-              cout << myname << " Compression level for first digit: " << digit.Compression() << endl;
-              cout << myname << "      # TDC slices for first digit: " << adcs.size() << endl;
-            }
-            first = false;
-          }
-          unsigned int nzero = 0;
-          for ( auto adc : adcs ) if ( adc == 0.0 ) ++nzero;
-          if ( fdbg > 3 ) cout << myname << "Digit channel " << ichan
-                              << " (ROP-chan = " << irop << "-" << iropchan
-                              << ") has " << nadc << " ADCs and "
-                              << digit.Samples() << " samples. Uncompressed size is " << adcs.size()
-                              << ". Number filled is " << adcs.size()-nzero << endl;
-          float pedestal = fRawAdcPedestal;
-          if ( fRawPedestalOption == 3 ) {
-            float dbped = m_pPedProv->PedMean(ichan);
-            if ( fdbg > 4 ) cout << myname << "DB Pedestal: " << dbped << endl;
-            pedestal += dbped;
-          } else if ( fRawPedestalOption > 0 ) {
-            pedestal += digit.GetPedestal();
-          }
-          for ( unsigned int tick=0; tick<adcs.size(); ++tick ) {
-            double wt = adcs[tick] - pedestal;
-            if ( fdbg > 5 || ( fdbg > 4 && ichan<maxdbgchan && tick<maxdbgtick ) )
-              cout << myname << "  Tick " << tick << " raw - ped: " << adcs[tick] << " - " << pedestal
-                                 << " = " << wt << endl;
-            if ( wt == 0 ) continue;
-            if ( fhistusede ) wt *= adc2de(ichan);
-            ph->Fill(tick, iropchan, wt);
-            double allwt = wt;
-            if ( fAbsAll ) allwt = fabs(allwt);
-            if ( phallraw != nullptr ) phallraw->Fill(tick, ichan, allwt);
-            if ( phallrawon != nullptr ) phallrawon->Fill(tick, idig, allwt);
-          }  // end loop over ticks
-          ++idig;
-        }  // end loop over digits.
-        if ( fdbg > 4 ) cout << myname << "----------" << endl;
-        if ( fdbg > 1 ) {
-          if ( isOnlineOrdered )   cout << myname << "Digit order is online." << endl;
-          if ( isOfflineOrdered )  cout << myname << "Digit order is offline." << endl;
-          if ( !isOnlineOrdered &&
-               !isOfflineOrdered ) cout << myname << "Digit order is neither online nor offline." << endl;
-        }
-        // Display the contents of each raw data histogram.
-        if ( fdbg > 1 ) {
-          cout << myname << "Summary of raw data histograms:" << endl;
-          for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
-            summarize2dHist(rawhists[irop], myname, wnam, 4, 7);
-          }
-          if ( phallraw != nullptr ) summarize2dHist(phallraw, myname, wnam, 4, 7);
-          if ( phallrawon != nullptr ) summarize2dHist(phallrawon, myname, wnam, 4, 7);
-        }
-      }  // end DoRawSignalHists
-
-    } catch(...) {
-      cout << myname << "ERROR: Unable to retrieve raw data container with label " << fRawDigitProducerLabel << endl;
+    art::Handle< vector<raw::RawDigit> > rawDigitHandle;
+    event.getByLabel(fRawDigitLabel, rawDigitHandle);
+    if ( fdbg > 1 ) cout << myname << "Raw channel count: " << rawDigitHandle->size() << endl;
+    const vector<raw::RawDigit>* prawdata = rawDigitHandle.product();
+    if ( prawdata == nullptr ) {
+      cout << myname << "ERROR: Unable to find RawDigit vector data with label " << fRawDigitLabel << endl;
+    } else {
+      m_hrawsvc->process(*prawdata, &event);
     }
-    removeEventHists();
   }  // end DoRawDigit
 
   //************************************************************************

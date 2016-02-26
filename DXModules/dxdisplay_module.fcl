@@ -16,7 +16,7 @@ dxdisplay_default: {
   DoMcDescendantSignalAllHists:   false
   DoMcDescendantSignalHists:      false
   DoSimChannelSignalHists:        false
-  DoRawSignalHists:               false
+  DoRawDigit:                     false
   DoDeconvolutedSignalHists:      false
   DoHitSignalHists:               false
   DoClusterSignalHists:           false
@@ -87,15 +87,6 @@ dxdisplay_default: {
   # Maximum step size [cm] for filling the MC Particle trajectory histograms
   McParticleDsMax: 0.05
 
-  # Pedestal option.
-  #   0 - no pedestal subtraction
-  #   1 - Take pedestal from digit.
-  #   2 - Pass pedestal to uncompression.
-  RawPedestalOption:  1
-
-  # Extra pedestal to subtract from raw ADC counts.
-  RawAdcPedestal:  0.0
-
   # ADC count to MeV energy deposit conversion factors.
   # From Michelle
   #AdcToMeVConversionU:  0.014976
@@ -112,6 +103,22 @@ dxdisplay_default: {
 
   # If raw and wire histograms should be converted to energy.
   HistUseDE:  false
+}
+
+tools.rda_online: {
+  service_provider: DXRawDisplayService
+  LogLevel:                  1
+  TdcTickMin:                0
+  TdcTickMax:            10000
+  NTickPerBin:               1
+  NChanPerBin:               1
+  DoROPs:                false
+  DoAll:                 false
+  DoAllOnline:            true
+  DoMean:                 true
+  PedestalOption:            1   #1=digit, 2=svc
+  AdcOffset:               0.0
+  DecompressWithPedestal: true
 }
 
 END_PROLOG

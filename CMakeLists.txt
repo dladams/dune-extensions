@@ -64,9 +64,11 @@ include(ArtMake)
 include(BuildPlugins)
 
 # sources
+add_subdirectory(DXInterface)
 add_subdirectory(DXUtil)
 add_subdirectory(DXGeometry)
 add_subdirectory(DXPerf)
+add_subdirectory(DXServices)
 add_subdirectory(DXModules)
 
 # executables
