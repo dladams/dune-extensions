@@ -28,6 +28,8 @@ echo | tee -a $LOG
 nohup $COM 2>&1 1>>$LOG </dev/null &
 echo Job started
 echo Dumping FCL
-fcldump $FCLFILE 5 >${FCLFILE}dump
+FCLDUMP=${FCLFILE}dump
+fcldump $FCLFILE 5 >$FCLDUMP
+echo FCL dump: $FCLDUMP
 echo Job log: $LOG
 #tail -f $LOG
