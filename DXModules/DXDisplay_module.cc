@@ -39,8 +39,6 @@
 //     hE_mcsTTTapaAAA - Sim channel contributions for particle TTT to APA AAA
 //       DoSimChannelSignalHists - Make these histograms
 //       UseSimChannelDescendants - Include constributions from descendants (untracked are always included)
-//     hE_rawapaAAA -    Raw data for APA AAA
-//       DoRawSignalHists - Make these histograms
 //     hE_dcoapaAAA - Deconvoluted data (aka Wires) for APA AAA
 //       DoDeconvolutedSignalHists - Make these histograms
 
@@ -65,7 +63,8 @@
 #include "lardata/RecoBase/Cluster.h"
 #include "lardata/RecoBase/Track.h"
 #include "lardata/RawData/raw.h"
-#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/RawDigit.h"    // used in Wire section
+#include "lardata/RawData/ExternalTrigger.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 
@@ -218,6 +217,7 @@ private:
   bool fDoMcDescendantSignalAllHists;  // Create signal histograms for McParticle descendants all tracks
   bool fDoMcDescendantSignalHists;     // Create signal histograms for McParticle descendants
   bool fDoSimChannelSignalHists;       // Create signal histograms for SimChannels
+  bool fDoTrigger;                     // Do trigger report.
   bool fDoRawDigit;                    // Create signal histograms for the RawDigits
   bool fDoDeconvolutedSignalHists;     // Create signal histograms for the Wires (deconvoluted signals)
   bool fDoHitSignalHists;              // Create signal histograms for the the Hits.
@@ -236,7 +236,8 @@ private:
   string fClusterProducerLabel;        // The name of the producer that created clusters
   string fRefClusterProducerLabel;     // The name of the producer that created reference clusters
   string fTrackProducerLabel;          // The name of the producer that created tracks
-  string fRawDigitLabel;               // The name of the producer that created the raw digits.
+  string fRawDigitLabel;               // The label for the RawDigit data product.
+  string fExternalTriggerLabel;        // The label for the ExternalTrigger data product.
   bool fUseGammaNotPi0;                // Flag to select MCParticle gamma from pi0 instead of pi0
   bool fUseSecondaries;                // Flag to include secondary MC particles for tree and hists.
   bool fUseSimChannelDescendants;      // Use descendants when making SimChannel signal hists
@@ -430,6 +431,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fDoMcDescendantSignalAllHists  = p.get<bool>("DoMcDescendantSignalAllHists");
   fDoMcDescendantSignalHists     = p.get<bool>("DoMcDescendantSignalHists");
   fDoSimChannelSignalHists       = p.get<bool>("DoSimChannelSignalHists");
+  fDoTrigger                     = p.get<bool>("DoTrigger");
   fDoRawDigit                    = p.get<bool>("DoRawDigit");
   fDoDeconvolutedSignalHists     = p.get<bool>("DoDeconvolutedSignalHists");
   fDoHitSignalHists              = p.get<bool>("DoHitSignalHists");
@@ -444,6 +446,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fTruthProducerLabel            = p.get<string>("TruthLabel");
   fParticleProducerLabel         = p.get<string>("ParticleLabel");
   fSimulationProducerLabel       = p.get<string>("SimulationLabel");
+  fExternalTriggerLabel          = p.get<string>("ExternalTriggerLabel");
   fRawDigitLabel                 = p.get<string>("RawDigitLabel");
   fHitProducerLabel              = p.get<string>("HitLabel");
   fWireProducerLabel             = p.get<string>("WireLabel");
@@ -502,6 +505,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "DoMcDescendantSignalHists" << sep << fDoMcDescendantSignalHists << endl;
     cout << prefix << setw(wlab) << "DoSimChannelSignalHists" << sep << fDoSimChannelSignalHists << endl;
     cout << prefix << setw(wlab) << "DoDeconvolutedSignalHists" << sep << fDoDeconvolutedSignalHists << endl;
+    cout << prefix << setw(wlab) << "DoTrigger" << sep << fDoTrigger << endl;
     cout << prefix << setw(wlab) << "DoRawDigit" << sep << fDoRawDigit << endl;
     cout << prefix << setw(wlab) << "DoHitSignalHists" << sep << fDoHitSignalHists << endl;
     cout << prefix << setw(wlab) << "DoClusterSignalHists" << sep << fDoClusterSignalHists << endl;
@@ -513,6 +517,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "TruthLabel" << sep << fTruthProducerLabel << endl;
     cout << prefix << setw(wlab) << "ParticleLabel" << sep << fParticleProducerLabel << endl;
     cout << prefix << setw(wlab) << "SimulationLabel" << sep << fSimulationProducerLabel << endl;
+    cout << prefix << setw(wlab) << "ExternalTriggerLabel" << sep << fExternalTriggerLabel << endl;
     cout << prefix << setw(wlab) << "RawDigitLabel" << sep << fRawDigitLabel << endl;
     cout << prefix << setw(wlab) << "HitLabel" << sep << fHitProducerLabel << endl;
     cout << prefix << setw(wlab) << "WireLabel" << sep << fWireProducerLabel << endl;
@@ -1170,6 +1175,23 @@ void DXDisplay::analyze(const art::Event& event) {
       }
     }  // End loop over selected MC tracks
   }  // end DoMcTpcSignalMaps
+
+  //************************************************************************
+  // Triggers.
+  //************************************************************************
+
+  if ( fDoTrigger ) {
+    // Get the triggers for the event.
+    art::Handle< vector<raw::ExternalTrigger> > triggerHandle;
+    event.getByLabel(fExternalTriggerLabel, triggerHandle);
+    const vector<raw::ExternalTrigger>* ptrigs = triggerHandle.product();
+    if ( ptrigs == nullptr ) {
+      cout << myname << "ERROR: Unable to find ExternalTrigger vector data with label "
+           << fExternalTriggerLabel << endl;
+    } else {
+      if ( fdbg > 1 ) cout << myname << "Trigger count: " << ptrigs->size() << endl;
+    }
+  }
 
   //************************************************************************
   // Raw digits.

@@ -16,6 +16,7 @@ dxdisplay_default: {
   DoMcDescendantSignalAllHists:   false
   DoMcDescendantSignalHists:      false
   DoSimChannelSignalHists:        false
+  DoTrigger:                      false
   DoRawDigit:                     false
   DoDeconvolutedSignalHists:      false
   DoHitSignalHists:               false
@@ -56,6 +57,9 @@ dxdisplay_default: {
   # The same for reference and performance clusters:
   RefClusterLabel:  "clustercheat"
   ClusterLabel:     "clustercheat"
+
+  # The same for trigger.
+  ExternalTriggerLabel:   "daq"
 
   # The same for raw digits.
   RawDigitLabel:   "daq"
