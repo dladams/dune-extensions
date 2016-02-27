@@ -53,7 +53,7 @@ outputs: {
 
 physics.analyzers.DXDisplay.DoRawDigit: true
 physics.analyzers.DXDisplay.RawDigitLabel: "SplitterInput:TPC"
-physics.analyzers.DXDisplay.TdcTickMax: 10000
+physics.analyzers.DXDisplay.TdcTickMax: 15000
 physics.analyzers.DXDisplay.DebugLevel: 1
 
 

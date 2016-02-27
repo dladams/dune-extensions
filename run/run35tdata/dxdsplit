@@ -7,6 +7,8 @@ INFILE=$DATADIR/lbne_r010114_sr01_20160205T223323.root
 INFILE=$DATADIR/lbne_r011214_sr01_20160215T223726.root
 INFILE=$DATADIR/lbne_r011507_sr01_20160218T013546.root
 #INFILE=$DATADIR/lbne_r012511_sr01_20160223T040314.root
+INFILE=$DATADIR/lbne_r012991_sr01_20160225T022942.root
+INFILE=$DATADIR/lbne_r013434_sr01_20160227T031810.root
 OUTFILE=dxdsplit.root
 FCLFILE=dxdsplit.fcl
 NEVT=2
@@ -21,8 +23,11 @@ COM="lar -c $FCLFILE $SKIPARG -n $NEVT -s $INFILE -T $OUTFILE"
 LOG=dxdsplit.log
 echo $COM | tee $LOG
 date | tee -a $LOG
+hostname | tee -a $LOG
 echo | tee -a $LOG
-$COM 2>&1 | tee -a $LOG
+nohup $COM 2>&1 1>>$LOG </dev/null &
+echo Job started
+echo Dumping FCL
 fcldump $FCLFILE 5 >${FCLFILE}dump
-echo
-echo Log: $LOG
+echo Job log: $LOG
+#tail -f $LOG

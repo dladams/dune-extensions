@@ -124,7 +124,7 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
 
   // Channel-tick histogram creators for the reconstructed data products.
   string ztitle = "ADC counts";
-  double zmax = 200;
+  double zmax = 100;
   int ncontour = 20;
   ChannelTickHistCreator hcreateRop(tfsdir, sevt, m_TdcTickMin, m_TdcTickMax, ztitle, -zmax, zmax, 2*ncontour, m_NTickPerBin, m_NChanPerBin);
   bool fAbsAll = false;
