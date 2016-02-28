@@ -71,4 +71,6 @@ services.RawDigitAnalysisService: @local::tools.rda_online
 services.RawDigitAnalysisService.LogLevel:        2
 services.RawDigitAnalysisService.DoMean:       true
 services.RawDigitAnalysisService.PedestalOption:  2
+services.RawDigitAnalysisService.DoAllOnline: false
+services.RawDigitAnalysisService.DoAll:        true
 services.RawDigitAnalysisService.TdcTickMax:  15000
