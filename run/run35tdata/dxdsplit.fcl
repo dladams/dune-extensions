@@ -51,10 +51,12 @@ outputs: {
   }
 }
 
-physics.analyzers.DXDisplay.DoRawDigit: true
+physics.analyzers.DXDisplay.DoTrigger:  true
+physics.analyzers.DXDisplay.DoRawDigit: false
+physics.analyzers.DXDisplay.ExternalTriggerLabel: "SplitterInput:TRIGGER"
 physics.analyzers.DXDisplay.RawDigitLabel: "SplitterInput:TPC"
 physics.analyzers.DXDisplay.TdcTickMax: 15000
-physics.analyzers.DXDisplay.DebugLevel: 1
+physics.analyzers.DXDisplay.DebugLevel: 5
 
 
 services.user.DetPedestalService.DetPedestalDUNE.UseDB:   true

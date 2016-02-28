@@ -120,6 +120,7 @@ using std::setw;
 using std::string;
 using std::vector;
 using std::map;
+using std::multimap;
 using std::set;
 using std::sqrt;
 using std::shared_ptr;
@@ -131,6 +132,7 @@ using geo::kU;
 using geo::kV;
 using geo::kZ;
 using simb::MCParticle;
+using raw::ExternalTrigger;
 using recob::Cluster;
 using recob::Track;
 using tpc::IndexVector;
@@ -1189,7 +1191,36 @@ void DXDisplay::analyze(const art::Event& event) {
       cout << myname << "ERROR: Unable to find ExternalTrigger vector data with label "
            << fExternalTriggerLabel << endl;
     } else {
-      if ( fdbg > 1 ) cout << myname << "Trigger count: " << ptrigs->size() << endl;
+      // Find the reason this payload was triggered.
+      typedef multimap<int, int> TrigMap;     // ID indexed by time
+      TrigMap tmap;    // To sort triggers by time.
+      for ( const ExternalTrigger& trig : *ptrigs ) {
+        tmap.emplace(trig.GetTrigTime(), trig.GetTrigID());
+      }
+      int firstid = 0;
+      int firsttime = tmap.begin()->first;
+      for ( TrigMap::value_type tent : tmap ) {
+        int time = tent.first;
+        int id = tent.second;
+        if ( firstid ==0 && id >= 100 ) {
+          firstid = id;
+          firsttime = time;
+        }
+      }
+      if ( fdbg >= 2 ) cout << myname << "First trigger: " << setw(4) << firstid
+                           << " at tick " << setw(5) << firsttime/32 << endl;
+      if ( fdbg >= 3 ) cout << myname << "Trigger count: " << ptrigs->size() << endl;
+      if ( fdbg == 4 ) {
+        for ( TrigMap::value_type tent : tmap ) {
+          cout << myname << setw( 5) << tent.second
+                         << setw(15) << tent.first << endl;
+        }
+      } else if ( fdbg >= 5 ) {
+        for ( const ExternalTrigger& trig : *ptrigs ) {
+          cout << myname << setw( 5) << trig.GetTrigID()
+                         << setw(15) << trig.GetTrigTime() << endl;
+        }
+      }
     }
   }
 

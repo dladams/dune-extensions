@@ -83,7 +83,6 @@ DrawResult draw(std::string name ="help", int how =0, double xmin =0.0, double x
   }
   static TCanvas* pcan = 0;
   static TH2* phdraw;
-  string cname = "mycan";
   TH2* phnew = dynamic_cast<TH2*>(pobj);
   if ( phnew == 0 ) {
     cout << myname << "Object is not TH2: " << name << endl;
@@ -110,20 +109,35 @@ DrawResult draw(std::string name ="help", int how =0, double xmin =0.0, double x
   double toff = 1.00;
   string dopt = "colz";
   bool add = false;
+  double tsize = 0.0;
+  static int ccount = 0;
   if ( how == 0 ) {
     // Standard canvas.
     pcan = new TCanvas;
     fix2dcanvas();
-  } else if ( how == 1 ) {
+  } else if ( how == 1 || how == 2 ) {
+    ++ccount;
+    ostringstream sscname;
+    sscname << "mycan" << ccount;
+    string cname = sscname.str();
     // Extra-wide canvas.
-    pcan = new TCanvas(cname.c_str(), cname.c_str(), 1600, 500);
+    if ( how == 1 ) {
+      pcan = new TCanvas(cname.c_str(), cname.c_str(), 1600, 500);
+      pcan->SetLeftMargin(0.05);
+      pcan->SetLeftMargin(0.05);
+      axyoff = 0.70;
+    } else {
+      pcan = new TCanvas(cname.c_str(), cname.c_str(), 1600, 800);
+      tsize = 0.025;
+      pcan->SetLeftMargin(0.07);
+      axyoff = 1.20;
+      xh2 = 0.90;
+    }
     fix2dcanvas();
-    pcan->SetLeftMargin(xh1);
     pcan->SetRightMargin(1.0-xh2);
     palx1 = xh2;
     palx2 = xh2 + 0.015;
     paltoff = 0.50;
-    axyoff = 0.50;
   } else if ( how == -1 ) {
     if ( pcan == 0 || phdraw == 0 ) {
       cout << "There is no existing histogram!" << endl;
@@ -162,24 +176,19 @@ DrawResult draw(std::string name ="help", int how =0, double xmin =0.0, double x
     string hname = sshname.str();
     cout << "Creating histogram " << hname << endl;
     phdraw = dynamic_cast<TH2*>(phnew->Clone(hname.c_str()));
-    // Set palette parameters. First draw to make sure palette is present.
-    phdraw->Draw(dopt.c_str());
-    gPad->Update();
-    TPaletteAxis* ppalax = dynamic_cast<TPaletteAxis*>(phdraw->GetListOfFunctions()->FindObject("palette")); 
-    if ( ppalax == 0 ) {
-      cout << myname << "Unable to retrieve palette." << endl;
-      res.status = 5;
-      return res;
-    }
-    //cout << "Palette axis: " << hex << long(ppalax) << dec << endl;
-    ppalax->SetX1NDC(palx1);
-    ppalax->SetX2NDC(palx2);
-    ppalax->SetTitleOffset(paltoff);
     // Set axis parameters.
     //ph2->SetTitleOffset(toff);   // Sets x-axis label!!
     phdraw->SetTickLength(0.010, "X");
     phdraw->SetTickLength(0.010, "Y");
     phdraw->GetYaxis()->SetTitleOffset(axyoff);
+    if ( tsize > 0.0 ) {
+      phdraw->GetXaxis()->SetLabelSize(tsize);
+      phdraw->GetYaxis()->SetLabelSize(tsize);
+      phdraw->GetZaxis()->SetLabelSize(tsize);
+      phdraw->GetXaxis()->SetTitleSize(tsize);
+      phdraw->GetYaxis()->SetTitleSize(tsize);
+      phdraw->SetTitleSize(tsize);
+    }
     // Add projection hists.
     string hprx_name = phdraw->GetName();
     string hpry_name = phdraw->GetName();
@@ -256,6 +265,19 @@ DrawResult draw(std::string name ="help", int how =0, double xmin =0.0, double x
     //dla phdraw->Draw(dopt.c_str());
   }
   phdraw->Draw(dopt.c_str());
+  // Set palette parameters. First draw to make sure palette is present.
+  gPad->Update();
+  TPaletteAxis* ppalax = dynamic_cast<TPaletteAxis*>(phdraw->GetListOfFunctions()->FindObject("palette")); 
+  if ( ppalax == 0 ) {
+    cout << myname << "Unable to retrieve palette." << endl;
+    res.status = 5;
+    return res;
+  }
+  //cout << "Palette axis: " << hex << long(ppalax) << dec << endl;
+  ppalax->SetX1NDC(palx1);
+  ppalax->SetX2NDC(palx2);
+  ppalax->SetTitleOffset(paltoff);
+  // Add top and right axis.
   addaxis(phdraw);
   res.hdraw = phdraw;
   return res;
