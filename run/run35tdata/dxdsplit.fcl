@@ -52,21 +52,16 @@ outputs: {
 }
 
 physics.analyzers.DXDisplay.DoTrigger:  true
-physics.analyzers.DXDisplay.DoRawDigit: false
+physics.analyzers.DXDisplay.DoRawDigit: true
 physics.analyzers.DXDisplay.ExternalTriggerLabel: "SplitterInput:TRIGGER"
 physics.analyzers.DXDisplay.RawDigitLabel: "SplitterInput:TPC"
 physics.analyzers.DXDisplay.TdcTickMax: 15000
-physics.analyzers.DXDisplay.DebugLevel: 5
-
+physics.analyzers.DXDisplay.DebugLevel: 2
 
 services.user.DetPedestalService.DetPedestalDUNE.UseDB:   true
 services.user.DetPedestalService.DetPedestalDUNE.UseFile: false
 services.user.DetPedestalService.DetPedestalDUNE.Run:     false
-services.user.DetPedestalService.DetPedestalDUNE.CSVFile: "peds_michelle_20160115.csv"
-services.user.DetPedestalService.DetPedestalDUNE.CSVFile: "tingjun_offline_databaseRun_9754_fixed.csv"
-services.user.DetPedestalService.DetPedestalDUNE.CSVFile: "offline_databaseRun_9754.csv"
 services.user.DetPedestalService.DetPedestalDUNE.CSVFile: ""
-#services.user.DetPedestalService.DetPedestalDUNE.CSVFileName: "peds_michelle_20160115.csv"
 
 services.ChannelMappingService: @local::chmap35t
 services.RawDigitAnalysisService: @local::tools.rda_online
