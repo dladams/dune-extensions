@@ -51,6 +51,7 @@ outputs: {
   }
 }
 
+physics.analyzers.DXDisplay.DoEventTree: true
 physics.analyzers.DXDisplay.DoTrigger:  true
 physics.analyzers.DXDisplay.DoRawDigit: false
 physics.analyzers.DXDisplay.ExternalTriggerLabel: "SplitterInput:TRIGGER"

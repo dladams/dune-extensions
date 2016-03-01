@@ -27,6 +27,7 @@ dxdisplay_default: {
   DoSimChannelClusterMatching:    false
   DoRefClusterClusterMatching:    false
   DoTracks:                       false
+  DoEventTree:                    false
   DoMcPerfTree:                   false
   UseSecondaries:                 false
   UseSimChannelDescendants:       false
