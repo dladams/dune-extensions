@@ -17,6 +17,7 @@
 //     DoSimChannelClusterMatching - Make this tree.
 //   RefClusterClusterMatch: Match of reference and reco clusters. What does this mean?
 //     DoRefClusterClusterMatching - Make this tree.
+//   EventTree: Event summary tree.
 //   McPerfTree: Performance for the first select MC track.
 // Signal (i.e. channel-tick) histograms. These are recorded in eventE.
 //   Notation:
@@ -229,6 +230,7 @@ private:
   bool fDoMcDescendantClusterMatching; // Match clusters to McParticle descendant signals.
   bool fDoSimChannelClusterMatching;   // Match clusters to SimChannel signals.
   bool fDoRefClusterClusterMatching;   // Match clusters to reference clusters.
+  bool fDoEventTree;                   // Create event summary tree.
   bool fDoMcPerfTree;                  // Create MC performance tree.
   string fTruthProducerLabel;          // The name of the producer that tracked simulated particles through the detector
   string fParticleProducerLabel;       // The name of the producer that tracked simulated particles through the detector
@@ -273,12 +275,21 @@ private:
 
   // The n-tuples we'll create.
   SimChannelTupler* m_sctupler;
+  TTree* fEventTree;
   TTree* fMcPerfTree;
 
-  // The variables that will go into the performance tree.
+  // The variables that go into the event summary tree.
   int fevent;
   int frun;
   int fsubrun;
+  int fthi;
+  int ftlo;
+  int ftrigger;
+  int ftrigtick;
+  int fntrigptb;   // # PTB triggers
+  int fntrigctr;   // # trig counters
+
+  // The variables that go into the performance tree.
   int fprf_pdg;                  // PDG ID
   int fprf_trackid;              // Track ID
   int fprf_endproc;              // End process
@@ -339,6 +350,7 @@ DXDisplay::DXDisplay(fhicl::ParameterSet const& parameterSet)
 : EDAnalyzer(parameterSet), fdbg(0),
   m_pmctrajmc(nullptr), m_pmctrajmd(nullptr),
   m_sctupler(nullptr),
+  fEventTree(nullptr),
   fMcPerfTree(nullptr),
   fgeohelp(nullptr) {
   // Read in the parameters from the .fcl file.
@@ -391,8 +403,25 @@ void DXDisplay::beginJob() {
   }
 
   // MC performance tree.
+  if ( fDoEventTree ) {
+    if (  fdbg >= 1 ) cout << myname << "Creating event sunnary tree." << endl;
+    fMcPerfTree = tfs->make<TTree>("EventTree", "Event tree");
+    fMcPerfTree->Branch("event",    &fevent,          "event/I");
+    fMcPerfTree->Branch("subrun",   &fsubrun,         "subrun/I");
+    fMcPerfTree->Branch("run",      &frun,            "run/I");
+    fMcPerfTree->Branch("thi",      &fthi,            "thi/I");
+    fMcPerfTree->Branch("tlo",      &ftlo,            "tlo/I");
+    if ( fDoTrigger ) {
+      fMcPerfTree->Branch("trigger",      &ftrigger,        "trigger/I");
+      fMcPerfTree->Branch("trigtick",      &ftrigtick,       "trigtick/I");
+      fMcPerfTree->Branch("ntrigptb",      &fntrigptb,       "ntrigptb/I");
+      fMcPerfTree->Branch("ntrigctr",      &fntrigctr,       "ntrigctr/I");
+    }
+  }
+
+  // MC performance tree.
   if ( fDoMcPerfTree ) {
-    if (  fdbg > 0 ) cout << myname << "Creating MC performance tree." << endl;
+    if (  fdbg >= 1 ) cout << myname << "Creating MC performance tree." << endl;
     fMcPerfTree = tfs->make<TTree>("McPerfTree", "MC performance tree");
     fMcPerfTree->Branch("event",    &fevent,          "event/I");
     fMcPerfTree->Branch("subrun",   &fsubrun,         "subrun/I");
@@ -444,6 +473,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fDoMcDescendantClusterMatching = p.get<bool>("DoMcDescendantClusterMatching");
   fDoSimChannelClusterMatching   = p.get<bool>("DoSimChannelClusterMatching");
   fDoRefClusterClusterMatching   = p.get<bool>("DoSimChannelClusterMatching");
+  fDoEventTree                   = p.get<bool>("DoEventTree");
   fDoMcPerfTree                  = p.get<bool>("DoMcPerfTree");
   fTruthProducerLabel            = p.get<string>("TruthLabel");
   fParticleProducerLabel         = p.get<string>("ParticleLabel");
@@ -590,7 +620,7 @@ void DXDisplay::analyze(const art::Event& event) {
   fevent  = event.id().event(); 
   frun    = event.run();
   fsubrun = event.subRun();
-  if ( fdbg > 0 ) cout << myname << "Processing run " << frun << "-" << fsubrun
+  if ( fdbg >= 1 ) cout << myname << "Processing run " << frun << "-" << fsubrun
                        << ", event " << fevent << endl;
   art::Timestamp timestamp = event.time();
   art::TimeValue_t thi = timestamp.timeHigh();
@@ -599,6 +629,8 @@ void DXDisplay::analyze(const art::Event& event) {
     cout << myname << "Event time: " << setw(9) << thi << "."
          << setw(9) << tlo << " sec" << endl;
   }
+  fthi = thi;
+  ftlo = tlo;
 
   // Create string representations of the event number.
   ostringstream ssevt;
@@ -1206,12 +1238,19 @@ void DXDisplay::analyze(const art::Event& event) {
       }
       int firstid = 0;
       int firsttime = tmap.begin()->first;
+      fntrigptb = 0;
+      fntrigctr = 0;
       for ( TrigMap::value_type tent : tmap ) {
         int time = tent.first;
         int id = tent.second;
-        if ( firstid ==0 && id >= 100 ) {
-          firstid = id;
-          firsttime = time;
+        if ( id >= 100 ) {
+          if ( firstid == 0 ) {
+            firstid = id;
+            firsttime = time;
+          }
+          ++fntrigptb;
+        } else {
+          ++fntrigctr;
         }
       }
       if ( fdbg >= 2 ) cout << myname << "First trigger: " << setw(4) << firstid
@@ -1228,6 +1267,8 @@ void DXDisplay::analyze(const art::Event& event) {
                          << setw(15) << trig.GetTrigTime() << endl;
         }
       }
+      ftrigger = firstid;
+      ftrigtick = firsttime/32;
     }
   }
 
@@ -1454,6 +1495,7 @@ void DXDisplay::analyze(const art::Event& event) {
   //************************************************************************
   removeEventHists();
   if ( fMcPerfTree ) fMcPerfTree->Fill();
+  if ( fEventTree ) fEventTree->Fill();
   return;
 }
 
