@@ -592,6 +592,13 @@ void DXDisplay::analyze(const art::Event& event) {
   fsubrun = event.subRun();
   if ( fdbg > 0 ) cout << myname << "Processing run " << frun << "-" << fsubrun
                        << ", event " << fevent << endl;
+  art::Timestamp timestamp = event.time();
+  art::TimeValue_t thi = timestamp.timeHigh();
+  art::TimeValue_t tlo = timestamp.timeLow();
+  if ( fdbg >= 2 ) {
+    cout << myname << "Event time: " << setw(9) << thi << "."
+         << setw(9) << tlo << " sec" << endl;
+  }
 
   // Create string representations of the event number.
   ostringstream ssevt;
