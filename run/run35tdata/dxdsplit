@@ -46,13 +46,13 @@ else
   COM="$COM -s $INFILE"
   INPUT=$INFILE
 fi
-# Create an output file for small jobs.
-OUTEVTFILE=dxdsplit_event.root
-rm -f $OUTEVTFILE
-if [ $NEVT -eq 1 ]; then
+# Create an output file if NEVT < 0
+OUTEVTFILE=
+if [ $NEVT -lt 0 ]; then
+  OUTEVTFILE=dxdsplit_event.root
+  rm -f $OUTEVTFILE
   COM="$COM -o $OUTEVTFILE"
-else
-  OUTEVTFILE=
+  NEVT=`echo -$NEVT | sed 's/^-//g'`
 fi
 LOG=dxdsplit.log
 echo $COM | tee $LOG
