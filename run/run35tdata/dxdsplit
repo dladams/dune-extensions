@@ -23,12 +23,13 @@ if [ -n "$2" ]; then
   SKIPARG="--nskip $2"
 fi
 COM="lar -c $FCLFILE $SKIPARG -n $NEVT -s $INFILE -T $OUTFILE"
-# Create an output file for small jobs.
+# Create an output file if NEVT < 0
 OUTEVTFILE=
-if [ $NEVT -eq 1 ]; then
+if [ $NEVT -lt 0 ]; then
   OUTEVTFILE=dxdsplit_event.root
   rm -f $OUTEVTFILE
   COM="$COM -o $OUTEVTFILE"
+  NEVT=`echo -$NEVT | sed 's/^-//g'`
 fi
 LOG=dxdsplit.log
 echo $COM | tee $LOG
