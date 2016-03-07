@@ -71,6 +71,7 @@
 
 // Dune includes.
 #include "dune/DuneInterface/ChannelMappingService.h"
+#include "dune/DuneCommon/DuneTimeConverter.h"
 
 // Framework includes
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -626,8 +627,7 @@ void DXDisplay::analyze(const art::Event& event) {
   art::TimeValue_t thi = timestamp.timeHigh();
   art::TimeValue_t tlo = timestamp.timeLow();
   if ( fdbg >= 2 ) {
-    cout << myname << "Event time: " << setw(9) << thi << "."
-         << setw(9) << tlo << " sec" << endl;
+    cout << myname << "Event time: " << DuneTimeConverter::toString(timestamp) << " sec" << endl;
   }
   fthi = thi;
   ftlo = tlo;
