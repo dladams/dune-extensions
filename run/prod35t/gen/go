@@ -1,0 +1,5 @@
+OUTNAME=gen_mum
+NEVT=100
+LOG=$OUTNAME.log
+COM="lar -c prod_muminus_dune35t.fcl -o ${OUTNAME}_event.root -T $OUTNAME.root -n $NEVT"
+$COM 2>&1 | tee $LOG

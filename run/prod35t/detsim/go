@@ -1,0 +1,9 @@
+INDIR=../geant
+INNAME=geant_mum
+INFILE=$INDIR/${INNAME}_event.root
+OUTNAME=detsim_mum
+NEVT=10
+LOG=$OUTNAME.log
+FCL=standard_detsim_dune35t.fcl
+COM="lar -c $FCL -s $INFILE -o ${OUTNAME}_event.root -T $OUTNAME.root -n $NEVT"
+$COM 2>&1 | tee $LOG

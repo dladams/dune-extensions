@@ -1,0 +1,9 @@
+INDIR=../gen
+INNAME=gen_mum
+INFILE=$INDIR/${INNAME}_event.root
+OUTNAME=geant_mum
+NEVT=10
+LOG=$OUTNAME.log
+FCL=standard_g4_dune35t.fcl
+COM="lar -c $FCL -s $INFILE -o ${OUTNAME}_event.root -T $OUTNAME.root -n $NEVT"
+$COM 2>&1 | tee $LOG
