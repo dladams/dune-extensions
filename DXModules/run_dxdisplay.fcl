@@ -1,0 +1,62 @@
+# run_dxdisplay.fcl
+#
+# David Adams
+# March 2016
+#
+# A top-level FCL script to run the DXDisplay analysis module.
+#
+# See <https://cdcvs.fnal.gov/redmine/projects/larsoftsvn/wiki/Running_Jobs> for 
+# more information on the structure of .fcl files. 
+
+#include "services_dune.fcl"
+#include "dxdisplay_services.fcl"
+#include "dxdisplay_module.fcl"
+
+process_name: DXDisplay
+
+services: @local::dune35t_simulation_services
+
+service.TFileService: { fileName: "DXDisplay.root" }
+services.TimeTracker:       {}
+services.ExptGeoHelperInterface: @local::dune_geometry_helper
+services.RawDigitAnalysisService: @local::dxdraw
+
+source: {
+  module_type: RootInput
+
+  # Number of events to analyze; "-1" means all of the events in the input
+  # file. You can override this value with the "-n" option on the command line. 
+  maxEvents:  -1 
+
+  # I've commented this out, but if you really want to include the name of
+  # an input file in this script, here's how you do it.
+  # fileNames: ["myinput.root"]
+}
+
+# This is empty, because we're not writing any art::Events to an output file. 
+outputs:{}
+
+# The 'physics' section defines and configures some modules to do work on each event.
+# First modules are defined; they are scheduled later. Modules are grouped by type.
+physics: {
+  # Define the variables we'll need to run for this analysis program.
+  analyzers: {
+    # This name defines a job step below, and will appear as a directory 
+    # in the output histogram file. 
+    DXDisplay:  @local::dxdisplay_default
+  }
+
+  # Schedule job step(s) for execution by defining the analysis module
+  # for this job. An 'analysis' module (as opposed to a 'producer' or
+  # a 'filter') does not alter the contents of events in the input
+  # file, nor does it create any events as output. Any step names
+  # listed here must match a name in the 'analyzers' section above.
+
+  analysis: [ DXDisplay ]
+
+  # "end_paths" is a keyword and contains the modules that do not modify the art::Event;
+  # i.e., analyzers and output streams. 
+
+  end_paths: [ analysis ]  
+}
+
