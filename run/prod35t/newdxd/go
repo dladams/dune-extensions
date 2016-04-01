@@ -1,4 +1,4 @@
-INDIR=../detsim
+INDIR=../newdetsim
 INNAME=detsim_mum
 INFILE=$INDIR/${INNAME}_event.root
 OUTNAME=dxd_mum
