@@ -1,0 +1,4 @@
+#include "new_standard_detsim_dune35t.fcl"
+
+physics.producers.daq.SuppressOn:  true
+services.AdcSuppressService:       @local::zslegacy
