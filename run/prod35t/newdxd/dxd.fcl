@@ -1,0 +1,10 @@
+# dxd.fcl
+#
+#
+# Script to generate DXD RawDigit histograms.
+
+#include "run_dxdisplay.fcl"
+
+physics.analyzers.DXDisplay.DebugLevel:       1
+services.RawDigitAnalysisService.LogLevel:    1
+physics.analyzers.DXDisplay.DoRawDigit:    true
