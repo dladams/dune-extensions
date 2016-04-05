@@ -70,7 +70,7 @@
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 
 // Dune includes.
-//#include "dune/DuneInterface/ChannelMappingService.h"
+#include "dune/DuneCommon/DuneTimeConverter.h"
 
 // Framework includes
 #include "art/Framework/Core/EDAnalyzer.h"
