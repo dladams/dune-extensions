@@ -6,13 +6,13 @@
 
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent	dune_extensions  v00_00_15
+parent	dune_extensions  v00_00_19
 defaultqual	e9
 #
 fcldir product_dir job
 #
 product         version
-dunetpc 	v05_01_00
+dunetpc 	v05_07_00
 art_extensions  v00_00_07
 gcc		v4_9_3
 cetbuildtools   v4_18_01 - only_for_build

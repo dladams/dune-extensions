@@ -70,8 +70,7 @@
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 
 // Dune includes.
-#include "dune/DuneInterface/ChannelMappingService.h"
-#include "dune/DuneCommon/DuneTimeConverter.h"
+//#include "dune/DuneInterface/ChannelMappingService.h"
 
 // Framework includes
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -326,7 +325,7 @@ private:
   art::ServiceHandle<geo::Geometry> fGeometry;       // pointer to Geometry service
 
   // Channel mapping service.
-  art::ServiceHandle<ChannelMappingService> fchanmap;
+  //art::ServiceHandle<ChannelMappingService> fchanmap;
 
   // Vector of event hists that should be removed at the end of the event.
   mutable vector<TH1*> m_eventhists;

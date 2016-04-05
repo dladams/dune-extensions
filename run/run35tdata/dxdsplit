@@ -19,7 +19,8 @@ INFILE=$DATADIR/lbne_r013434_sr01_20160227T031810.root
 #INFILE=$DATADIR/lbne_r014076_sr01_20160302T002657.root
 #INFILE=$DATADIR/lbne_r014085_sr01_20160302T021905.root
 #INFILE=$DATADIR/lbne_r014234_sr01_20160302T224327.root
-#INFILES=datasets/dsfiles14049.dat
+INFILE=$DATADIR/lbne_r014434_sr01_20160303T221627.root
+INFILES=datasets/dsfiles14049.dat
 INFILES=
 if false; then
   FASTINFILE=$HOME/data/tmp/`basename $INFILE`
@@ -28,16 +29,45 @@ if false; then
   fi
   INFILE=$FASTINFILE
 fi
-OUTFILE=dxdsplit.root
-FCLFILE=dxdsplit.fcl
-NEVT=2
+if [ "$1" == "-h" ]; then
+  echo $0 FCL DIR [NEVT] [NSKIP]
+  echo "  NEVT < 0 writes events"
+  exit 0
+fi
+if [ -z "$INFILES" -a ! -r $INFILE ]; then
+  echo Input file not found: $INFILE
+  exit 1
+fi
+FCL=dxdsplit
 if [ -n "$1" ]; then
-  NEVT=$1
+  FCL=$1
+fi
+NAME=test
+if [ -n "$2" -a "$2" != "." ]; then
+  NAME=$2
+fi
+NEVT=1
+if [ -n "$3" ]; then
+  NEVT=$3
 fi
 SKIPARG=
-if [ -n "$2" ]; then
-  SKIPARG="--nskip $2"
+if [ -n "$4" ]; then
+  SKIPARG="--nskip $4"
 fi
+# Set file names.
+RUNDIR=$NAME
+OUTFILE=$NAME.root
+FCLFILE=$FCL.fcl
+LOG=$NAME.log
+# Create an output file if NEVT < 0
+OUTEVTFILE=
+if [ $NEVT -lt 0 ]; then
+  OUTEVTFILE=$NAME_event.root
+  rm -f $OUTEVTFILE
+  COM="$COM -o $OUTEVTFILE"
+  NEVT=`echo -$NEVT | sed 's/^-//g'`
+fi
+# Build the run command.
 COM="lar -c $FCLFILE $SKIPARG -n $NEVT -T $OUTFILE"
 if [ -n "$INFILES" ]; then
   COM="$COM -S $INFILES"
@@ -46,6 +76,7 @@ else
   COM="$COM -s $INFILE"
   INPUT=$INFILE
 fi
+<<<<<<< HEAD
 # Create an output file if NEVT < 0
 OUTEVTFILE=
 if [ $NEVT -lt 0 ]; then
@@ -55,6 +86,19 @@ if [ $NEVT -lt 0 ]; then
   NEVT=`echo -$NEVT | sed 's/-//g'`
 fi
 LOG=dxdsplit.log
+=======
+# Create run directory.
+if [ -r $RUNDIR ]; then
+  echo Run directory already exists: $RUNDIR
+  echo Please change name or remove this
+  exit 1
+fi 
+mkdir $RUNDIR
+cp $FCLFILE $RUNDIR/$FCLFILE
+RUNBASE=.
+# Start the job.
+cd $RUNDIR
+>>>>>>> 99e3106229ae7f8d2717b8fe984487768d8cb475
 echo $COM | tee $LOG
 date | tee -a $LOG
 hostname | tee -a $LOG

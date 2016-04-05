@@ -3,7 +3,7 @@
 // David Adams
 // February 2016
 
-// Create a correlation histogram from a 2D histogrram of channel vs. tick.
+// Create a correlation histogram from a 2D histogram of channel vs. tick.
 
 #include "TH2F.h"
 #include <vector>
@@ -18,7 +18,7 @@ using std::ostringstream;
 typedef vector<double> FloatVec;
 typedef vector<FloatVec> SignalVec;
 
-TH2* corrHist(TH2* phin, int a_chanmin =0, int a_chanmax =0, int dbg =1) {
+TH2* corrHist(TH2* phin, int a_chanmin =-1, int a_chanmax =0, int dbg =1) {
   unsigned int ntick = phin->GetNbinsX();
   unsigned int nchanin = phin->GetNbinsY();
   float cmin = a_chanmin;

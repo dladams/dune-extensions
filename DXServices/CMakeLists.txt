@@ -12,4 +12,5 @@ simple_plugin(DXRawDisplayService "service"
   DXGeometry
              )
 
+install_fhicl()
 #add_subdirectory(test)
