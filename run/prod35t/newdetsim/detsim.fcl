@@ -1,4 +1,18 @@
-#include "new_standard_detsim_dune35t.fcl"
+# detsim.fcl
 
-physics.producers.daq.SuppressOn:  true
-services.AdcSuppressService:       @local::zslegacy
+# David Adams
+# April 2016
+#
+# Wrapper for DetSim production.
+
+#include "standard_detsim_dune35t.fcl"
+
+# Drop zero suppression.
+physics.producers.daq.SuppressOn:  false
+services.AdcCompressService:       @local::cmpreplace
+
+# Switch to online supression.
+#services.AdcSuppressService:       @local::zsonline
+
+# Add stuck bits.
+#services.AdcDistortService:        @local::stuckbits

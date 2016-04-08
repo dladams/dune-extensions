@@ -8,4 +8,4 @@ FCL=detsim.fcl
 COM="lar -c $FCL -s $INFILE -o ${OUTNAME}_event.root -T $OUTNAME.root -n $NEVT"
 $COM 2>&1 | tee $LOG
 
-fcldump $FCL 10 > $FCL.fcldump
+fcldump $FCL 10 > ${FCL}dump
