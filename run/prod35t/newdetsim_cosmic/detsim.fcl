@@ -5,16 +5,16 @@
 #
 # Wrapper for DetSim production.
 
-#include "standard_detsim_dune35t.fcl"
+#include "standard_detsim_dune35t_milliblock.fcl"
 
-# Enable zero suppression. Likely needs tuning for noise level.
+# Enable legacy zero suppression. Likely needs tuning for noise level.
 #physics.producers.daq.SuppressOn:  true
+
+# Switch to online supression. Likely needs tuning.
+#services.AdcSuppressService:       @local::zsonline
 
 # Enable huffman compression.
 #services.AdcCompressService:       @local::cmphuffman
-
-# Switch to online supression.
-#services.AdcSuppressService:       @local::zsonline
 
 # Add stuck bits.
 #services.AdcDistortService:        @local::stuckbits

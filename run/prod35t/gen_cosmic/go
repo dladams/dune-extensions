@@ -1,0 +1,5 @@
+OUTNAME=gen_cosmic
+NEVT=100
+LOG=$OUTNAME.log
+COM="lar -c prodcosmics_dune35t_milliblock.fcl -o ${OUTNAME}_event.root -T $OUTNAME.root -n $NEVT"
+$COM 2>&1 | tee $LOG

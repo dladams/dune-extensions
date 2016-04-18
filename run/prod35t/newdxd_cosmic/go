@@ -1,0 +1,18 @@
+SUF=
+if [ -n "$1" -a "$1" != . ]; then
+  SUF=$1
+fi
+INDIR=../newdetsim_cosmic$SUF
+INNAME=detsim_cosmic
+INFILE=$INDIR/${INNAME}_event.root
+OUTNAME=dxd_cosmic$SUF
+NEVT=10
+if [ -n "$2" ]; then
+  NEVT=$2
+fi
+LOG=$OUTNAME.log
+FCL=dxd.fcl
+COM="lar -c $FCL -s $INFILE -o ${OUTNAME}_event.root -T $OUTNAME.root -n $NEVT"
+$COM 2>&1 | tee $LOG
+
+fcldump $FCL 10 > ${FCL}dump

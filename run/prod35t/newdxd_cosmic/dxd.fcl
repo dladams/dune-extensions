@@ -7,5 +7,6 @@
 
 physics.analyzers.DXDisplay.DebugLevel:       1
 physics.analyzers.DXDisplay.DoRawDigit:    true
-services.RawDigitAnalysisService.LogLevel:    1
-services.RawDigitAnalysisService.DoMean:   true
+services.RawDigitAnalysisService.LogLevel:       1
+services.RawDigitAnalysisService.TdcTickMax: 32000
+services.RawDigitAnalysisService.DoMean:      true
