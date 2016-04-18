@@ -3,9 +3,8 @@
 #
 # Script to generate DXD RawDigit histograms.
 
-#include "run_dxdisplay_35t.fcl"
+#include "run_dxdisplay_fdws.fcl"
 
 physics.analyzers.DXDisplay.DebugLevel:       1
-physics.analyzers.DXDisplay.DoRawDigit:    true
 services.RawDigitAnalysisService.LogLevel:    1
-services.RawDigitAnalysisService.DoMean:   true
+physics.analyzers.DXDisplay.DoRawDigit:    true

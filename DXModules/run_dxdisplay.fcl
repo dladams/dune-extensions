@@ -12,13 +12,11 @@
 #include "dxdisplay_services.fcl"
 #include "dxdisplay_module.fcl"
 
-process_name: DXDisplay
+process_name: dxdisplay
 
-services: @local::dune35t_simulation_services
-
-service.TFileService: { fileName: "DXDisplay.root" }
-services.TimeTracker:       {}
-services.ExptGeoHelperInterface: @local::dune_geometry_helper
+service.TFileService:             { fileName: "DXDisplay.root" }
+services.TimeTracker:             {}
+services.ExptGeoHelperInterface:  @local::dune_geometry_helper
 services.RawDigitAnalysisService: @local::dxdraw
 
 source: {

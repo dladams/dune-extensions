@@ -4,4 +4,4 @@ LOG=$OUTNAME.log
 FCL=prod_muminus_0.1-5.0GeV_isotropic_dune10kt_workspace.fcl
 COM="lar -c $FCL -o ${OUTNAME}_event.root -T $OUTNAME.root -n $NEVT"
 $COM 2>&1 | tee $LOG
-fcldump $FCL >${FCL}dump
+fcldump $FCL 20 >${FCL}dump

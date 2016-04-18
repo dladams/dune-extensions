@@ -1,0 +1,5 @@
+# run_dxdisplay_workspace.fcl
+
+#include "run_dxdisplay.fcl"
+
+services.Geometry: @local::dune35t_geo

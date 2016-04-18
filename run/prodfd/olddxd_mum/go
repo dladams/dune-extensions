@@ -1,0 +1,15 @@
+INNAME=detsim_mum
+OUTNAME=dxd_mum
+INDIR=../old$INNAME
+INFILE=$INDIR/${INNAME}_event.root
+NEVT=10
+if [ -n "$1" ]; then
+  NEVT=$1
+fi
+LOG=$OUTNAME.log
+FCL=dxd.fcl
+COM="lar -c $FCL -s $INFILE -o ${OUTNAME}_event.root -T $OUTNAME.root -n $NEVT"
+echo $COM >$LOG
+$COM 2>&1 | tee -a $LOG
+
+fcldump $FCL 20 > ${FCL}dump
