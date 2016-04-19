@@ -1,4 +1,4 @@
-SUF=10
+SUF=
 if [ -n "$1" ]; then
   SUF=$1
 fi
