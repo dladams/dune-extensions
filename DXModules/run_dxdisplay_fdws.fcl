@@ -1,0 +1,5 @@
+# run_dxdisplay_fdws.fcl
+
+#include "run_dxdisplay.fcl"
+
+services.Geometry: @local::dune10kt_workspace_geo

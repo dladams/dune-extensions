@@ -1,0 +1,23 @@
+# dxdisplay_services.fcl
+#
+# David Adams
+# March 2016
+
+BEGIN_PROLOG
+
+dxdraw: {
+  service_provider: DXRawDisplayService
+  TdcTickMin:        0
+  TdcTickMax:     3200
+  NTickPerBin:       1
+  NChanPerBin:       1
+  DoROPs:        false
+  DoAll:          true
+  DoAllOnline:   false
+  DoMean:        false
+  PedestalOption:    1
+  AdcOffset:       0.0
+  DecompressWithPedestal:   true
+}
+
+END_PROLOG

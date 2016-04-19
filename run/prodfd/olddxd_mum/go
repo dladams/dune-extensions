@@ -1,10 +1,14 @@
-INNAME=detsim_mum
-OUTNAME=dxd_mum
-INDIR=../old$INNAME
+SUF=10
+if [ -n "$1" ]; then
+  SUF=$1
+fi
+INNAME=detsim_mum$SUF
+OUTNAME=dxd_mum$SUF
+INDIR=../olddetsim_mum
 INFILE=$INDIR/${INNAME}_event.root
 NEVT=10
-if [ -n "$1" ]; then
-  NEVT=$1
+if [ -n "$2" ]; then
+  NEVT=$2
 fi
 LOG=$OUTNAME.log
 FCL=dxd.fcl
