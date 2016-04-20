@@ -1,0 +1,15 @@
+SUF=
+if [ -n "$1" ]; then
+  SUF=$1
+fi
+INNAME=geant_mum
+OUTNAME=detsim_mum$SUF
+INDIR=../$INNAME
+INFILE=$INDIR/${INNAME}_event.root
+NEVT=10
+LOG=$OUTNAME.log
+FCL=detsim$SUF.fcl
+COM="lar -c $FCL -s $INFILE -o ${OUTNAME}_event.root -T $OUTNAME.root -n $NEVT"
+$COM 2>&1 | tee $LOG
+
+fcldump $FCL 20 > ${FCL}dump
