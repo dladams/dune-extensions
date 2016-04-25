@@ -1,0 +1,13 @@
+# dxd_ws.fcl
+#
+#
+# Script to generate DXD RawDigit histograms.
+
+#include "run_dxdisplay.fcl"
+
+services.Geometry: @local::dune10kt_1x2x6_geo
+
+physics.analyzers.DXDisplay.DebugLevel:       1
+physics.analyzers.DXDisplay.DoRawDigit:    true
+services.RawDigitAnalysisService.LogLevel:       1
+services.RawDigitAnalysisService.TdcTickMax:  4500

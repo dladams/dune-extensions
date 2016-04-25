@@ -1,0 +1,7 @@
+# detsim_ws_nozs.fcl
+
+#include "old_standard_detsim_dune10kt_workspace.fcl"
+
+# Turn off zero suppression.
+#physics.producers.daq.CompressionType: none
+physics.producers.daq.ZeroThreshold:   0

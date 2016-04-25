@@ -5,6 +5,9 @@
 
 #include "run_dxdisplay_fdws.fcl"
 
+services.Geometry: @local::dune10kt_1x2x6_geo
+
 physics.analyzers.DXDisplay.DebugLevel:       1
-services.RawDigitAnalysisService.LogLevel:    1
 physics.analyzers.DXDisplay.DoRawDigit:    true
+services.RawDigitAnalysisService.LogLevel:       1
+services.RawDigitAnalysisService.TdcTickMax:  4500

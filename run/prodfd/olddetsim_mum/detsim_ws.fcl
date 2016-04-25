@@ -1,0 +1,3 @@
+# detsim_ws.fcl
+
+#include "old_standard_detsim_dune10kt_workspace.fcl"

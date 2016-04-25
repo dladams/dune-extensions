@@ -1,0 +1,11 @@
+# detsim_ws_nozs_rc1.fcl
+
+#include "old_standard_detsim_dune10kt_1x2x6.fcl"
+
+# Turn off zero suppression.
+#physics.producers.daq.CompressionType: none
+physics.producers.daq.ZeroThreshold:   0
+
+# Turn off Root compression.
+outputs.out1.compressionLevel: 0
+

@@ -1,11 +1,21 @@
+SUF=
+if [ -n "$1" ]; then
+  SUF=$1
+fi
+NEVT=10
+if [ -n "$2" ]; then
+  NEVT=$2
+fi
 INDIR=../geant
 INNAME=geant_mum
 INFILE=$INDIR/${INNAME}_event.root
-OUTNAME=detsim_mum
-NEVT=10
+OUTNAME=detsim_mum$SUF
 LOG=$OUTNAME.log
-FCL=detsim.fcl
+FCL=detsim$SUF.fcl
 COM="lar -c $FCL -s $INFILE -o ${OUTNAME}_event.root -T $OUTNAME.root -n $NEVT"
-$COM 2>&1 | tee $LOG
+echo $COM >$LOG
+date >>$LOG
+$COM 2>&1 | tee -a $LOG
+date >>$LOG
 
 fcldump $FCL 10 > ${FCL}dump

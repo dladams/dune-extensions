@@ -1,0 +1,12 @@
+# detsim_126_nozs_rc0_hc.fcl
+
+#include "detsim_126.fcl"
+
+# Disable zero suppression.
+physics.producers.daq.SuppressOn:  false
+
+# Turn off Root compression.
+outputs.out1.compressionLevel: 0
+
+# Enable compression.
+services.AdcCompressService.UseHuffman: true

@@ -1,0 +1,3 @@
+# detsim_45deg.fcl
+
+#include "old_standard_detsim_dune10kt_45deg_1x2x6.fcl"

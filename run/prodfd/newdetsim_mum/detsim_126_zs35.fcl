@@ -1,0 +1,6 @@
+# detsim_126_zs35.fcl
+
+#include "detsim_126.fcl"
+
+# Use 35t zero suppression.
+services.AdcSuppressService:  @local::zsonline

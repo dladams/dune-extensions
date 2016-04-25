@@ -1,0 +1,6 @@
+# detsim_126_nozs.fcl
+
+#include "detsim_126.fcl"
+
+# Disable zero suppression.
+physics.producers.daq.SuppressOn:  false

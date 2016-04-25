@@ -1,10 +1,14 @@
+SUF=
+if [ -n "$1" -a $1 != "." ]; then
+  SUF=$1
+fi
 INDIR=../geant
 INNAME=geant_mum
 INFILE=$INDIR/${INNAME}_event.root
-OUTNAME=detsim_mum
+OUTNAME=detsim_mum$SUF
 NEVT=10
 LOG=$OUTNAME.log
-FCL=detsim.fcl
+FCL=detsim$SUF.fcl
 COM="lar -c $FCL -s $INFILE -o ${OUTNAME}_event.root -T $OUTNAME.root -n $NEVT"
 $COM 2>&1 | tee $LOG
 

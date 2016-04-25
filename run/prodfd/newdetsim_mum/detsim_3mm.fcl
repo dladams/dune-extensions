@@ -1,0 +1,3 @@
+# detsim.fcl
+
+#include "standard_detsim_dune10kt_3mmpitch_1x2x6.fcl"

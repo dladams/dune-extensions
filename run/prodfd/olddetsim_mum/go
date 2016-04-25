@@ -1,15 +1,29 @@
-SUF=
+GEO=ws
+OPT=
 if [ -n "$1" ]; then
-  SUF=$1
+  GEO=$1
+fi
+if [ -n "$2" ]; then
+  OPT=$2
+fi
+SUF=_$GEO
+if [ -n "$OPT" ]; then
+  SUF=${SUF}_$OPT
 fi
 INNAME=geant_mum
 OUTNAME=detsim_mum$SUF
 INDIR=../$INNAME
-INFILE=$INDIR/${INNAME}_event.root
+INFILE=$INDIR/${INNAME}_${GEO}_event.root
 NEVT=10
 LOG=$OUTNAME.log
 FCL=detsim$SUF.fcl
+if [ ! -r $FCL ]; then
+  echo Input FCL file not found: $FCL
+  exit 1
+fi
 COM="lar -c $FCL -s $INFILE -o ${OUTNAME}_event.root -T $OUTNAME.root -n $NEVT"
+echo Log is $LOG
 $COM 2>&1 | tee $LOG
+echo Log is $LOG
 
 fcldump $FCL 20 > ${FCL}dump
