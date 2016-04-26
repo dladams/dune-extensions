@@ -1,0 +1,5 @@
+# detsim.fcl
+
+#include "old_standard_detsim_dune35t.fcl"
+
+#physics.producers.daq.CompressionType: "none"

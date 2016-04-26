@@ -1,0 +1,12 @@
+# detsim_ws_nozs_lonoise.fcl
+
+#include "old_standard_detsim_dune10kt_1x2x6.fcl"
+
+# Turn off zero suppression.
+#physics.producers.daq.CompressionType: none
+physics.producers.daq.ZeroThreshold:   0
+
+# Reduce noise level.
+physics.producers.daq.NoiseFactU:  0.0357
+physics.producers.daq.NoiseFactV:  0.0357
+physics.producers.daq.NoiseFactZ:  0.0357

@@ -1,0 +1,5 @@
+#include "pedestals_dune.fcl"
+#include "geometry_dune.fcl"
+services.DetPedestalService: @local::dune_fixedpeds
+services.Geometry: @local::dune35t_geo
+services.ExptGeoHelperInterface: @local::dune_geometry_helper

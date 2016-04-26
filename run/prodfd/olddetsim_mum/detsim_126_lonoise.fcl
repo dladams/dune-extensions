@@ -1,0 +1,8 @@
+# detsim_ws_lonoise.fcl
+
+#include "old_standard_detsim_dune10kt_1x2x6.fcl"
+
+# Reduce noise level.
+physics.producers.daq.NoiseFactU:  0.0349
+physics.producers.daq.NoiseFactV:  0.0349
+physics.producers.daq.NoiseFactZ:  0.0349

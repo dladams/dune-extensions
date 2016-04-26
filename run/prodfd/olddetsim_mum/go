@@ -1,10 +1,14 @@
 GEO=ws
 OPT=
-if [ -n "$1" ]; then
+NEVT=10
+if [ -n "$1" -a "$1" != . ]; then
   GEO=$1
 fi
-if [ -n "$2" ]; then
+if [ -n "$2" -a "$2" != . ]; then
   OPT=$2
+fi
+if [ -n "$3" ]; then
+  NEVT=$3
 fi
 SUF=_$GEO
 if [ -n "$OPT" ]; then
@@ -14,7 +18,6 @@ INNAME=geant_mum
 OUTNAME=detsim_mum$SUF
 INDIR=../$INNAME
 INFILE=$INDIR/${INNAME}_${GEO}_event.root
-NEVT=10
 LOG=$OUTNAME.log
 FCL=detsim$SUF.fcl
 if [ ! -r $FCL ]; then
