@@ -23,7 +23,10 @@ if [ ! -r $FCL ]; then
 fi
 COM="lar -c $FCL -s $INFILE -o ${OUTNAME}_event.root -T $OUTNAME.root -n $NEVT"
 echo Log is $LOG
-$COM 2>&1 | tee $LOG
+echo $COM >$LOG
+date >>$LOG
+$COM 2>&1 | tee -a $LOG
+date >>$LOG
 echo Log is $LOG
 
 fcldump $FCL 20 > ${FCL}dump

@@ -4,6 +4,7 @@ void fig(string geo, int opt) {
   double cmin = 5200;
   double cmax = 7200;
   string clab;
+  string hname = "h4_rawall";
   if ( geo == "ws" ) {
     if ( opt == 1 ) {
       tmin = 1900;
@@ -22,21 +23,22 @@ void fig(string geo, int opt) {
       return;
     }
   } else if ( geo == "126" ) {
-    tmin = 3530;
-    tmax = 3730;
+    hname = "h2_rawall";
+    tmin = 3000;
+    tmax = 3200;
     if ( opt == 1 ) {
-      tmin = 3400;
-      tmax = 3900;
-      cmin = 10100;
-      cmax = 12700;
+      tmin = 2300;
+      tmax = 4500;
+      cmin =  5200;
+      cmax =  7600;
       clab = "all";
     } else if ( opt == 2 ) {
-      cmin = 11100;
-      cmax = 11300;
+      cmin =  6115;
+      cmax =  6165;
       clab = "ind";
     } else if ( opt == 3 ) {
-      cmin = 12420;
-      cmax = 12540;
+      cmin =  7330;
+      cmax =  7380;
       clab = "col";
     } else {
       cout << "Invalid geometry/option: " << geo << "/" << opt << endl;
@@ -46,7 +48,7 @@ void fig(string geo, int opt) {
     cout << "Invalid geometry: " << geo << endl;
     return;
   }
-  DrawResult dres = draw("h4_rawall", 0, tmin, tmax, 100);
+  DrawResult dres = draw(hname, 0, tmin, tmax, 100);
   dres.hdraw->GetYaxis()->SetRangeUser(cmin, cmax);
   dres.hdraw->Draw("colz");
   addaxis();

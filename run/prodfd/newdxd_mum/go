@@ -22,8 +22,12 @@ fi
 LOG=$OUTNAME.log
 FCL=dxd$SUF.fcl
 if [ ! -r $FCL ]; then
-  echo Input FCL file not found: $FCL
-  exit 1
+  FCL1=$FCL
+  FCL=dxd_$GEO.fcl
+  if [ ! -r $FCL ]; then
+    echo Input FCL file not found: $FCL1, $FCL
+    exit 1
+  fi
 fi
 COM="lar -c $FCL -s $INFILE -o ${OUTNAME}_event.root -T ${PRE}$OUTNAME.root -n $NEVT"
 echo $COM >$LOG
