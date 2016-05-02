@@ -1,0 +1,41 @@
+PRE=new
+GEO=126
+OPT=
+if [ -n "$1" ]; then
+  PRE=$1
+fi
+if [ -n "$2" ]; then
+  GEO=$2
+fi
+if [ -n "$3" ]; then
+  OPT=$3
+fi
+SUF=_$GEO
+if [ -n "$OPT" ]; then
+  SUF=${SUF}_$OPT
+fi
+INNAME=detsim_mum$SUF
+OUTNAME=${PRE}_caldata_mum$SUF
+INDIR=../${PRE}detsim_mum
+INFILE=$INDIR/${INNAME}_event.root
+if [ ! -r $INFILE ]; then
+  echo Unable to find input file: $INFILE
+  exit 1
+fi
+NEVT=10
+if [ -n "$4" ]; then
+  NEVT=$4
+fi
+LOG=$OUTNAME.log
+FCL=caldata_$GEO.fcl
+if [ ! -r $FCL ]; then
+  echo Input FCL file not found: $FCL
+  exit 2
+fi
+COM="lar -c $FCL -s $INFILE -o ${OUTNAME}_event.root -T $OUTNAME.root -n $NEVT"
+echo $COM >$LOG
+echo Log is $LOG
+$COM 2>&1 | tee -a $LOG
+echo Log is $LOG
+
+fcldump $FCL 20 > ${FCL}dump
