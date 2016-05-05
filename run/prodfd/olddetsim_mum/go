@@ -1,4 +1,4 @@
-GEO=ws
+GEO=126
 OPT=
 NEVT=10
 if [ -n "$1" -a "$1" != . ]; then

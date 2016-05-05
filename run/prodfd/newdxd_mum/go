@@ -1,5 +1,5 @@
 PRE=new_
-GEO=ws
+GEO=126
 OPT=
 if [ -n "$1" ]; then
   GEO=$1

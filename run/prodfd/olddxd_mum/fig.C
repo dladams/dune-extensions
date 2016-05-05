@@ -24,21 +24,21 @@ void fig(string geo, int opt) {
     }
   } else if ( geo == "126" ) {
     hname = "h2_rawall";
-    tmin = 3000;
-    tmax = 3200;
+    tmin = 2200;
+    tmax = 2400;
     if ( opt == 1 ) {
-      tmin = 2300;
-      tmax = 4500;
-      cmin =  5200;
-      cmax =  7600;
+      tmin = 1800;
+      tmax = 2700;
+      cmin =  7900;
+      cmax = 10300;
       clab = "all";
     } else if ( opt == 2 ) {
-      cmin =  6115;
-      cmax =  6165;
+      cmin =  8600;
+      cmax =  8650;
       clab = "ind";
     } else if ( opt == 3 ) {
-      cmin =  7330;
-      cmax =  7380;
+      cmin = 10100;
+      cmax = 10200;
       clab = "col";
     } else {
       cout << "Invalid geometry/option: " << geo << "/" << opt << endl;
