@@ -204,7 +204,7 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
     unsigned int irop = geohelp.channelRop(ichan);
     if ( m_dbg > 4 ) cout << myname << "              ROP: " << irop << endl;
     TH2* ph = nullptr;
-    if ( rophists.size() > irop ) rophists[irop];
+    if ( rophists.size() > irop ) ph = rophists[irop];
     unsigned int iropchan = ichan - geohelp.ropFirstChannel(irop);
     if ( m_dbg > 4 ) cout << myname << "      ROP channel: " << iropchan << endl;
     int nadc = digit.NADC();

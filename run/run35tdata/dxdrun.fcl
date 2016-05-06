@@ -72,5 +72,6 @@ services.RawDigitAnalysisService.LogLevel:        2
 services.RawDigitAnalysisService.DoMean:       true
 services.RawDigitAnalysisService.PedestalOption:  1  # 1=digit, 2=DB
 services.RawDigitAnalysisService.DoAllOnline: false
-services.RawDigitAnalysisService.DoAll:        true
+services.RawDigitAnalysisService.DoAll:       false
+services.RawDigitAnalysisService.DoROPs:       true
 services.RawDigitAnalysisService.TdcTickMax:  15000
