@@ -47,6 +47,9 @@
     gSystem->AddLinkedLibs(lib.c_str());
   }
 
+  gROOT->ProcessLine(".L $DUNE_EXTENSIONS_INC/DXGeometry/PlanePosition.h+");
+  gROOT->ProcessLine(".L $DUNE_EXTENSIONS_INC/DXGeometry/GeoHelper.h+");
+
   gROOT->ProcessLine(".L palette.cxx+");
   gROOT->ProcessLine(".L gettree.cxx+");
   gROOT->ProcessLine(".L addaxis.cxx+");
@@ -73,6 +76,11 @@
 
   gStyle->SetPadRightMargin(0.14);   // For 2D plots
   gStyle->SetTitleY(0.97);
+
+  // Read local rootlogon.
+  if ( gSystem->FindFile(".", "myrootlogon.C") ) {
+    gROOT->ProcessLine(".X myrootlogon.C");
+  }
 
   if ( dxopen(gApplication->InputFiles()) == 0 ) {
     cout << "Opened DXDisplay file " << gFile->GetName() << endl;

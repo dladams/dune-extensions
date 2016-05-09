@@ -1,3 +1,21 @@
+# dune_extensions/DXGeometry/CMakeLists.txt
+#
+# David Adams
+# May 2016
+
+#include(CetRootCint)
+#include_directories ( ${CMAKE_CURRENT_SOURCE_DIR} )
+#cet_rootcint( "DXGeometry" )
+
+#set( PACKAGE DXGeometry )
+#FILE( GLOB src_files *.cxx )
+#cet_rootcint( ${PACKAGE} )
+
+#cet_rootcint( "DXGeometry_dict" )
+
+
+#MESSAGE( STATUS "DXGeometry PACKAGE: " ${PACKAGE} )
+#MESSAGE( STATUS "DXGeometry src_files: " ${src_files} )
 
 art_make(BASENAME_ONLY
          LIB_LIBRARIES
@@ -29,3 +47,5 @@ install_headers()
 install_fhicl()
 install_source( README.txt )
 install_scripts()
+
+

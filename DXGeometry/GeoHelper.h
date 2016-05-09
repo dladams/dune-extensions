@@ -92,7 +92,7 @@ public:
   Index nrop() const { return m_nrop; }
 
   // TPC index (0, ..., ntpc()-1)
-  Index tpcIndex(unsigned int icry, unsigned int itpcplane);
+  //may2016 Index tpcIndex(unsigned int icry, unsigned int itpcplane);
 
   // TPC properties.
   Index tpcCryostat(Index itpc) const { return m_tpccry.at(itpc); }

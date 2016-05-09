@@ -9,6 +9,7 @@
 // Struct that holds a position on a LAr TPC readout plane in LAr detector coordinates.
 
 #include <vector>
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
 
 class PlanePosition {
 
@@ -34,5 +35,8 @@ public:
 
 // Vector of plane positions, e.g. positions for all planes in a TPC.
 typedef std::vector<PlanePosition> PlanePositionVector;
+#ifdef __CINT__
+#pragma link C++ class PlanePositionVector;
+#endif
 
 #endif
