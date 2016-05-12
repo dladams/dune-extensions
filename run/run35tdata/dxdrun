@@ -15,7 +15,7 @@ INFILE=$DATADIR/split_lbne_r013434_sr01_20160227T031810.root
 INFILE=$DATADIR/sliced35t/lbne_r013843_sr01_20160229T180430_20160504T002939_split.root
 OUTFILE=dxdrun.root
 FCLFILE=dxdrun.fcl
-NEVT=2
+NEVT=10
 if [ -n "$1" ]; then
   NEVT=$1
 fi

@@ -240,7 +240,7 @@ int GeoHelper::tpcCorners(unsigned int icry, unsigned int itpc, double* pos1, do
 //**********************************************************************
 
 Index GeoHelper::rop(geo::PlaneID pid) const {
-  const string myname = "GeoHelper::Rop: ";
+  const string myname = "GeoHelper::rop: ";
   auto itrplane = m_tpprop.find(pid);
   if ( itrplane == m_tpprop.end() ) {
     cout << myname << "WARNING: Unknown plane: " << pid << endl;
