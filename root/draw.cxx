@@ -209,7 +209,7 @@ DrawResult draw(std::string name ="help", int how =0, double xmin =0.0, double x
       xbin2 = xmax;
     }
     TH1* hprx = phdraw->ProjectionX(hprx_name.c_str());
-    hprx->GetXaxis()->SetRangeUser(xbin1, xbin2);
+    if ( xmax > xmin ) hprx->GetXaxis()->SetRangeUser(xmin, xmax);
     string ytitle;
     hprx->GetYaxis()->SetTitle(ylabprx.c_str());
     res.hdrawx = hprx;
@@ -230,7 +230,7 @@ DrawResult draw(std::string name ="help", int how =0, double xmin =0.0, double x
       ostringstream sstitle;
       sstitle << phdraw->GetTitle() << " channel " << ich;
       hprx->SetTitle(sstitle.str().c_str());
-      hprx->GetXaxis()->SetRangeUser(xbin1, xbin2);
+      if ( xmax > xmin ) hprx->GetXaxis()->SetRangeUser(xmin, xmax);
       hprx->GetYaxis()->SetTitle(ylabprx.c_str());
       res.hdrawxChan.push_back(hprx);
     }

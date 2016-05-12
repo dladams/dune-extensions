@@ -74,4 +74,5 @@ services.RawDigitAnalysisService.PedestalOption:  1  # 1=digit, 2=DB
 services.RawDigitAnalysisService.DoAllOnline: false
 services.RawDigitAnalysisService.DoAll:       false
 services.RawDigitAnalysisService.DoROPs:       true
+services.RawDigitAnalysisService.NchanMeanRms:  100
 services.RawDigitAnalysisService.TdcTickMax:  15000

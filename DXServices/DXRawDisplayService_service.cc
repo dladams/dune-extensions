@@ -68,6 +68,7 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
   m_DoAll                  = pset.get<bool>("DoAll");
   m_DoAllOnline            = pset.get<bool>("DoAllOnline");
   m_DoMean                 = pset.get<bool>("DoMean");
+  m_NchanMeanRms           = pset.get<int>("NchanMeanRms");
   m_PedestalOption         = pset.get<unsigned int>("PedestalOption");
   m_AdcOffset              = pset.get<float>("AdcOffset");
   m_DecompressWithPedestal = pset.get<bool>("DecompressWithPedestal");
@@ -82,6 +83,21 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
     cout << myname << "Pedestal provider: @" <<  m_pPedProv << endl;
   }
 
+  if ( m_dbg > 0 ) {
+    cout << myname << "                LogLevel: " << m_dbg << endl;
+    cout << myname << "              TdcTickMin: " << m_TdcTickMin << endl;
+    cout << myname << "              TdcTickMax: " << m_TdcTickMax << endl;
+    cout << myname << "             NTickPerBin: " << m_NTickPerBin << endl;
+    cout << myname << "             NChanPerBin: " << m_NChanPerBin << endl;
+    cout << myname << "                  DoROPs: " << m_DoROPs << endl;
+    cout << myname << "                   DoAll: " << m_DoAll << endl;
+    cout << myname << "             DoAllOnline: " << m_DoAllOnline << endl;
+    cout << myname << "                  DoMean: " << m_DoMean << endl;
+    cout << myname << "            NchanMeanRms: " << m_NchanMeanRms << endl;
+    cout << myname << "          PedestalOption: " << m_PedestalOption << endl;
+    cout << myname << "               AdcOffset: " << m_AdcOffset << endl;
+    cout << myname << "  DecompressWithPedestal: " << m_DecompressWithPedestal << endl;
+  }
 }
 
 //************************************************************************
@@ -127,6 +143,7 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
   double zmax = 100;
   int ncontour = 20;
   ChannelTickHistCreator hcreateRop(tfsdir, sevt, m_TdcTickMin, m_TdcTickMax, ztitle, -zmax, zmax, 2*ncontour, m_NTickPerBin, m_NChanPerBin);
+  ChannelTickHistCreator hcreateRopMr(tfsdir, sevt, m_TdcTickMin, m_TdcTickMax, ztitle, -zmax, zmax, 2*ncontour, m_NchanMeanRms, 1);
   bool fAbsAll = false;
   string allname = "ADC counts";
   double allzmin = -zmax;
@@ -143,8 +160,6 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
   }
   const GeoHelper& geohelp = *m_pgh;
   int nchan = m_pgh->geometry()->Nchannels();
-
-  // For now, take chann
 
   // Create histograms.
   vector<TH2*> rophists;
@@ -181,6 +196,22 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
     phmean = tfsdir.make<TH1F>(hname.c_str(), htitle.c_str(), nchan, 0, nchan);
     m_eventhists.push_back(phmean);
   }
+  vector<TH2*> rophists_mean;
+  vector<TH2*> rophists_rms;
+  if ( m_NchanMeanRms ) {
+    for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
+      TH2* ph = hcreateRopMr.create("rawmean" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
+                                    "Raw signal mean for " + geohelp.ropName(irop));
+      rophists_mean.push_back(ph);
+      m_eventhists.push_back(ph);
+      if ( m_dbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
+      ph = hcreateRopMr.create("rawrms" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
+                                    "Raw signal RMS for " + geohelp.ropName(irop));
+      rophists_rms.push_back(ph);
+      m_eventhists.push_back(ph);
+      if ( m_dbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
+    }
+  }
 
   // Loop over digits.
   if ( m_dbg > 2 ) cout << myname << "Uncompressing data." << endl;
@@ -204,7 +235,18 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
     unsigned int irop = geohelp.channelRop(ichan);
     if ( m_dbg > 4 ) cout << myname << "              ROP: " << irop << endl;
     TH2* ph = nullptr;
+    TH2* ph_mean = nullptr;
+    TH2* ph_rms = nullptr;
     if ( rophists.size() > irop ) ph = rophists[irop];
+    if ( rophists_mean.size() > irop ) ph_mean = rophists_mean[irop];
+    if ( rophists_rms.size() > irop ) ph_rms = rophists_rms[irop];
+    if ( m_dbg >= 3 ) {
+      cout << "ROP hists for channel " << ichan << ":";
+      if ( ph != nullptr ) cout << " " << ph->GetName();
+      if ( ph_mean != nullptr ) cout << " " << ph_mean->GetName();
+      if ( ph_rms != nullptr ) cout << " " << ph_rms->GetName();
+      cout << endl;
+    }
     unsigned int iropchan = ichan - geohelp.ropFirstChannel(irop);
     if ( m_dbg > 4 ) cout << myname << "      ROP channel: " << iropchan << endl;
     int nadc = digit.NADC();
@@ -264,6 +306,10 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
     int icnt = 0;
     double tsum = 0.0;
     double tsumsq = 0.0;
+    double tsum_bin = 0;
+    double tsumsq_bin = 0.0;
+    unsigned int ibin = 0;
+    unsigned int ntick_bin = 0;
     for ( unsigned int tick=0; tick<adcs.size(); ++tick ) {
       double wt = adcs[tick] - pedestal + m_AdcOffset;;
       ++icnt;
@@ -278,6 +324,23 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
       if ( fAbsAll ) allwt = fabs(allwt);
       if ( phallraw != nullptr ) phallraw->Fill(tick, ichan, allwt);
       if ( phallrawon != nullptr ) phallrawon->Fill(tick, ichanon, allwt);
+      tsum_bin += wt;
+      tsumsq_bin += wt*wt;
+      ++ntick_bin;
+      if ( ntick_bin == m_NchanMeanRms || tick==adcs.size()-1 ) {
+        double mean = tsum_bin/ntick_bin;
+        double rms = sqrt(tsumsq_bin/ntick_bin);
+        ph_mean->SetBinContent(ibin+1, iropchan+1, mean);
+        ph_rms->SetBinContent(ibin+1, iropchan+1, rms);
+        if ( m_dbg >= 4 ) {
+          cout << myname << "Mean[" << ibin << ", " << iropchan << "] = " << mean << endl;
+          cout << myname << " Rms[" << ibin << ", " << iropchan << "] = " << rms << endl;
+        }
+        tsum_bin = 0.0;
+        tsumsq_bin = 0.0;
+        ++ibin;
+        ntick_bin = 0;
+      }
     }  // end loop over ticks
     // Channel stats.
     double tcnt = icnt;
@@ -288,8 +351,8 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
       double rmssq = tsumsq/tcnt - mean*mean;
       if ( rmssq > 0.0 ) rms = sqrt(rmssq);
       if ( phmean != nullptr ) {
-        phmean->SetBinContent(ichan, mean);
-        phmean->SetBinError(ichan, rms);
+        phmean->SetBinContent(ichan+1, mean);
+        phmean->SetBinError(ichan+1, rms);
       }
       if ( m_dbg > 3 ) cout << " Mean, RMS: " << mean << " +/- " << rms << endl;
     }
@@ -303,9 +366,15 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
          !isOfflineOrdered ) cout << myname << "Digit order is neither online nor offline." << endl;
   }
   // Display the contents of each raw data histogram.
-  if ( m_dbg > 1 ) {
+  if ( m_dbg >= 2 ) {
     cout << myname << "Summary of raw data histograms:" << endl;
     for ( TH2* ph : rophists ) {
+      summarize2dHist(ph, myname, wnam, 4, 7);
+    }
+    for ( TH2* ph : rophists_mean ) {
+      summarize2dHist(ph, myname, wnam, 4, 7);
+    }
+    for ( TH2* ph : rophists_rms ) {
       summarize2dHist(ph, myname, wnam, 4, 7);
     }
     if ( phallraw != nullptr ) summarize2dHist(phallraw, myname, wnam, 4, 7);

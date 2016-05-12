@@ -15,6 +15,7 @@ dxdraw: {
   DoAll:          true
   DoAllOnline:   false
   DoMean:        false
+  NchanMeanRms:      0
   PedestalOption:    1
   AdcOffset:       0.0
   DecompressWithPedestal:   true

@@ -13,17 +13,18 @@
 //     hE_rawapaAAA -    Raw data for APA AAA
 //
 // Properties:
-//   LogLevel    - 0=no msgs, 1=init only, 2+=every call to process
-//   TdcTickMin  - Lower limit for the tick axis.
-//   TdcTickMax  - Upper limit for the tick axis.
-//   NTickPerBin - Rebin factor for the tick axis.
-//   NChanPerBin - Rebin factor for the channel axis.
-//   DoROPs      - Make a channel-tick histogram for each readout plane for each event.
-//   DoAll       - Make a channel-tick histogram for the full detector for each event.
-//   DoAllOnline - Make a channel-tick histogram for the full detector with online channel ordering for each event.
-//   DoMean      - Make a channel mean +/- RMS histogram for each event.
+//   LogLevel       - 0=no msgs, 1=init only, 2+=every call to process
+//   TdcTickMin     - Lower limit for the tick axis.
+//   TdcTickMax     - Upper limit for the tick axis.
+//   NTickPerBin    - Rebin factor for the tick axis.
+//   NChanPerBin    - Rebin factor for the channel axis.
+//   DoROPs         - Make a channel-tick histogram for each readout plane for each event.
+//   DoAll          - Make a channel-tick histogram for the full detector for each event.
+//   DoAllOnline    - Make a channel-tick histogram for the full detector with online channel ordering for each event.
+//   DoMean         - Make a channel mean +/- RMS histogram for each event.
+//   NchanMeanRms   - if >0, make 2D channel vs. tick  mean and RMS histos with channel bin size of NchanMeanRms.
 //   PedestalOption - 1=take from digit, 2=take from service, otherwise none
-//   AdcOffset   - Offset added to all bins.
+//   AdcOffset      - Offset added to all bins.
 //   DecompressWithPedestal - Include pedestal when decompressing data.
 
 #ifndef DXRawDisplayService_H
@@ -89,6 +90,7 @@ private:
   bool m_DoAll;
   bool m_DoAllOnline;
   bool m_DoMean;
+  float m_NchanMeanRms;
   int m_PedestalOption;
   float m_AdcOffset;
   bool m_DecompressWithPedestal;
