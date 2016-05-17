@@ -72,3 +72,5 @@ services.DetPedestalService: @local::dune_fixedpeds
 
 # Disable bad channels.
 #services.IChannelStatusService.BadChannels: [ ]
+
+physics.producers.caldata.LogLevel: 1

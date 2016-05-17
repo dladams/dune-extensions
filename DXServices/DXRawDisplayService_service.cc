@@ -22,6 +22,7 @@
 #include "lardata/RawData/raw.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
 
 // ROOT includes.
 #include "TH2.h"
@@ -50,16 +51,18 @@ using std::cout;
 using std::endl;
 using std::ostringstream;
 using std::setw;
+using lariov::ChannelStatusService;
+using lariov::ChannelStatusProvider;
 using raw::RawDigit;
 
 //************************************************************************
 
 DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
-: m_dbg(1) {
+: m_LogLevel(1), m_NEventsProcessed(0), m_NDigitsProcessed(0) {
   const string myname = "DXRawDisplayService::ctor: ";
-  if ( m_dbg > 0 ) cout << myname << "Begin job." << endl;
+  if ( m_LogLevel > 0 ) cout << myname << "Begin job." << endl;
 
-  pset.get_if_present<int>("LogLevel", m_dbg);
+  pset.get_if_present<int>("LogLevel", m_LogLevel);
   m_TdcTickMin             = pset.get<unsigned int>("TdcTickMin");
   m_TdcTickMax             = pset.get<unsigned int>("TdcTickMax");
   m_NTickPerBin            = pset.get<unsigned int>("NTickPerBin");
@@ -72,9 +75,13 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
   m_PedestalOption         = pset.get<unsigned int>("PedestalOption");
   m_AdcOffset              = pset.get<float>("AdcOffset");
   m_DecompressWithPedestal = pset.get<bool>("DecompressWithPedestal");
+  m_UseChannelMap          = pset.get<bool>("UseChannelMap");
+  m_BadChannelFlag         = pset.get<int>("BadChannelFlag");
+  m_MaxEventsLog           = pset.get<int>("MaxEventsLog");
+  m_MaxDigitsLog           = pset.get<int>("MaxDigitsLog");
   art::ServiceHandle<geo::Geometry> geosvc;       // pointer to Geometry service
   m_pgh = new GeoHelper(&*geosvc, true, 0);
-  if ( m_dbg > 0 ) cout << myname << "Fetched geometry helper." << endl;
+  if ( m_LogLevel > 0 ) cout << myname << "Fetched geometry helper." << endl;
 
   // Fetch pedestal provider.
   m_pPedProv = nullptr;
@@ -83,8 +90,8 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
     cout << myname << "Pedestal provider: @" <<  m_pPedProv << endl;
   }
 
-  if ( m_dbg > 0 ) {
-    cout << myname << "                LogLevel: " << m_dbg << endl;
+  if ( m_LogLevel > 0 ) {
+    cout << myname << "                LogLevel: " << m_LogLevel << endl;
     cout << myname << "              TdcTickMin: " << m_TdcTickMin << endl;
     cout << myname << "              TdcTickMax: " << m_TdcTickMax << endl;
     cout << myname << "             NTickPerBin: " << m_NTickPerBin << endl;
@@ -97,6 +104,10 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
     cout << myname << "          PedestalOption: " << m_PedestalOption << endl;
     cout << myname << "               AdcOffset: " << m_AdcOffset << endl;
     cout << myname << "  DecompressWithPedestal: " << m_DecompressWithPedestal << endl;
+    cout << myname << "           UseChannelMap: " << m_UseChannelMap << endl;
+    cout << myname << "          BadChannelFlag: " << m_BadChannelFlag << endl;
+    cout << myname << "            MaxEventsLog: " << m_MaxEventsLog << endl;
+    cout << myname << "            MaxDigitsLog: " << m_MaxDigitsLog << endl;
   }
 }
 
@@ -107,16 +118,47 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset, art::A
 
 //************************************************************************
 
-DXRawDisplayService::~DXRawDisplayService() { }
+DXRawDisplayService::~DXRawDisplayService() {
+  const string myname = "DXRawDisplayService::dtor: ";
+  if ( m_LogLevel > 0 ) {
+    cout << myname << "Processed event count: " << m_NEventsProcessed << endl;
+    cout << myname << "Processed digit count: " << m_NDigitsProcessed << endl;
+  }
+}
    
 //************************************************************************
 
 int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event* pevt) const {
   const string myname = "DXRawDisplayService::process: ";
+  int dbg = m_LogLevel;
+  if ( dbg > 1 ) cout << myname << "Processed event count: " << m_NEventsProcessed << endl;
+  if ( m_NEventsProcessed > m_MaxEventsLog && dbg > 1 ) {
+    cout << myname << "MaxEventsLog limit reached. Increase this parameter to log more events." << endl;
+    dbg = 1;
+  }
+  ++m_NEventsProcessed;
 
   // Fetch TFileService.
   art::ServiceHandle<art::TFileService> tfsHandle;
   art::TFileService* ptfs = &*tfsHandle;
+
+  // Fetch the offline/online channel map.
+  const ChannelMappingService* pchanmap = nullptr;
+  if ( m_UseChannelMap ) {
+    art::ServiceHandle<ChannelMappingService> hchanmap;
+    pchanmap = &*hchanmap;
+  }
+
+  // Fetch the channel status service.
+  const ChannelStatusProvider* pcsp = nullptr;
+  if ( m_BadChannelFlag > 0 ) {
+    art::ServiceHandle<ChannelStatusService> cssHandle;
+    pcsp = cssHandle->GetProviderPtr();
+    if ( pcsp == nullptr ) {
+      cout << myname << "ERROR: Channel status service not found." << endl;
+      abort();
+    }
+  }
 
   // Build event string.
   string sevt;
@@ -125,14 +167,14 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
     unsigned int event  = pevt->id().event(); 
     unsigned int run    = pevt->run();
     unsigned int subrun = pevt->subRun();
-    if ( m_dbg > 1 ) cout << myname << "Processing run " << run << "-" << subrun
+    if ( dbg > 1 ) cout << myname << "Processing run " << run << "-" << subrun
                          << ", event " << event << endl;
     ostringstream ssevt;
     ssevt << event;
     sevt = ssevt.str();
     wnam += 9;
   } else {
-    if ( m_dbg > 1 ) cout << myname << "Processing without event ID." << endl;
+    if ( dbg > 1 ) cout << myname << "Processing without event ID." << endl;
   }
 
   // Create directory for event-level histograms.
@@ -163,12 +205,12 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
 
   // Create histograms.
   vector<TH2*> rophists;
-  if ( m_dbg > 2 ) cout << myname << "Creating raw data histograms." << endl;
+  if ( dbg > 2 ) cout << myname << "Creating raw data histograms." << endl;
   if ( m_DoROPs ) {
     for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
       TH2* ph = hcreateRop.create("raw" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
                                       "Raw signals for " + geohelp.ropName(irop));
-      if ( m_dbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
+      if ( dbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
       rophists.push_back(ph);
       m_eventhists.push_back(ph);
     }
@@ -179,15 +221,11 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
                                  "Raw signals for full detector");
     m_eventhists.push_back(phallraw);
   }
-  const ChannelMappingService* pchanmap = nullptr;
   TH2* phallrawon = nullptr;
   if ( m_DoAllOnline ) {
     phallrawon = hcreateAll.create("rawallon", 0, geohelp.geometry()->Nchannels(),
                                  "Online-ordered raw signals for full detector");
     m_eventhists.push_back(phallrawon);
-    // Channel mapping service.
-    art::ServiceHandle<ChannelMappingService> hchanmap;
-    pchanmap = &*hchanmap;
   }
   TH1* phmean = nullptr;
   if ( m_DoMean ) {
@@ -204,17 +242,17 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
                                     "Raw signal mean for " + geohelp.ropName(irop));
       rophists_mean.push_back(ph);
       m_eventhists.push_back(ph);
-      if ( m_dbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
+      if ( dbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
       ph = hcreateRopMr.create("rawrms" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
                                     "Raw signal RMS for " + geohelp.ropName(irop));
       rophists_rms.push_back(ph);
       m_eventhists.push_back(ph);
-      if ( m_dbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
+      if ( dbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
     }
   }
 
   // Loop over digits.
-  if ( m_dbg > 2 ) cout << myname << "Uncompressing data." << endl;
+  if ( dbg > 2 ) cout << myname << "Uncompressing data." << endl;
   bool first = true;
   unsigned int maxdbgchan = 50;
   unsigned int maxdbgtick = 50;
@@ -223,65 +261,77 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
   bool isOnlineOrdered = true;
   bool isOfflineOrdered = true;
   for ( const RawDigit& digit : digs ) {
-    if ( m_dbg > 4 ) cout << myname << "----------" << endl;
+    if ( dbg > 4 ) cout << myname << "Processed digit count: " << m_NDigitsProcessed << endl;
+    if ( m_NDigitsProcessed > m_MaxDigitsLog && dbg > 4 ) {
+      cout << myname << "MaxDigitsLog limit reached. Increase this parameter to log more digits." << endl;
+      dbg = 4;
+    }
+    ++m_NDigitsProcessed;
+    if ( dbg > 4 ) cout << myname << "----------" << endl;
     unsigned int ichan = digit.Channel();
-    unsigned int ichanon = idig;
+    unsigned int ichanon = ichan;
     if ( pchanmap != nullptr ) {
       ichanon = pchanmap->online(ichan);
       isOnlineOrdered &= ichanon == idig;
       isOfflineOrdered &= ichan == idig;
     }
-    if ( m_dbg > 4 ) cout << myname << "          Channel: " << ichan << endl;
+    if ( m_BadChannelFlag == 1 ) {
+      if ( pcsp->IsBad(ichanon) ) {
+        if ( dbg >=2 ) cout << myname << "Skipping bad channel on/off = " << ichanon << "/" << ichan << endl;
+        continue;
+      }
+    }
+    if ( dbg > 4 ) cout << myname << "          Channel: " << ichan << endl;
     unsigned int irop = geohelp.channelRop(ichan);
-    if ( m_dbg > 4 ) cout << myname << "              ROP: " << irop << endl;
+    if ( dbg > 4 ) cout << myname << "              ROP: " << irop << endl;
     TH2* ph = nullptr;
     TH2* ph_mean = nullptr;
     TH2* ph_rms = nullptr;
     if ( rophists.size() > irop ) ph = rophists[irop];
     if ( rophists_mean.size() > irop ) ph_mean = rophists_mean[irop];
     if ( rophists_rms.size() > irop ) ph_rms = rophists_rms[irop];
-    if ( m_dbg >= 3 ) {
-      cout << "ROP hists for channel " << ichan << ":";
+    if ( dbg >= 3 ) {
+      cout << myname << "ROP hists for channel " << ichan << ":";
       if ( ph != nullptr ) cout << " " << ph->GetName();
       if ( ph_mean != nullptr ) cout << " " << ph_mean->GetName();
       if ( ph_rms != nullptr ) cout << " " << ph_rms->GetName();
       cout << endl;
     }
     unsigned int iropchan = ichan - geohelp.ropFirstChannel(irop);
-    if ( m_dbg > 4 ) cout << myname << "      ROP channel: " << iropchan << endl;
+    if ( dbg > 4 ) cout << myname << "      ROP channel: " << iropchan << endl;
     int nadc = digit.NADC();
     vector<short> adcs;
-    if ( m_dbg > 4 ) cout << myname << "      Compression: " << digit.Compression() << endl;
-    if ( m_dbg > 4 ) cout << myname << "  Compressed size: " << digit.ADCs().size() << endl;
-    if ( m_dbg > 4 ) cout << myname << "Uncompressed size: " << digit.Samples() << endl;
-    if ( m_dbg > 4 ) cout << myname << "   Digit pedestal: " << digit.GetPedestal() << endl;
+    if ( dbg > 4 ) cout << myname << "      Compression: " << digit.Compression() << endl;
+    if ( dbg > 4 ) cout << myname << "  Compressed size: " << digit.ADCs().size() << endl;
+    if ( dbg > 4 ) cout << myname << "Uncompressed size: " << digit.Samples() << endl;
+    if ( dbg > 4 ) cout << myname << "   Digit pedestal: " << digit.GetPedestal() << endl;
     if ( digit.Compression() == raw::kNone ) {
-      if ( m_dbg > 4 ) cout << myname << "Copying uncompressed..." << endl;
+      if ( dbg > 4 ) cout << myname << "Copying uncompressed..." << endl;
       adcs = digit.ADCs();
     } else {
-      if ( m_dbg > 5 || (m_dbg > 4 && ichan<maxdbgchan) ) {
+      if ( dbg > 5 || (dbg > 4 && ichan<maxdbgchan) ) {
         cout << myname << "Uncompressed data:" << endl;
         for ( unsigned int tick=0; tick<digit.ADCs().size(); ++tick ) {
           cout << myname << "  Raw ADC entry " << tick << ": " << digit.ADCs()[tick] << endl;
-          if ( m_dbg < 5 && tick >= maxdbgtick ) {
+          if ( dbg < 5 && tick >= maxdbgtick ) {
             cout << myname << "..." << endl;
             break;
           }
         }
       }
-      if ( m_dbg > 4 ) cout << myname << "Uncompressing..." << endl;
+      if ( dbg > 4 ) cout << myname << "Uncompressing..." << endl;
       // Following is to avoid crash. See https://cdcvs.fnal.gov/redmine/issues/11572.
       adcs.resize(digit.Samples());
       if ( m_DecompressWithPedestal ) {
-        int iped = digit.GetPedestal();
-        raw::Uncompress(digit.ADCs(), adcs, iped, digit.Compression());
+        float fped = digit.GetPedestal();
+        raw::Uncompress(digit.ADCs(), adcs, fped, digit.Compression());
       } else {
         raw::Uncompress(digit.ADCs(), adcs, digit.Compression());
       }
-      if ( m_dbg > 4 ) cout << myname << "Uncompressed." << endl;
+      if ( dbg > 4 ) cout << myname << "Uncompressed." << endl;
     }
     if ( first ) {
-      if ( m_dbg > 2 && m_dbg<5 ) {
+      if ( dbg > 2 && dbg<5 ) {
         cout << myname << " Compression level for first digit: " << digit.Compression() << endl;
         cout << myname << "      # TDC slices for first digit: " << adcs.size() << endl;
       }
@@ -289,7 +339,7 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
     }
     unsigned int nzero = 0;
     for ( auto adc : adcs ) if ( adc == 0.0 ) ++nzero;
-    if ( m_dbg > 3 ) cout << myname << "Digit channel " << ichan
+    if ( dbg > 3 ) cout << myname << "Digit channel " << ichan
                         << " (ROP-chan = " << irop << "-" << iropchan
                         << ") has " << nadc << " ADCs and "
                         << digit.Samples() << " samples. Uncompressed size is " << adcs.size()
@@ -299,7 +349,7 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
       pedestal += digit.GetPedestal();
     } else if ( m_PedestalOption == 2 ) {
       float dbped = m_pPedProv->PedMean(ichan);
-      if ( m_dbg > 4 ) cout << myname << "DB Pedestal: " << dbped << endl;
+      if ( dbg > 4 ) cout << myname << "DB Pedestal: " << dbped << endl;
       pedestal += dbped;
     }
     // Loop over ticks.
@@ -315,7 +365,7 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
       ++icnt;
       tsum += wt;
       tsumsq += wt*wt;
-      if ( m_dbg > 5 || ( m_dbg > 4 && ichan<maxdbgchan && tick<maxdbgtick ) )
+      if ( dbg > 5 || ( dbg > 4 && ichan<maxdbgchan && tick<maxdbgtick ) )
         cout << myname << "  Tick " << tick << " raw - ped: " << adcs[tick] << " - " << pedestal
                            << " = " << wt << endl;
       if ( wt == 0 ) continue;
@@ -327,12 +377,13 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
       tsum_bin += wt;
       tsumsq_bin += wt*wt;
       ++ntick_bin;
-      if ( ntick_bin == m_NchanMeanRms || tick==adcs.size()-1 ) {
+      if ( ph_mean != nullptr && ph_rms != nullptr &&
+           (ntick_bin == m_NchanMeanRms || tick==adcs.size()-1) ) {
         double mean = tsum_bin/ntick_bin;
         double rms = sqrt(tsumsq_bin/ntick_bin);
         ph_mean->SetBinContent(ibin+1, iropchan+1, mean);
         ph_rms->SetBinContent(ibin+1, iropchan+1, rms);
-        if ( m_dbg >= 4 ) {
+        if ( dbg >= 4 ) {
           cout << myname << "Mean[" << ibin << ", " << iropchan << "] = " << mean << endl;
           cout << myname << " Rms[" << ibin << ", " << iropchan << "] = " << rms << endl;
         }
@@ -354,19 +405,19 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
         phmean->SetBinContent(ichan+1, mean);
         phmean->SetBinError(ichan+1, rms);
       }
-      if ( m_dbg > 3 ) cout << " Mean, RMS: " << mean << " +/- " << rms << endl;
+      if ( dbg > 3 ) cout << myname << " Mean, RMS: " << mean << " +/- " << rms << endl;
     }
     ++idig;
   }  // end loop over digits.
-  if ( m_dbg > 4 ) cout << myname << "----------" << endl;
-  if ( m_dbg > 2 && pchanmap != nullptr ) {
+  if ( dbg > 4 ) cout << myname << "----------" << endl;
+  if ( dbg > 2 && pchanmap != nullptr ) {
     if ( isOnlineOrdered )   cout << myname << "Digit order is online." << endl;
     if ( isOfflineOrdered )  cout << myname << "Digit order is offline." << endl;
     if ( !isOnlineOrdered &&
          !isOfflineOrdered ) cout << myname << "Digit order is neither online nor offline." << endl;
   }
   // Display the contents of each raw data histogram.
-  if ( m_dbg >= 2 ) {
+  if ( dbg >= 2 ) {
     cout << myname << "Summary of raw data histograms:" << endl;
     for ( TH2* ph : rophists ) {
       summarize2dHist(ph, myname, wnam, 4, 7);
@@ -400,15 +451,16 @@ summarize2dHist(TH2* ph, string prefix,
 
 void DXRawDisplayService::removeEventHists() const {
   const string myname = "DXRawDisplayService::removeEventHists: ";
-  if ( m_dbg > 1 ) cout << "Deleting events hists, count = " << m_eventhists.size() << endl;
+  bool dbg = m_LogLevel;
+  if ( dbg > 1 ) cout << "Deleting events hists, count = " << m_eventhists.size() << endl;
   for ( TH1* ph : m_eventhists ) {
-    if ( m_dbg > 2 ) cout << myname << "Removing " << ph->GetName() << endl;
+    if ( dbg > 2 ) cout << myname << "Removing " << ph->GetName() << endl;
     ph->Write();
     ph->SetDirectory(0);
     delete ph;
   }
   m_eventhists.clear();
-  if ( m_dbg > 1 ) cout << "After delete event hist count: " << m_eventhists.size() << endl;
+  if ( dbg > 1 ) cout << "After delete event hist count: " << m_eventhists.size() << endl;
 }
 
 //************************************************************************

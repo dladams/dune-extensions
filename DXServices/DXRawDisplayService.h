@@ -26,6 +26,11 @@
 //   PedestalOption - 1=take from digit, 2=take from service, otherwise none
 //   AdcOffset      - Offset added to all bins.
 //   DecompressWithPedestal - Include pedestal when decompressing data.
+//   UseChannelmap  - Use service to convert offline to online channels (otherwise they are assumed to be the same)
+//   BadChannelFlag - 0 - Use bad channels as they are
+//                    1 - Set pedestal-subtracted ADC counts to zero
+//   MaxEventsLog - Maximum # of events (calls to process) to log.
+//   MaxDigitsLog - Maximum # of digits (calls to process) to log.
 
 #ifndef DXRawDisplayService_H
 #define DXRawDisplayService_H
@@ -81,7 +86,7 @@ private:
 private:
 
   // Properties.
-  int m_dbg;
+  int m_LogLevel;
   unsigned int m_TdcTickMin;
   unsigned int m_TdcTickMax;
   unsigned int m_NTickPerBin;
@@ -94,6 +99,10 @@ private:
   int m_PedestalOption;
   float m_AdcOffset;
   bool m_DecompressWithPedestal;
+  bool m_UseChannelMap;
+  int m_BadChannelFlag;
+  unsigned int m_MaxEventsLog;
+  unsigned int m_MaxDigitsLog;
 
   const lariov::DetPedestalProvider* m_pPedProv;
 
@@ -101,6 +110,10 @@ private:
 
   // Vector of event hists that should be removed at the end of the event.
   mutable std::vector<TH1*> m_eventhists;
+
+  // counters;
+  mutable unsigned int m_NEventsProcessed;
+  mutable unsigned int m_NDigitsProcessed;
 
 };
 

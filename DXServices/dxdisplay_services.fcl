@@ -7,6 +7,7 @@ BEGIN_PROLOG
 
 dxdraw: {
   service_provider: DXRawDisplayService
+  LogLevel:          1
   TdcTickMin:        0
   TdcTickMax:     3200
   NTickPerBin:       1
@@ -19,6 +20,10 @@ dxdraw: {
   PedestalOption:    1
   AdcOffset:       0.0
   DecompressWithPedestal:   true
+  UseChannelMap: false
+  BadChannelFlag:    0
+  MaxEventsLog:     10
+  MaxDigitsLog:     10
 }
 
 END_PROLOG

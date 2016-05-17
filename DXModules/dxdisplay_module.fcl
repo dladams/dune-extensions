@@ -124,6 +124,8 @@ tools.rda_online: {
   PedestalOption:            1   #1=digit, 2=svc
   AdcOffset:               0.0
   DecompressWithPedestal: true
+  UseChannelMap:          true
+  BadChannelFlag:            0
 }
 
 END_PROLOG

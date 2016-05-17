@@ -25,8 +25,10 @@
   gSystem->AddIncludePath("-I$FHICLCPP_INC");
   gSystem->AddIncludePath("-I$CLHEP_INC");
   gSystem->AddIncludePath("-I$LARCORE_INC");
+  gSystem->AddIncludePath("-I$LAREVT_INC");
   gSystem->AddIncludePath("-I$DUNETPC_INC");
   gSystem->AddIncludePath("-I$ART_EXTENSIONS_INC");
+  gSystem->AddIncludePath("-I$ART_INC");
   gSystem->AddIncludePath("-I$DUNE_EXTENSIONS_INC");
 
   gSystem->AddDynamicPath("-L$FHICLCPP_LIB -lfhiclcpp");
@@ -36,6 +38,7 @@
   libs.push_back("$CETLIB_LIB/libcetlib");
   libs.push_back("$FHICLCPP_LIB/libfhiclcpp");
   libs.push_back("$LARCORE_LIB/liblarcore_Geometry");
+  libs.push_back("$DUNETPC_LIB/libdune_ArtSupport");
   libs.push_back("$DUNETPC_LIB/libdune_Geometry");
   libs.push_back("$DUNE_EXTENSIONS_LIB/libDXUtil");
   libs.push_back("$DUNE_EXTENSIONS_LIB/libDXGeometry");
@@ -73,6 +76,11 @@
   //gROOT->ProcessLine(".L detlar.cxx+");
   gROOT->ProcessLine(".L drawTracks.C");
   gROOT->ProcessLine(".L dxopen.C");
+
+  gROOT->ProcessLine(".L $DUNETPC_INC/dune/ArtSupport/aclic_ArtServiceHelper.h++");
+  ArtServiceHelper& ash = ArtServiceHelper::instance();
+  cout << "Art service helper is ash. E.g. ash.print() to list available services.";
+
 
   gStyle->SetPadRightMargin(0.14);   // For 2D plots
   gStyle->SetTitleY(0.97);

@@ -3,7 +3,7 @@
 // David Adams
 // January 2016
 //
-// Struct to hold the reult of a draw command.
+// Struct to hold the result of a draw command.
 
 #include <vector>
 class TH1;
