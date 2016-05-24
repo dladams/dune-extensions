@@ -3,13 +3,20 @@
 // David Adams
 // May 2016
 //
-// Provides interqctive access to DUNE channel maps.
+// Provides interactive access to DUNE channel maps.
+
+#undef HAVEROPSUPPORT
 
 #include <string>
 #include <iostream>
 #include <sstream>
-#include "dune/ArtSupport/ArtServiceHelper.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h"
+#ifdef HAVEROPSUPPORT
+#include "larcore/SimpleTypesAndConstants/readout_types.h"
+#endif
+#include "larcore/Geometry/Geometry.h"
+#include "dune/ArtSupport/ArtServiceHelper.h"
 #include "dune/DuneInterface/ChannelMappingService.h"
 
 using std::string;
@@ -19,6 +26,12 @@ using std::endl;
 using std::getline;
 using std::istringstream;
 using art::ServiceHandle;
+using geo::View_t;
+using geo::Geometry;
+#ifdef HAVEROPSUPPORT
+using readout::ROPID;
+using readout::ROPID_t;
+#endif
 
 //**********************************************************************
 
@@ -29,6 +42,14 @@ void check(bool ok) {
     cout << "Check failed." << endl;
     abort();
   }
+}
+
+string sview(View_t view) {
+  if ( view == geo::kU ) return "u";
+  if ( view == geo::kV ) return "v";
+  if ( view == geo::kW ) return "z";
+  if ( view == geo::kZ ) return "z2";
+  return "?";
 }
 
 }  // end unnamed namespace
@@ -92,7 +113,8 @@ int main(int narg, char** argv) {
 
   // Fetch the services.
   ServiceHandle<ChannelMappingService> hchm;
-  const ChannelMappingService* pchm = &*hchm;
+  const ChannelMappingService* pchm = &*ServiceHandle<ChannelMappingService>();
+  const Geometry* pgeo = &*ServiceHandle<Geometry>();
 
   while ( true ) {
     cout << "\n" << labels[0] << ": ";
@@ -100,12 +122,36 @@ int main(int narg, char** argv) {
     string schan;
     cin >> schan;
     if ( ! isdigit(schan[0]) ) return 0;
-    istringstream sschan(schan);
-    int chanin;
-    sschan >> chanin;
-    if ( chanin < 0 ) return 0;
-    int chanout = onToOff ? pchm->offline(chanin) : pchm->online(chanin);
-    cout << labels[1] << "[" << chanin << "] = " << chanout << endl;
+    string::size_type ipos = schan.find("-");
+    string schan1 = schan.substr(0,ipos);
+    string schan2;
+    istringstream sschan(schan1);
+    int chanin1;
+    sschan >> chanin1;
+    if ( chanin1 < 0 ) return 0;
+    int chanin2 = chanin1;
+    if ( ipos != string::npos ) {
+      schan2 = schan.substr(ipos+1);
+      if ( schan2.size()==0 || ! isdigit(schan2[0]) ) return 0;
+      istringstream sschan2(schan2);
+      sschan2 >> chanin2;
+    }
+    for ( int chanin=chanin1; chanin<=chanin2; ++chanin ) {
+      int chanout = onToOff ? pchm->offline(chanin) : pchm->online(chanin);
+      //int chanon = onToOff ? chanin : chanout;
+      int chanoff = onToOff ? chanout : chanin;
+      View_t view = pgeo->View(chanoff);
+#ifdef HAVEROPSUPPORT
+      ROP ropid = pgeo->ChannelToROP(chanoff);
+      int rop = ropid.ROP;
+#endif
+      cout << labels[1] << "[" << chanin << "] = " << chanout;
+      cout << " view = " << sview(view);
+#ifdef HAVEROPSUPPORT
+      cout << " rop = " << rop;
+#endif
+      cout << endl;
+    }
   }
   return 0;
 }
