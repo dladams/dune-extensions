@@ -9,7 +9,7 @@ cet_make_exec(chanmap
   SOURCE chanmap.cxx
   LIBRARIES
     larcore_Geometry
-    AXService
+    dune_ArtSupport
     cetlib
     ${ROOT_BASIC_LIB_LIST}
 )

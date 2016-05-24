@@ -10,7 +10,7 @@
 #include <string>
 #include <iostream>
 #include <cassert>
-#include "AXService/ArtServiceHelper.h"
+#include "dune/ArtSupport/ArtServiceHelper.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "TFile.h"

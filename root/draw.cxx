@@ -29,7 +29,8 @@ using std::endl;
 using std::hex;
 using std::dec;
 
-DrawResult draw(std::string name ="help", int how =0, double xmin =0.0, double xmax =0.0, double zmax =0.0) {
+DrawResult draw(std::string name ="help", int how =0, double zmax =0.0,
+                double xmin =0.0, double xmax =0.0, double ymin =0.0, double ymax =0.0) {
   DrawResult res;
   // Record the histogram name.
   dxhist(name);
@@ -41,6 +42,7 @@ DrawResult draw(std::string name ="help", int how =0, double xmin =0.0, double x
     string sep = "_";
     sslab << plab->GetTitle() << sep << name;
     if ( xmax > xmin ) sslab << sep << xmin << sep << xmax;
+    if ( ymax > ymin ) sslab << sep << ymin << sep << ymax;
     if ( zmax > 0.0 ) sslab << sep << zmax;
     plname += "_";
     dxprint(sslab.str());
@@ -49,7 +51,7 @@ DrawResult draw(std::string name ="help", int how =0, double xmin =0.0, double x
   const string myname = "draw: ";
   if ( name == "help" ) {
     cout << myname << endl;
-    cout << myname << "Usage: draw(hname, how, xmin, xmax);" << endl;
+    cout << myname << "Usage: draw(hname, how, zmax, xmin, xmax, ymin, ymax);" << endl;
     cout << myname << "how = 0 - new standard canvas" << endl;
     cout << myname << "      1 - new stretched canvas" << endl;
     cout << myname << "     -1 - add to existing histogram/canvas" << endl;
@@ -204,9 +206,15 @@ DrawResult draw(std::string name ="help", int how =0, double xmin =0.0, double x
     // Make a tick-projection histogram for all channels.
     int xbin1 = 1;
     int xbin2 = phdraw->GetNbinsX();
+    int ybin1 = 1;
+    int ybin2 = phdraw->GetNbinsY();
     if ( xmin < xmax ) {
       xbin1 = xmin + 1;
       xbin2 = xmax;
+    }
+    if ( ymin < ymax ) {
+      ybin1 = ymin + 1;
+      ybin2 = ymax;
     }
     TH1* hprx = phdraw->ProjectionX(hprx_name.c_str());
     if ( xmax > xmin ) hprx->GetXaxis()->SetRangeUser(xmin, xmax);
@@ -236,6 +244,7 @@ DrawResult draw(std::string name ="help", int how =0, double xmin =0.0, double x
     }
     // Make a channel-projection histogram.
     TH1* hpry = phdraw->ProjectionY(hpry_name.c_str(), xbin1, xbin2);
+    if ( ymax > ymin ) hpry->GetYaxis()->SetRangeUser(ymin, ymax);
     hpry->GetYaxis()->SetTitle(ylabpry.c_str());
     ostringstream sstpry;
     sstpry << hpry->GetTitle();
@@ -254,7 +263,9 @@ DrawResult draw(std::string name ="help", int how =0, double xmin =0.0, double x
   //phdraw->GetListOfFunctions()->Print(); 
   if ( !add &&  xmax > xmin ) {
     phdraw->GetXaxis()->SetRangeUser(xmin, xmax);
-    //dla phdraw->Draw(dopt.c_str());
+  }
+  if ( !add &&  ymax > ymin ) {
+    phdraw->GetYaxis()->SetRangeUser(ymin, ymax);
   }
   if ( !add &&  zmax > 0.0 ) {
     cout << "Changing z limits to zmax = " << zmax << "." << endl;

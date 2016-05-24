@@ -76,4 +76,4 @@ services.RawDigitAnalysisService.DoAll:           true
 services.RawDigitAnalysisService.DoROPs:          true
 services.RawDigitAnalysisService.NchanMeanRms:     100
 services.RawDigitAnalysisService.TdcTickMax:     15000
-services.RawDigitAnalysisService.BadChannelFlag:     0 # 1=skip bad channels
+services.RawDigitAnalysisService.BadChannelFlag:     1 # 1=skip bad channels

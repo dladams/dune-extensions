@@ -8,7 +8,7 @@
 #include "DXPerf/TpcSignalMatchTree.h"
 #include "DXPerf/TpcSignalMap.h"
 #include "DXPerf/TpcSignalMatcher.h"
-#include "AXService/ArtServiceHelper.h"
+#include "dune/ArtSupport/ArtServiceHelper.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "TTree.h"
 

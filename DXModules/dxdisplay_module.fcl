@@ -126,6 +126,8 @@ tools.rda_online: {
   DecompressWithPedestal: true
   UseChannelMap:          true
   BadChannelFlag:            0
+  MaxEventsLog:              1
+  MaxDigitsLog:            100
 }
 
 END_PROLOG

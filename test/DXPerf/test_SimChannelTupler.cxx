@@ -6,7 +6,7 @@
 // Test script for SimChannelTupler.
 
 #include "DXPerf/SimChannelTupler.h"
-#include "AXService/ArtServiceHelper.h"
+#include "dune/ArtSupport/ArtServiceHelper.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "art/Framework/Services/Optional/TFileService.h"

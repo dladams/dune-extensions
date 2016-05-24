@@ -11,13 +11,13 @@ cet_test(test_TpcSignalMatcher SOURCES test_TpcSignalMatcher.cxx
 )
 
 cet_test(test_TpcSignalMatchTree SOURCES test_TpcSignalMatchTree.cxx
-  LIBRARIES DXPerf AXService dune_Geometry
+  LIBRARIES DXPerf dune_ArtSupport dune_Geometry
 )
 
 cet_test(test_MCTrajectoryFollower SOURCES test_MCTrajectoryFollower.cxx
-  LIBRARIES DXPerf AXService
+  LIBRARIES DXPerf dune_ArtSupport
 )
 
 cet_test(test_SimChannelTupler SOURCES test_SimChannelTupler.cxx
-  LIBRARIES DXPerf AXService larsim_Simulation
+  LIBRARIES DXPerf dune_ArtSupport larsim_Simulation
 )
