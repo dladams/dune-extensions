@@ -64,7 +64,7 @@ services.user.DetPedestalService.DetPedestalDUNE.UseFile: false
 services.user.DetPedestalService.DetPedestalDUNE.Run:     false
 services.user.DetPedestalService.DetPedestalDUNE.CSVFile: ""
 
-services.ChannelMappingService: @local::chmap35t
+#services.ChannelMappingService: @local::chmap35t
 #services.ChannelMappingService.FileName: "channelMap_v4.txt"
 #source.TPCChannelMapFile: "channelMap_v4.txt"
 services.RawDigitAnalysisService: @local::tools.rda_online

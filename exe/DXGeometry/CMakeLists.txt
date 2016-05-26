@@ -1,4 +1,8 @@
-add_executable(draw_detector draw_detector.cxx)
-target_link_libraries(draw_detector DXGeometry)
+cet_make_exec(draw_detector
+  SOURCE draw_detector.cxx
+  LIBRARIES
+    DXGeometry
+)
+
 
 install_source()
