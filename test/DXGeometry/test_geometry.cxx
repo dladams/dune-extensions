@@ -47,7 +47,7 @@ bool inrange(double x, double x1, double x2) {
 int main(int narg, char** argv) {
   //string geopath = "services.Geometry";
   const string myname = "test_geometry: ";
-  vector<string> gnames = {"lbne10kt", "lbne35t", "dune35t4apa_v4", "dune10kt_v1", "dune35t4apa_v5", "dune10kt_v1_workspace"};
+  vector<string> gnames = {"lbne10kt", "lbne35t", "dune35t4apa_v6", "dune10kt_v1", "dune35t4apa_v5", "dune10kt_v1_workspace"};
   string gname = gnames[3];
   bool useChan = true;
   if ( narg > 1 ) {
