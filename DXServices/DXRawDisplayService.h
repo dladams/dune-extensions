@@ -23,10 +23,7 @@
 //   DoAllOnline    - Make a channel-tick histogram for the full detector with online channel ordering for each event.
 //   DoMean         - Make a channel mean +/- RMS histogram for each event.
 //   NchanMeanRms   - if >0, make 2D channel vs. tick  mean and RMS histos with channel bin size of NchanMeanRms.
-//   PedestalOption - 1=take from digit, 2=take from service, otherwise none
-//   AdcOffset      - Offset added to all bins.
-//   DecompressWithPedestal - Include pedestal when decompressing data.
-//   UseChannelmap  - Use service to convert offline to online channels (otherwise they are assumed to be the same)
+//   UseChannelMap  - Use service to convert offline to online channels (otherwise they are assumed to be the same)
 //   BadChannelFlag - 0 - Use bad channels as they are
 //                    1 - Set pedestal-subtracted ADC counts to zero
 //   MaxEventsLog - Maximum # of events (calls to process) to log.
@@ -96,15 +93,10 @@ private:
   bool m_DoAllOnline;
   bool m_DoMean;
   float m_NchanMeanRms;
-  int m_PedestalOption;
-  float m_AdcOffset;
-  bool m_DecompressWithPedestal;
   bool m_UseChannelMap;
   int m_BadChannelFlag;
   unsigned int m_MaxEventsLog;
   unsigned int m_MaxDigitsLog;
-
-  const lariov::DetPedestalProvider* m_pPedProv;
 
   GeoHelper* m_pgh;
 

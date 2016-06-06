@@ -64,13 +64,25 @@ services.user.DetPedestalService.DetPedestalDUNE.UseFile: false
 services.user.DetPedestalService.DetPedestalDUNE.Run:     false
 services.user.DetPedestalService.DetPedestalDUNE.CSVFile: ""
 
+services.RawDigitExtractService: {
+  service_provider: StandardRawDigitExtractService
+  LogLevel: 1
+  PedestalOption: 1
+  FlagStuckOff: true
+  FlagStuckOn: true
+}
+
+services.RawDigitPrepService: {
+  service_provider: StandardRawDigitPrepService
+  LogLevel: 1
+}
+
 #services.ChannelMappingService: @local::chmap35t
 #services.ChannelMappingService.FileName: "channelMap_v4.txt"
 #source.TPCChannelMapFile: "channelMap_v4.txt"
 services.RawDigitAnalysisService: @local::tools.rda_online
 services.RawDigitAnalysisService.LogLevel:           2
 services.RawDigitAnalysisService.DoMean:          true
-services.RawDigitAnalysisService.PedestalOption:     1  # 1=digit, 2=DB
 services.RawDigitAnalysisService.DoAllOnline:     true
 services.RawDigitAnalysisService.DoAll:           true
 services.RawDigitAnalysisService.DoROPs:          true
