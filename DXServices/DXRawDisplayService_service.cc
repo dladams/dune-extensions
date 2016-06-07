@@ -71,6 +71,7 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
   m_DoROPs                 = pset.get<bool>("DoROPs");
   m_DoAll                  = pset.get<bool>("DoAll");
   m_DoAllOnline            = pset.get<bool>("DoAllOnline");
+  m_DoAllFlag              = pset.get<bool>("DoAllFlag");
   m_DoMean                 = pset.get<bool>("DoMean");
   m_NchanMeanRms           = pset.get<int>("NchanMeanRms");
   m_UseChannelMap          = pset.get<bool>("UseChannelMap");
@@ -90,6 +91,7 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
     cout << myname << "                  DoROPs: " << m_DoROPs << endl;
     cout << myname << "                   DoAll: " << m_DoAll << endl;
     cout << myname << "             DoAllOnline: " << m_DoAllOnline << endl;
+    cout << myname << "               DoAllFlag: " << m_DoAllFlag << endl;
     cout << myname << "                  DoMean: " << m_DoMean << endl;
     cout << myname << "            NchanMeanRms: " << m_NchanMeanRms << endl;
     cout << myname << "           UseChannelMap: " << m_UseChannelMap << endl;
@@ -185,6 +187,7 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
     allzmin = 0.0;
   }
   ChannelTickHistCreator hcreateAll(tfsdir, sevt, m_TdcTickMin, m_TdcTickMax, allname, allzmin, zmax, 2*ncontour, m_NTickPerBin, m_NChanPerBin);
+  ChannelTickHistCreator hcreateFlag(tfsdir, sevt, m_TdcTickMin, m_TdcTickMax, allname, 0.0, 5.0, 5, m_NTickPerBin, 1);
 
   // Check geometry helper.
   if ( m_pgh == nullptr ) {
@@ -215,8 +218,14 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
   TH2* phallrawon = nullptr;
   if ( m_DoAllOnline ) {
     phallrawon = hcreateAll.create("rawallon", 0, geohelp.geometry()->Nchannels(),
-                                 "Online-ordered raw signals for full detector");
+                                  "Online-ordered raw signals for full detector");
     m_eventhists.push_back(phallrawon);
+  }
+  TH2* phallflag = nullptr;
+  if ( m_DoAllFlag ) {
+    phallflag = hcreateFlag.create("rawflag", 0, geohelp.geometry()->Nchannels(),
+                                "Raw signal flags for full detector");
+    m_eventhists.push_back(phallflag);
   }
   TH1* phmean = nullptr;
   if ( m_DoMean ) {
@@ -289,7 +298,7 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
     if ( dbg > 5 ) cout << myname << "              ROP: " << irop << endl;
     unsigned int iropchan = ichan - geohelp.ropFirstChannel(irop);
     if ( dbg > 5 ) cout << myname << "      ROP channel: " << iropchan << endl;
-    // Build event histograms.
+    // Set the ROP histogram pointers.
     TH2* ph = nullptr;
     TH2* ph_mean = nullptr;
     TH2* ph_rms = nullptr;
@@ -322,6 +331,7 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
       if ( fAbsAll ) allwt = fabs(allwt);
       if ( phallraw != nullptr ) phallraw->Fill(tick, ichan, allwt);
       if ( phallrawon != nullptr ) phallrawon->Fill(tick, ichanon, allwt);
+      if ( phallflag != nullptr ) phallflag->Fill(tick, ichan, flags[tick]);
       tsum_bin += wt;
       tsumsq_bin += wt*wt;
       ++ntick_bin;

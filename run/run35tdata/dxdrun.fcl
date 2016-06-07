@@ -85,6 +85,7 @@ services.RawDigitAnalysisService.LogLevel:           2
 services.RawDigitAnalysisService.DoMean:          true
 services.RawDigitAnalysisService.DoAllOnline:     true
 services.RawDigitAnalysisService.DoAll:           true
+services.RawDigitAnalysisService.DoAllFlag:       true
 services.RawDigitAnalysisService.DoROPs:          true
 services.RawDigitAnalysisService.NchanMeanRms:     100
 services.RawDigitAnalysisService.TdcTickMax:     15000

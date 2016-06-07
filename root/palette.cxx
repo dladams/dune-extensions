@@ -63,6 +63,18 @@ int palette(int ipal) {
     colout = 40;
     TColor::CreateGradientColorTable(nRGBs, stops, red, green, blue, 255, alpha);
     return colout;
+  } else if ( ipal == 30 ) {
+    // Five colors for flag plots
+    const int nRGBs = 8;
+    Double_t stops[nRGBs] = { 0.00, 0.25, 0.26, 0.45, 0.64, 0.65, 0.85, 1.00};
+    Double_t red[nRGBs]   = { 1.00, 1.00, 0.50, 0.00, 0.00, 1.00, 0.00, 1.00};
+    Double_t green[nRGBs] = { 1.00, 1.00, 1.00, 1.00, 1.00, 0.00, 0.00, 0.00};
+    Double_t blue[nRGBs]  = { 1.00, 1.00, 0.00, 0.00, 0.50, 1.00, 1.00, 0.00};
+    colout = 5;
+    TColor::CreateGradientColorTable(nRGBs, stops, red, green, blue, 255, alpha);
+    cout << TColor::GetColorPalette(0) << endl;
+    return colout;
+
   } else {
     // white->black
     const int nRGBs = 2;
