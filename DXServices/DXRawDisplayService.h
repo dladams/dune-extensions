@@ -97,6 +97,7 @@ private:
   float m_NchanMeanRms;
   bool m_UseChannelMap;
   int m_BadChannelFlag;
+  bool m_SkipStuckBits;
   unsigned int m_MaxEventsLog;
   unsigned int m_MaxDigitsLog;
 

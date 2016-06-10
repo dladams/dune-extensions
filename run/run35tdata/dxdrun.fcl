@@ -72,9 +72,19 @@ services.RawDigitExtractService: {
   FlagStuckOn: true
 }
 
+services.AdcMitigationService: {
+  service_provider: InterpolatingAdcMitigationService
+  LogLevel: 2
+  SkipUnderflows:      true
+  SkipOverflows:       true
+  MaxConsecutiveSamples:  5
+  MaxConsecutiveFlag:     0
+}
+
 services.RawDigitPrepService: {
   service_provider: StandardRawDigitPrepService
   LogLevel: 1
+  DoMitigation: true
 }
 
 #services.ChannelMappingService: @local::chmap35t
@@ -89,4 +99,5 @@ services.RawDigitAnalysisService.DoAllFlag:       true
 services.RawDigitAnalysisService.DoROPs:          true
 services.RawDigitAnalysisService.NchanMeanRms:     100
 services.RawDigitAnalysisService.TdcTickMax:     15000
-services.RawDigitAnalysisService.BadChannelFlag:     1 # 1=skip bad channels
+services.RawDigitAnalysisService.BadChannelFlag:     0 # 1=skip bad channels
+services.RawDigitAnalysisService.SkipStuckBits:  false

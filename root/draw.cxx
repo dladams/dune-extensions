@@ -98,10 +98,12 @@ DrawResult draw(std::string name ="help", int how =0, double zmax =0.0,
   }
   // Early draw to make palette available
   double zmin = phnew->GetMinimum();
+  bool isflag = name.find("flag") != string::npos;
   if ( zmin < 0.0 ) {
     if ( (name.find("raw") != string::npos)  && zmax > 0 && zmax <=20 ) palette(3);
     else palette(2);
   }
+  else if ( isflag ) palette(31);
   else palette(1);
   // Draw canvas and determine set palette parameters.
   double palx1 = 0.865;

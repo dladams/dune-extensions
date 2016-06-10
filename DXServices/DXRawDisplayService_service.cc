@@ -58,6 +58,18 @@ using raw::RawDigit;
 
 //************************************************************************
 
+namespace {
+
+void fill2dhist(TH2* ph, double x, double y, double val, double err =-1.0) {
+  int ibin = ph->FindBin(x, y);
+  ph->SetBinContent(ibin, val);
+  if ( err > 0.0 ) ph->SetBinError(ibin, err);
+}
+
+}  // end unnamed namespace
+
+//************************************************************************
+
 DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
 : m_LogLevel(1), m_NEventsProcessed(0), m_NDigitsProcessed(0) {
   const string myname = "DXRawDisplayService::ctor: ";
@@ -76,6 +88,7 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
   m_NchanMeanRms           = pset.get<int>("NchanMeanRms");
   m_UseChannelMap          = pset.get<bool>("UseChannelMap");
   m_BadChannelFlag         = pset.get<int>("BadChannelFlag");
+  m_SkipStuckBits          = pset.get<bool>("SkipStuckBits");
   m_MaxEventsLog           = pset.get<int>("MaxEventsLog");
   m_MaxDigitsLog           = pset.get<int>("MaxDigitsLog");
   art::ServiceHandle<geo::Geometry> geosvc;       // pointer to Geometry service
@@ -96,6 +109,7 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
     cout << myname << "            NchanMeanRms: " << m_NchanMeanRms << endl;
     cout << myname << "           UseChannelMap: " << m_UseChannelMap << endl;
     cout << myname << "          BadChannelFlag: " << m_BadChannelFlag << endl;
+    cout << myname << "           SkipStuckBits: " << m_SkipStuckBits << endl;
     cout << myname << "            MaxEventsLog: " << m_MaxEventsLog << endl;
     cout << myname << "            MaxDigitsLog: " << m_MaxDigitsLog << endl;
   }
@@ -187,7 +201,7 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
     allzmin = 0.0;
   }
   ChannelTickHistCreator hcreateAll(tfsdir, sevt, m_TdcTickMin, m_TdcTickMax, allname, allzmin, zmax, 2*ncontour, m_NTickPerBin, m_NChanPerBin);
-  ChannelTickHistCreator hcreateFlag(tfsdir, sevt, m_TdcTickMin, m_TdcTickMax, allname, 0.0, 5.0, 5, m_NTickPerBin, 1);
+  ChannelTickHistCreator hcreateFlag(tfsdir, sevt, m_TdcTickMin, m_TdcTickMax, allname, 0.0, 8.0, 8, m_NTickPerBin, 1);
 
   // Check geometry helper.
   if ( m_pgh == nullptr ) {
@@ -224,8 +238,17 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
   TH2* phallflag = nullptr;
   if ( m_DoAllFlag ) {
     phallflag = hcreateFlag.create("rawflag", 0, geohelp.geometry()->Nchannels(),
-                                "Raw signal flags for full detector");
+                                   "Raw signal flags for full detector");
     m_eventhists.push_back(phallflag);
+    phallflag->GetZaxis()->Set(8, 0.0, 8.0);
+    phallflag->GetZaxis()->SetBinLabel(1,"OK");
+    phallflag->GetZaxis()->SetBinLabel(2,"Under");
+    phallflag->GetZaxis()->SetBinLabel(3,"Over");
+    phallflag->GetZaxis()->SetBinLabel(4,"Bits0");
+    phallflag->GetZaxis()->SetBinLabel(5,"Bits1");
+    phallflag->GetZaxis()->SetBinLabel(6,"Fixed");
+    phallflag->GetZaxis()->SetBinLabel(7,"Inter");
+    phallflag->GetZaxis()->SetBinLabel(8,"Extra");
   }
   TH1* phmean = nullptr;
   if ( m_DoMean ) {
@@ -326,13 +349,24 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
       tsum += wt;
       tsumsq += wt*wt;
       if ( wt == 0 ) continue;
-      if ( ph != nullptr ) ph->Fill(tick, iropchan, wt);
+      if ( phallflag != nullptr )  fill2dhist(phallflag, tick, ichan, flags[tick]);
+      bool isSticky = flags[tick] == AdcStuckOn || flags[tick] == AdcStuckOff;
+      if ( isSticky && m_SkipStuckBits ) continue;
+      bool isFixed = flags[tick] == AdcSetFixed;
+      bool isInterpolated = flags[tick] == AdcInterpolated;
+      bool isExtrapolated = flags[tick] == AdcExtrapolated;
+      double err = 0.5;
+      if ( isSticky ) err = 32.0;
+      if ( isFixed ) err = 100.0;
+      if ( isInterpolated ) err = 2.0;
+      if ( isExtrapolated ) err = 5.0;
+      if ( ph != nullptr ) fill2dhist(ph, tick, iropchan, wt, err);
       double allwt = wt;
       if ( fAbsAll ) allwt = fabs(allwt);
-      if ( phallraw != nullptr ) phallraw->Fill(tick, ichan, allwt);
-      if ( phallrawon != nullptr ) phallrawon->Fill(tick, ichanon, allwt);
-      if ( phallflag != nullptr ) phallflag->Fill(tick, ichan, flags[tick]);
+      if ( phallraw != nullptr )   fill2dhist(phallraw, tick, ichan, allwt, err);
+      if ( phallrawon != nullptr ) fill2dhist(phallrawon, tick, ichanon, allwt, err);
       tsum_bin += wt;
+
       tsumsq_bin += wt*wt;
       ++ntick_bin;
       if ( ph_mean != nullptr && ph_rms != nullptr &&
