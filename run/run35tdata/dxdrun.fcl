@@ -107,9 +107,13 @@ services.RawDigitPrepService: {
 }
 
 services.AdcSuppressService:       @local::zsonline
-services.AdcSuppressService.LogLevel:  2
+services.AdcSuppressService.LogLevel:  1
 services.AdcSuppressService.TL:       50
 services.AdcSuppressService.TD:       30
+
+services.AdcSignalFindingService: {
+  service_provider: AdcSuppressSignalFindingService
+}
 
 #services.ChannelMappingService: @local::chmap35t
 #services.ChannelMappingService.FileName: "channelMap_v4.txt"

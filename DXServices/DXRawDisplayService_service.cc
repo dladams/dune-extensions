@@ -41,7 +41,7 @@
 // Dune includes.
 #include "dune/DuneInterface/ChannelMappingService.h"
 #include "dune/DuneInterface/RawDigitPrepService.h"
-#include "dune/DuneInterface/AdcSuppressService.h"
+#include "dune/DuneInterface/AdcSignalFindingService.h"
 
 // Local includes.
 #include "DXUtil/ChannelTickHistCreator.h"
@@ -297,9 +297,9 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
   if ( dbg >=2 ) cout << myname << "Prepared digit count: " << prepdigs.size() << endl;
 
   // Fetch zero-supression service.
-  const AdcSuppressService* pzss = nullptr;
+  const AdcSignalFindingService* psfs = nullptr;
   if ( m_DoZSROPs ) {
-    pzss = &*art::ServiceHandle<AdcSuppressService>();
+    psfs = &*art::ServiceHandle<AdcSignalFindingService>();
   }
 
   // Loop over digits.
@@ -309,14 +309,14 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
   bool isOnlineOrdered = true;
   bool isOfflineOrdered = true;
   if ( dbg > 4 ) cout << myname << "Looping over digits." << endl;
-  for ( AdcChannelDataMap::value_type prepdig : prepdigs ) {
+  for ( AdcChannelDataMap::value_type chprepdig : prepdigs ) {
     ++m_NDigitsProcessed;
     // Extract and check prep data.
-    AdcChannel ichan            =  prepdig.first;
-    const AdcSignalVector& sigs =  prepdig.second.samples;
-    AdcSignal ped =  prepdig.second.pedestal;
-    const AdcFlagVector& flags  =  prepdig.second.flags;
-    const raw::RawDigit& digit  = *prepdig.second.digit;
+    AdcChannel ichan        =  chprepdig.first;
+    AdcChannelData& prepdig = chprepdig.second;
+    const AdcSignalVector& sigs =  prepdig.samples;
+    const AdcFlagVector& flags  =  prepdig.flags;
+    const raw::RawDigit& digit  = *prepdig.digit;
     unsigned int nsig = digit.Samples();
     if ( sigs.size() != nsig || flags.size() != nsig ) {
       cout << myname << "ERROR: Inconsistent array sizes in prep data." << endl;
@@ -358,8 +358,7 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
       cout << endl;
     }
     // Apply zero suppression.
-    AdcFilterVector zskeep;
-    if ( pzss != nullptr ) pzss->filter(digit.ADCs(), ichan, ped, zskeep);
+    if ( psfs != nullptr ) psfs->find(prepdig);
     // Loop over ticks.
     int icnt = 0;
     double tsum = 0.0;
@@ -371,7 +370,7 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
     unsigned int ntick_bin_nominal = 0;
     for ( unsigned int tick=0; tick<nsig; ++tick ) {
       double wt = sigs[tick];
-      double wtzs = m_DoZSROPs ? zskeep[tick]*wt : 0.0;
+      double wtzs = m_DoZSROPs ? prepdig.signal[tick]*wt : 0.0;
       ++icnt;
       tsum += wt;
       tsumsq += wt*wt;
