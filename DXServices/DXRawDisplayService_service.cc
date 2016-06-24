@@ -41,6 +41,7 @@
 // Dune includes.
 #include "dune/DuneInterface/ChannelMappingService.h"
 #include "dune/DuneInterface/RawDigitPrepService.h"
+#include "dune/DuneInterface/AdcSuppressService.h"
 
 // Local includes.
 #include "DXUtil/ChannelTickHistCreator.h"
@@ -84,6 +85,7 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
   m_DoAll                  = pset.get<bool>("DoAll");
   m_DoAllOnline            = pset.get<bool>("DoAllOnline");
   m_DoAllFlag              = pset.get<bool>("DoAllFlag");
+  m_DoZSROPs               = pset.get<bool>("DoZSROPs");
   m_DoMean                 = pset.get<bool>("DoMean");
   m_NchanMeanRms           = pset.get<int>("NchanMeanRms");
   m_UseChannelMap          = pset.get<bool>("UseChannelMap");
@@ -105,6 +107,7 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
     cout << myname << "                   DoAll: " << m_DoAll << endl;
     cout << myname << "             DoAllOnline: " << m_DoAllOnline << endl;
     cout << myname << "               DoAllFlag: " << m_DoAllFlag << endl;
+    cout << myname << "                DoZSROPs: " << m_DoZSROPs << endl;
     cout << myname << "                  DoMean: " << m_DoMean << endl;
     cout << myname << "            NchanMeanRms: " << m_NchanMeanRms << endl;
     cout << myname << "           UseChannelMap: " << m_UseChannelMap << endl;
@@ -213,6 +216,7 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
 
   // Create histograms.
   vector<TH2*> rophists;
+  vector<TH2*> rophists_zs;
   if ( dbg > 2 ) cout << myname << "Creating raw data histograms." << endl;
   if ( m_DoROPs ) {
     for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
@@ -220,6 +224,15 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
                                       "Raw signals for " + geohelp.ropName(irop));
       if ( dbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
       rophists.push_back(ph);
+      m_eventhists.push_back(ph);
+    }
+  }
+  if ( m_DoZSROPs ) {
+    for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
+      TH2* ph = hcreateRop.create("rzs" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
+                                      "Zero-suppressed raw signals for " + geohelp.ropName(irop));
+      if ( dbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
+      rophists_zs.push_back(ph);
       m_eventhists.push_back(ph);
     }
   }
@@ -283,6 +296,12 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
   }
   if ( dbg >=2 ) cout << myname << "Prepared digit count: " << prepdigs.size() << endl;
 
+  // Fetch zero-supression service.
+  const AdcSuppressService* pzss = nullptr;
+  if ( m_DoZSROPs ) {
+    pzss = &*art::ServiceHandle<AdcSuppressService>();
+  }
+
   // Loop over digits.
   // Digit information is only logged for dbg >= 5.
   unsigned int idig = 0;
@@ -295,6 +314,7 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
     // Extract and check prep data.
     AdcChannel ichan            =  prepdig.first;
     const AdcSignalVector& sigs =  prepdig.second.samples;
+    AdcSignal ped =  prepdig.second.pedestal;
     const AdcFlagVector& flags  =  prepdig.second.flags;
     const raw::RawDigit& digit  = *prepdig.second.digit;
     unsigned int nsig = digit.Samples();
@@ -323,9 +343,11 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
     if ( dbg > 5 ) cout << myname << "      ROP channel: " << iropchan << endl;
     // Set the ROP histogram pointers.
     TH2* ph = nullptr;
+    TH2* phzs = nullptr;
     TH2* ph_mean = nullptr;
     TH2* ph_rms = nullptr;
     if ( rophists.size() > irop ) ph = rophists[irop];
+    if ( rophists_zs.size() > irop ) phzs = rophists_zs[irop];
     if ( rophists_mean.size() > irop ) ph_mean = rophists_mean[irop];
     if ( rophists_rms.size() > irop ) ph_rms = rophists_rms[irop];
     if ( dbg >= 5 ) {
@@ -335,6 +357,9 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
       if ( ph_rms != nullptr ) cout << " " << ph_rms->GetName();
       cout << endl;
     }
+    // Apply zero suppression.
+    AdcFilterVector zskeep;
+    if ( pzss != nullptr ) pzss->filter(digit.ADCs(), ichan, ped, zskeep);
     // Loop over ticks.
     int icnt = 0;
     double tsum = 0.0;
@@ -343,36 +368,45 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
     double tsumsq_bin = 0.0;
     unsigned int ibin = 0;
     unsigned int ntick_bin = 0;
+    unsigned int ntick_bin_nominal = 0;
     for ( unsigned int tick=0; tick<nsig; ++tick ) {
       double wt = sigs[tick];
+      double wtzs = m_DoZSROPs ? zskeep[tick]*wt : 0.0;
       ++icnt;
       tsum += wt;
       tsumsq += wt*wt;
-      if ( wt == 0 ) continue;
-      if ( phallflag != nullptr )  fill2dhist(phallflag, tick, ichan, flags[tick]);
-      bool isSticky = flags[tick] == AdcStuckOn || flags[tick] == AdcStuckOff;
-      if ( isSticky && m_SkipStuckBits ) continue;
-      bool isFixed = flags[tick] == AdcSetFixed;
-      bool isInterpolated = flags[tick] == AdcInterpolated;
-      bool isExtrapolated = flags[tick] == AdcExtrapolated;
-      double err = 0.5;
-      if ( isSticky ) err = 32.0;
-      if ( isFixed ) err = 100.0;
-      if ( isInterpolated ) err = 2.0;
-      if ( isExtrapolated ) err = 5.0;
-      if ( ph != nullptr ) fill2dhist(ph, tick, iropchan, wt, err);
-      double allwt = wt;
-      if ( fAbsAll ) allwt = fabs(allwt);
-      if ( phallraw != nullptr )   fill2dhist(phallraw, tick, ichan, allwt, err);
-      if ( phallrawon != nullptr ) fill2dhist(phallrawon, tick, ichanon, allwt, err);
-      tsum_bin += wt;
-
-      tsumsq_bin += wt*wt;
-      ++ntick_bin;
+      ++ntick_bin_nominal;
+      if ( wt != 0 ) {
+        if ( phallflag != nullptr )  fill2dhist(phallflag, tick, ichan, flags[tick]);
+        bool isSticky = flags[tick] == AdcStuckOn || flags[tick] == AdcStuckOff;
+        if ( !isSticky || !m_SkipStuckBits )  {
+          bool isFixed = flags[tick] == AdcSetFixed;
+          bool isInterpolated = flags[tick] == AdcInterpolated;
+          bool isExtrapolated = flags[tick] == AdcExtrapolated;
+          double err = 0.5;
+          if ( isSticky ) err = 32.0;
+          if ( isFixed ) err = 100.0;
+          if ( isInterpolated ) err = 2.0;
+          if ( isExtrapolated ) err = 5.0;
+          if ( ph != nullptr ) fill2dhist(ph, tick, iropchan, wt, err);
+          if ( phzs != nullptr ) fill2dhist(phzs, tick, iropchan, wtzs, err);
+          double allwt = wt;
+          if ( fAbsAll ) allwt = fabs(allwt);
+          if ( phallraw != nullptr )   fill2dhist(phallraw, tick, ichan, allwt, err);
+          if ( phallrawon != nullptr ) fill2dhist(phallrawon, tick, ichanon, allwt, err);
+          tsum_bin += wt;
+          tsumsq_bin += wt*wt;
+          ++ntick_bin;
+        }
+      }
       if ( ph_mean != nullptr && ph_rms != nullptr &&
-           (ntick_bin == m_NchanMeanRms || tick==nsig-1) ) {
-        double mean = tsum_bin/ntick_bin;
-        double rms = sqrt(tsumsq_bin/ntick_bin);
+           (ntick_bin_nominal == m_NchanMeanRms || tick==nsig-1) ) {
+        double mean = 0.0;
+        double rms = 0.0;
+        if ( ntick_bin > 0 ) {
+          mean = tsum_bin/ntick_bin;
+          rms = sqrt(tsumsq_bin/ntick_bin);
+        }
         ph_mean->SetBinContent(ibin+1, iropchan+1, mean);
         ph_rms->SetBinContent(ibin+1, iropchan+1, rms);
         if ( dbg >= 5 ) {
@@ -383,6 +417,7 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
         tsumsq_bin = 0.0;
         ++ibin;
         ntick_bin = 0;
+        ntick_bin_nominal = 0;
       }
     }  // end loop over ticks
     // Channel stats.
@@ -413,6 +448,9 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
   if ( dbg >= 2 ) {
     cout << myname << "Summary of raw data histograms:" << endl;
     for ( TH2* ph : rophists ) {
+      summarize2dHist(ph, myname, wnam, 4, 7);
+    }
+    for ( TH2* ph : rophists_zs ) {
       summarize2dHist(ph, myname, wnam, 4, 7);
     }
     for ( TH2* ph : rophists_mean ) {

@@ -22,6 +22,7 @@
 //   DoAll          - Make a channel-tick histogram for the full detector for each event.
 //   DoAllOnline    - Make a channel-tick histogram for the full detector with online channel ordering for each event.
 //   DoAllFlag      - Make a channel-tick histogram of flags for the full detector for each event.
+//   DoZSROPs       - Make a zero-suppressed channel-tick histogram for each readout plane for each event.
 //   DoMean         - Make a channel mean +/- RMS histogram for each event.
 //   NchanMeanRms   - if >0, make 2D channel vs. tick  mean and RMS histos with channel bin size of NchanMeanRms.
 //   UseChannelMap  - Use service to convert offline to online channels (otherwise they are assumed to be the same)
@@ -93,6 +94,7 @@ private:
   bool m_DoAll;
   bool m_DoAllOnline;
   bool m_DoAllFlag;
+  bool m_DoZSROPs;
   bool m_DoMean;
   float m_NchanMeanRms;
   bool m_UseChannelMap;

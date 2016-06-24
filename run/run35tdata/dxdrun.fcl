@@ -7,6 +7,7 @@
 # create raw data histograms.
 
 #include "services_dune.fcl"
+#include "detsimmodules_dune.fcl"
 #include "clusteralgorithms.fcl"
 #include "dxdisplay_module.fcl"
 #include "SSPToOffline.fcl"
@@ -74,18 +75,41 @@ services.RawDigitExtractService: {
 
 services.AdcMitigationService: {
   service_provider: InterpolatingAdcMitigationService
-  LogLevel: 2
+  LogLevel: 1
   SkipUnderflows:      true
   SkipOverflows:       true
   MaxConsecutiveSamples:  5
   MaxConsecutiveFlag:     0
 }
 
+services.AdcNoiseRemovalService: {
+  service_provider: Dune35tNoiseRemovalService
+  LogLevel: 1
+  GroupingFlag: 1
+  SkipStuckCodes:  true
+  CorrectStuckCodes: true
+  ShowGroups: 2
+  ShowGroupsChannel: 4
+}
+
+services.PedestalEvaluationService: {
+  service_provider: MedianPedestalService
+  LogLevel:         1
+  SkipStuckBits: true
+}
+
 services.RawDigitPrepService: {
   service_provider: StandardRawDigitPrepService
   LogLevel: 1
   DoMitigation: true
+  DoNoiseRemoval:  true
+  DoPedestalAdjustment:  true
 }
+
+services.AdcSuppressService:       @local::zsonline
+services.AdcSuppressService.LogLevel:  2
+services.AdcSuppressService.TL:       50
+services.AdcSuppressService.TD:       30
 
 #services.ChannelMappingService: @local::chmap35t
 #services.ChannelMappingService.FileName: "channelMap_v4.txt"
@@ -97,6 +121,7 @@ services.RawDigitAnalysisService.DoAllOnline:     true
 services.RawDigitAnalysisService.DoAll:           true
 services.RawDigitAnalysisService.DoAllFlag:       true
 services.RawDigitAnalysisService.DoROPs:          true
+services.RawDigitAnalysisService.DoZSROPs:        true
 services.RawDigitAnalysisService.NchanMeanRms:     100
 services.RawDigitAnalysisService.TdcTickMax:     15000
 services.RawDigitAnalysisService.BadChannelFlag:     0 # 1=skip bad channels
