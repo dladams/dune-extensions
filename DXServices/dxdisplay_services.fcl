@@ -14,11 +14,14 @@ dxdraw: {
   NChanPerBin:       1
   DoROPs:        false
   DoAll:          true
+  DoAllFlag:      true
   DoAllOnline:   false
+  DoZSROPs:      false
   DoMean:        false
   NchanMeanRms:      0
   UseChannelMap: false
   BadChannelFlag:    0
+  SkipStuckBits: false
   MaxEventsLog:     10
   MaxDigitsLog:     10
 }

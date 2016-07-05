@@ -5,7 +5,25 @@
 
 #include "run_dxdisplay_35t.fcl"
 
+services.RawDigitExtractService: {
+  service_provider: StandardRawDigitExtractService
+  LogLevel: 1
+  PedestalOption: 1
+  FlagStuckOff: false
+  FlagStuckOn: false
+}
+
+services.RawDigitPrepService: {
+  service_provider: StandardRawDigitPrepService
+  LogLevel: 1
+  DoMitigation:          false
+  DoEarlySignalFinding:  false
+  DoNoiseRemoval:        false
+  DoPedestalAdjustment:  false
+}
+
 physics.analyzers.DXDisplay.DebugLevel:       1
 physics.analyzers.DXDisplay.DoRawDigit:    true
 services.RawDigitAnalysisService.LogLevel:    1
 services.RawDigitAnalysisService.DoMean:   true
+services.RawDigitAnalysisService.DoROPs:   true

@@ -68,6 +68,7 @@
   gROOT->ProcessLine(".L HistoCompare.cxx+");
   gROOT->ProcessLine(".L slidingWindow.cxx+");
   gROOT->ProcessLine(".L corrHist.cxx+");
+  gROOT->ProcessLine(".L FFTHist.cxx+");
 
   draw::set35t();
   draw::set10ktw();

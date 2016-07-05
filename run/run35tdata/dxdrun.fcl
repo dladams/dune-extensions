@@ -87,6 +87,7 @@ services.AdcNoiseRemovalService: {
   LogLevel: 1
   GroupingFlag: 1
   SkipStuckCodes:  true
+  SkipSignals:     true
   CorrectStuckCodes: true
   ShowGroups: 2
   ShowGroupsChannel: 4
@@ -101,9 +102,10 @@ services.PedestalEvaluationService: {
 services.RawDigitPrepService: {
   service_provider: StandardRawDigitPrepService
   LogLevel: 1
-  DoMitigation: true
-  DoNoiseRemoval:  true
-  DoPedestalAdjustment:  true
+  DoMitigation:          true
+  DoEarlySignalFinding:  false
+  DoNoiseRemoval:        true
+  DoPedestalAdjustment:  false
 }
 
 services.AdcSuppressService:       @local::zsonline
