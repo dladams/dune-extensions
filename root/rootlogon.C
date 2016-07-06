@@ -69,6 +69,7 @@
   gROOT->ProcessLine(".L slidingWindow.cxx+");
   gROOT->ProcessLine(".L corrHist.cxx+");
   gROOT->ProcessLine(".L FFTHist.cxx+");
+  gROOT->ProcessLine(".L PFHist.cxx+");
 
   draw::set35t();
   draw::set10ktw();
@@ -78,7 +79,7 @@
   gROOT->ProcessLine(".L drawTracks.C");
   gROOT->ProcessLine(".L dxopen.C");
 
-  gROOT->ProcessLine(".L $DUNETPC_INC/dune/ArtSupport/aclic_ArtServiceHelper.h++");
+  gROOT->ProcessLine(".L $DUNETPC_INC/dune/ArtSupport/aclic_ArtServiceHelper.h+");
   ArtServiceHelper& ash = ArtServiceHelper::instance();
   cout << "Art service helper is ash. E.g. ash.print() to list available services.";
 
