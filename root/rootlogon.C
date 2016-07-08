@@ -70,6 +70,7 @@
   gROOT->ProcessLine(".L corrHist.cxx+");
   gROOT->ProcessLine(".L FFTHist.cxx+");
   gROOT->ProcessLine(".L PFHist.cxx+");
+  gROOT->ProcessLine(".L RestrictedDFT.cxx+");
 
   draw::set35t();
   draw::set10ktw();
