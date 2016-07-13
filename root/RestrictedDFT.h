@@ -27,7 +27,10 @@
 // values are returned as a vector or histogram. A conventional DFT
 // would start at 0 and have ntfit = nt, i.e. cover the range [0, ntfit).
 //
-// Choosing ntfit > nt (nt = tmax -tmin) implies`
+// There are multiple fitting options:
+//     0: Full least-squares fit.
+//  10+n: - Progressive fit with n passes (n= 1-9)
+//  20+n: - Progressive fit with n passes (n= 1-9) with fit subtracted for each frequency
 
 #include <string>
 #include <vector>
