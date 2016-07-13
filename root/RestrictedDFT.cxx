@@ -15,10 +15,11 @@ typedef RestrictedDFT::Vector Vector;
 
 //**********************************************************************
 
-RestrictedDFT::RestrictedDFT(Index tmin, Index tmax, Index ntfit, Index nk)
+RestrictedDFT::RestrictedDFT(Index tmin, Index tmax, Index ntfit, Index nk, Index fitopt)
 : m_tmin(tmin),
   m_nt(tmax-tmin),
   m_ntfit(ntfit),
+  m_fitopt(fitopt),
   m_coeffs((nk>0 ? 2*nk-1 : 0), 0.0),
   m_err(0.0), m_chsq(-1.0), m_dof(0) { }
 
@@ -58,6 +59,7 @@ void RestrictedDFT::print(int lev) const {
       cout << "    " << ic << ": " << m_coeffs[ic] << endl;
     }
   }
+  cout << "   Fit opt: " << fitOption() << endl;
   if ( m_err != 0.0 ) {
     cout << " Fit error: " << fitError() << endl;
     cout << "       DOF: " << fitDOF() << endl;
@@ -183,7 +185,22 @@ int RestrictedDFT::fit(const TH1& hist, const BoolVector* pkeep) {
 //**********************************************************************
 
 int RestrictedDFT::doFit(const Vector& valsin, const Vector& errsin, const BoolVector& keep) {
-  string myname = "RestrictedDFT::doFit: ";
+  const string myname = "RestrictedDFT::doFit: ";
+  if ( m_fitopt == 0 ) {
+    return lsfFit(valsin, errsin, keep);
+  } else if ( m_fitopt > 10 && m_fitopt < 20 ) {
+    return progFit(valsin, errsin, keep, false, m_fitopt - 10);
+  } else if ( m_fitopt > 20 && m_fitopt < 30 ) {
+    return progFit(valsin, errsin, keep, true, m_fitopt - 20);
+  }
+  cout << myname << "ERROR: Invalid fit option: " << m_fitopt << endl;
+  return 9;
+}
+
+//**********************************************************************
+
+int RestrictedDFT::lsfFit(const Vector& valsin, const Vector& errsin, const BoolVector& keep) {
+  const string myname = "RestrictedDFT::lsfFit: ";
   int m_dbg = 0;
   if ( valsin.size() < tmax() ) return 1;
   // Extract measurement.
@@ -263,6 +280,116 @@ int RestrictedDFT::doFit(const Vector& valsin, const Vector& errsin, const BoolV
     }
   }
   m_dof = npt - ncof;
+  return 0;
+}
+
+//**********************************************************************
+
+int RestrictedDFT::progFit(const Vector& valsin, const Vector& errsin, const BoolVector& keep, bool update, Index npass) {
+  string myname = "RestrictedDFT::progFit: ";
+  int m_dbg = 0;
+  if ( valsin.size() < tmax() ) return 1;
+  // Extract measurement.
+  Index npt = 0;
+  TVectorD b(nTick());
+  vector<int> iptTick(nTick(),999999);   // The tick for each fitted point.
+  for ( unsigned int it=0; it<nTick(); ++it ) {
+    if ( keep[it+tmin()] ) {
+      b(npt) = valsin[it+tmin()];
+      iptTick[npt] = it + tmin();
+      ++npt;
+    }
+  }
+  b.ResizeTo(npt);
+  iptTick.resize(npt, 999999);
+  // Build error vector.
+  TVectorD e(npt);
+  for ( unsigned int ipt=0; ipt<npt; ++ipt ) {
+    Index it = iptTick[ipt];
+    e(ipt) = errsin[it];
+  }
+  if ( m_dbg  >= 3 ) {
+    for ( unsigned int ipt=0; ipt<npt; ++ipt ) {
+      Index it = iptTick[ipt];
+      cout << myname << it << ": " << b(ipt) << " +/- " << e(ipt) << endl;
+    }
+  }
+  // Zero the coefficients.
+  for ( unsigned int ic=0; ic<nCoefficient(); ++ic ) {
+    m_coeffs[ic] = 0.0;
+  }
+  // Loop over passes.
+  for ( unsigned int ip=0; ip<npass; ++ip ) {
+    for ( unsigned int ipt=0; ipt<npt; ++ipt ) {
+      Index it = iptTick[ipt];
+      b(ipt) = valsin[it+tmin()] - value(it);
+    }
+    // Loop over frequencies.
+    for ( unsigned int ik=0; ik<nFrequency(); ++ik ) {
+      vector<Index> icofs;
+      if ( ik == 0 ) {
+        icofs.push_back(0);
+      } else {
+        icofs.push_back(2*ik - 1);
+        icofs.push_back(2*ik);
+      }
+      Index ncof = icofs.size();
+      TMatrixD m(npt, ncof);
+      for ( unsigned int ic=0; ic<ncof; ++ic ) {
+        for ( unsigned int ipt=0; ipt<npt; ++ipt ) {
+          Index it = iptTick[ipt];
+          m(ipt, ic) = termFunction(icofs[ic], it);
+        }
+      }
+      if ( m_dbg >= 4 ) {
+        cout << myname << "Coefficient matrix for ik=:" << ik << endl;
+        for ( unsigned int ipt=0; ipt<npt; ++ipt ) {
+          Index it = iptTick[ipt];
+          cout << myname << it << ":";
+          for ( unsigned int ic=0; ic<ncof; ++ic ) {
+            cout << " " << m(ipt, ic);
+          }
+          cout << endl;
+        }
+      }
+      // Solve the equation.
+      TVectorD newcofs = NormalEqn(m, b, e);
+      if ( ! newcofs.IsValid() ) {
+        cout << myname << "ERROR: Fit failed for ik=" << ik << "." << endl;
+        m_err = -99;
+        return 2;
+      }
+      // Update the current coefficients.
+      for ( unsigned int ic=0; ic<ncof; ++ic ) {
+        m_coeffs[icofs[ic]] += newcofs[ic];
+      }
+      if ( update ) {  // Remove the new contribution from the data.
+        for ( unsigned int ipt=0; ipt<npt; ++ipt ) {
+          Value newval = 0.0;
+          for ( unsigned int ic=0; ic<ncof; ++ic ) {
+            newval += newcofs[ic]*m(ipt, ic);
+          }
+          b(ipt) -= newval;
+        }
+      }
+    }  // end loop over frequencies
+  }  // end loop over passes
+  // Evaluate chi-square.
+  m_chsqunw = 0.0;
+  m_chsq = 0.0;
+  for ( unsigned int ipt=0; ipt<npt; ++ipt ) {
+    Index it = iptTick[ipt];
+    Value val = value(it);
+    Value msd = valsin[it];
+    Value dif = msd - val;
+    Value err = errsin[it];
+    m_chsqunw += dif*dif;
+    m_chsq += dif*dif/(err*err);
+    if ( m_dbg >= 5 ) {
+      cout << myname << it << ": " << val << " - " << msd << " = " << dif << endl;
+    }
+  }
+  m_dof = npt - nCoefficient();
   return 0;
 }
 

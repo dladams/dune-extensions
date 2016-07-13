@@ -47,7 +47,7 @@ public:
   // Ctor from t0, # points and # frequencies.
   // The range of ticks is [tmin, tmax).
   // The term frequencies are 1/fit, 2/ntfit, ...
-  RestrictedDFT(Index tmin, Index tmax, Index ntfit, Index nk);
+  RestrictedDFT(Index tmin, Index tmax, Index ntfit, Index nk, Index fitopt);
 
   // Ctor from t0, # points array of coefficients.
   RestrictedDFT(Index tmin, Index tmax, Index ntfit, const Vector& coeffs);
@@ -62,6 +62,9 @@ public:
 
   // Return the number of frequencies.
   Index nFrequency() const;
+
+  // Return the fit option.
+  Index fitOption() const { return m_fitopt; }
 
   // Return the number of coefficients.
   Index nCoefficient() const;
@@ -109,10 +112,13 @@ public:
 private:
 
   int doFit(const Vector& valsin, const Vector& errsin, const BoolVector& keep);
+  int lsfFit(const Vector& valsin, const Vector& errsin, const BoolVector& keep);
+  int progFit(const Vector& valsin, const Vector& errsin, const BoolVector& keep, bool update, Index npass);
 
   Index m_tmin;          // First time bin.
   Index m_nt;            // # time bins.
   Index m_ntfit;         // # ticks in the fit DFT; model period
+  Index m_fitopt;        // Fitting option.
   Vector m_coeffs;       // Array of term coefficients.
   Value m_err;           // Uncertainty assumed in the fit.
   Value m_chsqunw;       // Unweighted fit chi-square.
