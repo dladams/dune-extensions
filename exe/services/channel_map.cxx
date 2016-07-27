@@ -11,7 +11,7 @@
 #include <iostream>
 #include <sstream>
 #include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "larcore/SimpleTypesAndConstants/RawTypes.h"
+#include "larcoreobj/SimpleTypesAndConstants/RawTypes.h"
 #ifdef HAVEROPSUPPORT
 #include "larcore/SimpleTypesAndConstants/readout_types.h"
 #endif

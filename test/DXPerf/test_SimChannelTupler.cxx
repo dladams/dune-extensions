@@ -14,7 +14,7 @@
 #include "larcore/Geometry/Geometry.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
-#include "larsim/Simulation/SimChannel.h"
+#include "larsimobj/Simulation/SimChannel.h"
 #include "DXGeometry/GeoHelper.h"
 
 #include <string>

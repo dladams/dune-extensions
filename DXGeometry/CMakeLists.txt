@@ -21,8 +21,8 @@ art_make(BASENAME_ONLY
          LIB_LIBRARIES
            dune_Geometry
            larcore_Geometry
-           lardata_RawData
-           lardata_RecoBase
+           lardata_RawData_utils
+           lardataobj_RecoBase
            fhiclcpp
            ${SIMULATIONBASE}
            ${ART_FRAMEWORK_CORE}

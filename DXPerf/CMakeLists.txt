@@ -10,6 +10,7 @@ art_make(BASENAME_ONLY
          LIB_LIBRARIES
            DXUtil
            DXGeometry
+           nusimdata_SimulationBase
          MODULE_LIBRARIES
            DXPerf
 )

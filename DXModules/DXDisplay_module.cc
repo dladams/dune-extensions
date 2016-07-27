@@ -51,21 +51,21 @@
 #include <utility>
 
 // nutuools includes
-#include "SimulationBase/MCParticle.h"
-#include "SimulationBase/MCTruth.h"
+#include "nusimdata/SimulationBase/MCParticle.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
 
 // LArSoft includes
-#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t, geo::SignalType, geo::WireID
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::View_t, geo::SignalType, geo::WireID
 #include "larcore/Geometry/Geometry.h"
-#include "larsim/Simulation/SimChannel.h"
+#include "larsimobj/Simulation/SimChannel.h"
 #include "larsim/Simulation/LArG4Parameters.h"
-#include "lardata/RecoBase/Hit.h"
-#include "lardata/RecoBase/Wire.h"
-#include "lardata/RecoBase/Cluster.h"
-#include "lardata/RecoBase/Track.h"
-#include "lardata/RawData/raw.h"
-#include "lardata/RawData/RawDigit.h"    // used in Wire section
-#include "lardata/RawData/ExternalTrigger.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Wire.h"
+#include "lardataobj/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RawData/raw.h"
+#include "lardataobj/RawData/RawDigit.h"    // used in Wire section
+#include "lardataobj/RawData/ExternalTrigger.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 
@@ -79,7 +79,7 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Core/FindManyP.h"
+#include "canvas/Persistency/Common/FindManyP.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "cetlib/exception.h"

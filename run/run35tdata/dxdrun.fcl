@@ -95,8 +95,9 @@ services.AdcNoiseRemovalService: {
 
 services.PedestalEvaluationService: {
   service_provider: MedianPedestalService
-  LogLevel:         1
-  SkipStuckBits: true
+  LogLevel:           1
+  SkipFlaggedSamples: true
+  SkipSignals:        true
 }
 
 services.RawDigitPrepService: {

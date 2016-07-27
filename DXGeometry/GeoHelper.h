@@ -13,7 +13,7 @@
 #include <vector>
 #include <map>
 // We need the folowing because simple enums cannot be forward declared.
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "PlanePosition.h"
 
 namespace geo {

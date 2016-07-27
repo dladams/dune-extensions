@@ -18,7 +18,8 @@
 #include <map>
 #include <iostream>
 #include <memory>
-#include "art/Framework/Core/FindManyP.h"
+//#include "art/Framework/Core/FindManyP.h"
+#include "canvas/Persistency/Common/Ptr.h"
 #include "DXUtil/TpcTypes.h"
 #include "DXUtil/TpcSegment.h"
 #include "DXGeometry/GeoHelper.h"

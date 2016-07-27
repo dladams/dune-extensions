@@ -11,7 +11,7 @@
 
 #include <vector>
 #include <map>
-#include "SimulationBase/MCParticle.h"
+#include "nusimdata/SimulationBase/MCParticle.h"
 #include "DXUtil/TpcTypes.h"
 
 namespace art {

@@ -6,9 +6,9 @@
 #include "SimChannelTupler.h"
 #include <iostream>
 #include <iomanip>
-#include "art/Persistency/Provenance/EventID.h"
+#include "canvas/Persistency/Provenance/EventID.h"
 #include "art/Framework/Services/Optional/TFileService.h"
-#include "larsim/Simulation/SimChannel.h"
+#include "larsimobj/Simulation/SimChannel.h"
 #include "TTree.h"
 #include "DXGeometry/GeoHelper.h"
 

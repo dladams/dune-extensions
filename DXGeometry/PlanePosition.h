@@ -9,7 +9,7 @@
 // Struct that holds a position on a LAr TPC readout plane in LAr detector coordinates.
 
 #include <vector>
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 
 class PlanePosition {
 

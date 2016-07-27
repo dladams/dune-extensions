@@ -5,7 +5,7 @@
 #include <iostream>
 
 // Art includes
-#include "art/Persistency/Provenance/EventID.h"
+#include "canvas/Persistency/Provenance/EventID.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 
