@@ -33,6 +33,7 @@ art_make(BASENAME_ONLY
            ${ART_PERSISTENCY_COMMON}
            ${ART_PERSISTENCY_PROVENANCE}
            ${ART_UTILITIES}
+           ${CANVAS_UTILITIES}
            ${MF_MESSAGELOGGER}
            ${MF_UTILITIES}
            ${CETLIB}
