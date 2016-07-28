@@ -16,9 +16,9 @@ TCanvas* drawTracks(string sel ="event==1", string var ="pty:ptz:ptx", string hv
   int dbg = 1;
   if ( mcptree() == 0 ) return 0;
   ostringstream ssbasesel;
-  ssbasesel << "ptx>" << draw::xmin << "&&ptx<" << draw::xmax;
-  ssbasesel << "&&pty>" << draw::ymin << "&&pty<" << draw::ymax;
-  ssbasesel << "&&ptz>" << draw::zmin << "&&ptz<" << draw::zmax;
+  ssbasesel << "ptx>" << drawpars::xmin << "&&ptx<" << drawpars::xmax;
+  ssbasesel << "&&pty>" << drawpars::ymin << "&&pty<" << drawpars::ymax;
+  ssbasesel << "&&ptz>" << drawpars::zmin << "&&ptz<" << drawpars::zmax;
   string basesel = ssbasesel.str();
   if ( sel != "" ) basesel += "&&" + sel;
   string sel0 = basesel + "&&rpdg>=5";          // neutrals
@@ -38,9 +38,9 @@ TCanvas* drawTracks(string sel ="event==1", string var ="pty:ptz:ptx", string hv
   string sopt;
   // Draw axis.
   if ( var == "pty:ptz:ptx" ) {
-    TH3F* paxis = new TH3F("hax", sel.c_str(), 20, draw::xmin, draw::xmax,
-                                               20, draw::zmin, draw::zmax,
-                                               20, draw::ymin, draw::ymax);
+    TH3F* paxis = new TH3F("hax", sel.c_str(), 20, drawpars::xmin, drawpars::xmax,
+                                               20, drawpars::zmin, drawpars::zmax,
+                                               20, drawpars::ymin, drawpars::ymax);
     paxis->SetStats(0);
     paxis->GetXaxis()->SetTitle("x [cm]");
     paxis->GetXaxis()->SetTitleOffset(1.6);

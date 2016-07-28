@@ -1,8 +1,8 @@
 // drawpars.cxx
 
-#include "drawpars.h"
+#include "root/drawpars.h"
 
-void draw::set35t() {
+void drawpars::set35t() {
   xmin = -50.0;
   xmax = 250.0;
   ymin = -110.0;
@@ -11,7 +11,7 @@ void draw::set35t() {
   zmax =  170.0;
 }
 
-void draw::set10ktw() {
+void drawpars::set10ktw() {
   xmin = -400.0;
   xmax =  400.0;
   ymin = -620.0;

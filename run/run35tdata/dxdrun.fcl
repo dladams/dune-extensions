@@ -104,9 +104,12 @@ services.RawDigitPrepService: {
   service_provider: StandardRawDigitPrepService
   LogLevel: 1
   DoMitigation:          true
-  DoEarlySignalFinding:  false
+  DoEarlySignalFinding:  true
   DoNoiseRemoval:        true
   DoPedestalAdjustment:  false
+  DoDeconvolution:       false
+  DoROI:                 false
+  DoWires:               false
 }
 
 services.AdcSuppressService:       @local::zsonline

@@ -5,6 +5,9 @@
 //
 // Struct to hold the result of a draw command.
 
+#ifndef DrawResult_H
+#define DrawResult_H
+
 #include <vector>
 class TH1;
 class TH2;
@@ -19,3 +22,5 @@ struct DrawResult {
   TH1* channels() const;
   TH1* ticksForChannel(unsigned int chan) const;
 };
+
+#endif

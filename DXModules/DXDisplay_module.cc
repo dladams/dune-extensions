@@ -1672,15 +1672,15 @@ processTracks(const art::Event& event, string conname, string label) const {
 
 void DXDisplay::removeEventHists() {
   const string myname = "DXDisplay::removeEventHists: ";
-  if ( fdbg > 1 ) cout << "Deleting events hists, count = " << m_eventhists.size() << endl;
+  if ( fdbg >= 3 ) cout << myname << "Deleting events hists, count = " << m_eventhists.size() << endl;
   for ( TH1* ph : m_eventhists ) {
-    if ( fdbg > 2 ) cout << myname << "Removing " << ph->GetName() << endl;
+    if ( fdbg >= 4 ) cout << myname << "Removing " << ph->GetName() << endl;
     ph->Write();
     ph->SetDirectory(0);
     delete ph;
   }
   m_eventhists.clear();
-  if ( fdbg > 1 ) cout << "After delete event hist count: " << m_eventhists.size() << endl;
+  if ( fdbg >= 3 ) cout << myname << "After delete event hist count: " << m_eventhists.size() << endl;
 }
 
 //************************************************************************

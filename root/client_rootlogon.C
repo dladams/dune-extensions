@@ -5,5 +5,6 @@
 // Relevant changes should be propagated back.
 
 {
-  gROOT->ProcessLine(".X $DUNE_EXTENSIONS_ROOTSCRIPTS/rootlogon.C");
+  gROOT->ProcessLine(".X $DUNE_EXTENSIONS_ROOTSCRIPTS/rootlogon_load.C");
+  gROOT->ProcessLine(".X $DUNE_EXTENSIONS_ROOTSCRIPTS/rootlogon_setup.C");
 }

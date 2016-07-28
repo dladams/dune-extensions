@@ -1,0 +1,154 @@
+# go
+#
+# David Adams
+# July 2016
+#
+# script to run lar id a dediated directory.
+
+HELP=
+INNAME=run13843
+NEVT=
+NSKIP=
+CLEAN=
+EVTOUT=
+BG=
+while getopts hi:n:s:ceb OPT; do
+  case $OPT in
+  h) HELP=true;;
+  i) INNAME=$OPTARG;;
+  n) echo nevt;NEVT=$OPTARG;;
+  s) NSKIP=$OPTARG;;
+  c) CLEAN=true;;
+  e) EVTOUT=true;;
+  b) BG=true;;
+  esac
+done
+shift $(( OPTIND-1 ))
+FCLNAME=$1
+
+if [ -n "$HELP" ]; then
+  echo "Usage: $0 [-i $INNAME] [-n NEVT] [-s NSKIP] -c FCLNAME"
+  echo "       $0 -h"
+  echo "  INNAME = input file specifier"
+  echo "    NEVT = # events to process"
+  echo "   NSKIP = # events to skip"
+  echo "  -c to remove old run directory"
+  echo "  -e to write out events"
+  echo "  -b to run job in background"
+  exit 0
+fi
+
+if [ $# -ne 1 ]; then
+  echo Exactly one argument must be provided.
+  exit 7
+fi
+
+# Find the input file.
+DATADIR=$HOME/data/dune
+INFILE=
+if [ -n "$INNAME" ]; then
+  if [ $INFILE=run13843 ]; then
+    INFILE=$DATADIR/sliced35t/lbne_r013843_sr01_20160229T180430_20160504T002939_split.root
+  else
+    echo Invalid input file specifier: $INFILE
+    exit 1
+  fi
+  if [ ! -r $INFILE ]; then
+    echo Input file not found: $INFILE
+    exit 2
+  fi
+fi
+
+# Find the configuration file.
+FCLFILE=
+if [ -z "$FCLNAME" ]; then
+  echo Conguration name must be provided
+  exit 3
+fi
+FCLFILE=`pwd`/$FCLNAME.fcl
+if [ ! -r $FCLFILE  ]; then
+  echo FCL file not found: $FCLFILE
+  exit 4
+fi
+
+# Build base name for run directory and output files.
+BASE=$FCLNAME
+if [ -n "$INNAME" ]; then BASE=${BASE}_$INNAME; fi
+if [ -n "$NEVT" ]; then BASE=${BASE}_nevt$NEVT; fi
+if [ -n "$NSKIP" ]; then BASE=${BASE}_skip$NSKIP; fi
+RUNDIR=`pwd`/jobs/$BASE
+OUTFILE=$RUNDIR/$BASE.root
+LOG=$RUNDIR/$BASE.log
+
+# Check and clean run directory.
+if [ -r $RUNDIR ]; then
+  if [ -n "$CLEAN" ]; then
+    rm -rf $RUNDIR
+  else
+    echo "Run directory already exists: $RUNDIR"
+    echo "Use option -c to delete it"
+    exit 4
+  fi
+fi
+
+# Create run directory.
+if [ ! -r $RUNDIR ]; then
+  mkdir -p $RUNDIR || {
+    echo Unable to create run directory: $RUNDIR
+    exit 5
+  }
+fi
+
+# Create run command.
+COM=lar
+hash $COM || {
+  echo Command not found: $COM
+  exit 6
+}
+COM="$COM -c $FCLFILE"
+if [ -n "$INFILE" ]; then
+  COM="$COM -s $INFILE"
+fi
+if [ -n "$NEVT" ]; then
+  COM="$COM -n $NEVT"
+fi
+if [ -n "$NSKIP" ]; then
+  COM="$COM --nskip $NSKIP"
+fi
+if [ -n "$OUTFILE" ]; then
+  COM="$COM -T $OUTFILE"
+fi
+if [ -n "$EVTOUT" ]; then
+  COM="$COM -s $BASE.evt"
+fi
+
+# Change to run directory.
+cd $RUNDIR || {
+  echo Unable to change to run directory: $RUNDIR
+  exit 6
+}
+
+# Run job.
+echo $COM | tee $LOG
+date | tee -a $LOG
+hostname | tee -a $LOG
+echo | tee -a $LOG
+if [ -n "$BG" ]; then
+  { nohup $COM 2>&1 1>>$LOG </dev/null & } >/dev/null
+  echo Job started
+else
+  $COM 2>&1 | tee -a $LOG
+fi
+
+# Dump configuration.
+echo Dumping FCL
+FCLDUMP=${FCLFILE}dump
+fcldump $FCLFILE 5 >$FCLDUMP
+echo "         FCL dump: $FCLDUMP"
+echo "          Job log: $LOG"
+if [ -n "$EVTOUT" ]; then
+  echo "Output event file: $BASE.evt"
+else
+  echo No output event file.
+fi
+echo " Output root file: $OUTFILE"

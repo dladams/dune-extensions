@@ -38,6 +38,7 @@
 #include <string>
 
 #include "DXInterface/RawDigitAnalysisService.h"
+#include "dune/DuneInterface/AdcChannelData.h"
 
 namespace fhicl {
   class ParameterSet;
@@ -70,6 +71,7 @@ public:
   ~DXRawDisplayService();
 
   // The histogram filling routine, typically called once per event. 
+  int process(const AdcChannelDataMap& prepdigs, const art::Event* pevt) const; 
   int process(const std::vector<raw::RawDigit>& digs, const art::Event* pevt) const override; 
 
 private:

@@ -135,7 +135,7 @@ DXRawDisplayService::~DXRawDisplayService() {
    
 //************************************************************************
 
-int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event* pevt) const {
+int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::Event* pevt) const {
   const string myname = "DXRawDisplayService::process: ";
   int dbg = m_LogLevel;
   if ( dbg > 1 ) cout << myname << "Processed event count: " << m_NEventsProcessed << endl;
@@ -166,9 +166,6 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
       abort();
     }
   }
-
-  // Fetch the raw data prep service.
-  const art::ServiceHandle<RawDigitPrepService> hrdp;
 
   // Build event string.
   string sevt;
@@ -286,15 +283,6 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
       if ( dbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
     }
   }
-
-  // Prepare the raw data.
-  AdcChannelDataMap prepdigs;
-
-  if ( hrdp->prepare(digs, prepdigs) != 0 ) {
-    cout << myname << "ERROR: Data prep failed!" << endl;
-    return 1;
-  }
-  if ( dbg >=2 ) cout << myname << "Prepared digit count: " << prepdigs.size() << endl;
 
   // Fetch zero-supression service.
   const AdcSignalFindingService* psfs = nullptr;
@@ -467,6 +455,22 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
 
 //************************************************************************
 
+int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event* pevt) const {
+  const string myname = "DXRawDisplayService::process: ";
+  // Fetch the raw data prep service.
+  const art::ServiceHandle<RawDigitPrepService> hrdp;
+  // Prepare the raw data.
+  AdcChannelDataMap prepdigs;
+  // Process the prepared digits.
+  if ( hrdp->prepare(digs, prepdigs) != 0 ) {
+    cout << myname << "ERROR: Data prep failed!" << endl;
+    return 1;
+  }
+  return process(prepdigs, pevt);
+}
+
+//************************************************************************
+
 void DXRawDisplayService::
 summarize2dHist(TH2* ph, string prefix,
                 unsigned int wnam, unsigned int wbin, unsigned int went) const {
@@ -482,15 +486,15 @@ summarize2dHist(TH2* ph, string prefix,
 void DXRawDisplayService::removeEventHists() const {
   const string myname = "DXRawDisplayService::removeEventHists: ";
   bool dbg = m_LogLevel;
-  if ( dbg > 1 ) cout << "Deleting events hists, count = " << m_eventhists.size() << endl;
+  if ( dbg >= 3 ) cout << myname << "Deleting events hists, count = " << m_eventhists.size() << endl;
   for ( TH1* ph : m_eventhists ) {
-    if ( dbg > 2 ) cout << myname << "Removing " << ph->GetName() << endl;
+    if ( dbg >= 4 ) cout << myname << "Removing " << ph->GetName() << endl;
     ph->Write();
     ph->SetDirectory(0);
     delete ph;
   }
   m_eventhists.clear();
-  if ( dbg > 1 ) cout << "After delete event hist count: " << m_eventhists.size() << endl;
+  if ( dbg >= 3 ) cout << "After delete event hist count: " << m_eventhists.size() << endl;
 }
 
 //************************************************************************

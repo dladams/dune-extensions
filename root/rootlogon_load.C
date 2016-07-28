@@ -1,13 +1,15 @@
-// dune_extensions/root/rootlogon.C
+// dune_extensions/root/rootlogon_load.C
 //
 // David Adams
-// October 2015
+// July 2016.
 //
-// Root logon file to load the dune_extensions macros.
+// Root logon file to load the dune classes and dune_extensions classes.
 //
 // Dune, art_extensions and dune_extensions products
 // must be set up, e.g.
-//   setup dune_extensions v00_00_03 -q e7:prof
+//   setup dune_extensions v06_00_01 -q e10:prof
+//
+// Global symbol definitions should be put in rootlogon_setup.C.
 
 {
   cout << "Welcome to DXRoot." << endl;
@@ -72,8 +74,6 @@
   gROOT->ProcessLine(".L PFHist.cxx+");
   gROOT->ProcessLine(".L RestrictedDFT.cxx+");
 
-  draw::set35t();
-  draw::set10ktw();
 
   gROOT->ProcessLine(".L ex2dhist.C");
   //gROOT->ProcessLine(".L detlar.cxx+");
@@ -81,22 +81,25 @@
   gROOT->ProcessLine(".L dxopen.C");
 
   gROOT->ProcessLine(".L $DUNETPC_INC/dune/ArtSupport/aclic_ArtServiceHelper.h+");
-  ArtServiceHelper& ash = ArtServiceHelper::instance();
-  cout << "Art service helper is ash. E.g. ash.print() to list available services.";
 
 
   gStyle->SetPadRightMargin(0.14);   // For 2D plots
   gStyle->SetTitleY(0.97);
 
   // Read local rootlogon.
-  if ( gSystem->FindFile(".", "myrootlogon.C") ) {
+  TString myfile = "myrootlogon.C";
+  if ( gSystem->FindFile(".", myfile) ) {
     gROOT->ProcessLine(".X myrootlogon.C");
   }
 
-  if ( dxopen(gApplication->InputFiles()) == 0 ) {
-    cout << "Opened DXDisplay file " << gFile->GetName() << endl;
-  } else {
-    cout << "No DXDISPLAY input file specified." << endl;
-  }
+  //root6 drawpars::set35t();
+  //root6 drawpars::set10ktw();
+  //root6 ArtServiceHelper& ash = ArtServiceHelper::instance();
+  //root6 cout << "Art service helper is ash. E.g. ash.print() to list available services." << endl;
+  //root6 if ( dxopen(gApplication->InputFiles()) == 0 ) {
+  //root6   cout << "Opened DXDisplay file " << gFile->GetName() << endl;
+  //root6 } else {
+  //root6   cout << "No DXDISPLAY input file specified." << endl;
+  //root6 }
 
 }

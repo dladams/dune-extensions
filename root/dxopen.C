@@ -7,6 +7,10 @@
 // corresponding directory.
 
 #include "dxlabel.h"
+int dxopen(string ifname);
+int dxopen(TFile* pfile);
+int dxopen(TObjArray* pobjs);
+int dxopen();
 
 TFile* gDXFile = 0;
 
@@ -66,13 +70,14 @@ int dxopen(TObjArray* pobjs) {
     if ( pobj == 0 ) continue;
     TObjString* pos = dynamic_cast<TObjString*>(pobj);
     if ( pos == 0 ) continue;
-    string fname = pos->GetString();
+    string fname(pos->GetString());
     int rstat = dxopen(fname);
     if ( rstat == 0 ) {
       pobjs->RemoveAt(iobj);
       return 0;
     }
   }
+  return 0;
 }
 
 // Open the current DXDisplay file.
@@ -81,7 +86,7 @@ int dxopen() {
   if ( gDXFile == 0 ) return 0;
   string fname = gDXFile->GetName();
   int rstat = dxopen(gDXFile);
-  if ( rstat ! = 0 ) {
+  if ( rstat != 0 ) {
     cout << myname << "Unable to open DXDisplay file " << fname << endl;
     cout << myname << "Error " << rstat << "." << endl;
     return rstat;
