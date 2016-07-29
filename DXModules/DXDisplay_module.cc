@@ -334,7 +334,7 @@ private:
   //const lariov::DetPedestalProvider* m_pPedProv;
 
   // Analysis services.
-  art::ServiceHandle<RawDigitAnalysisService> m_hrawsvc;
+  const RawDigitAnalysisService* m_prawsvc;
 
 }; // class DXDisplay
 
@@ -352,7 +352,8 @@ DXDisplay::DXDisplay(fhicl::ParameterSet const& parameterSet)
   m_sctupler(nullptr),
   fEventTree(nullptr),
   fMcPerfTree(nullptr),
-  fgeohelp(nullptr) {
+  fgeohelp(nullptr),
+  m_prawsvc(nullptr) {
   // Read in the parameters from the .fcl file.
   this->reconfigure(parameterSet);
 }
@@ -417,6 +418,11 @@ void DXDisplay::beginJob() {
       fMcPerfTree->Branch("ntrigptb",      &fntrigptb,       "ntrigptb/I");
       fMcPerfTree->Branch("ntrigctr",      &fntrigctr,       "ntrigctr/I");
     }
+  }
+
+  if ( fDoRawDigit ) {
+    art::ServiceHandle<RawDigitAnalysisService> hrawsvc;
+    m_prawsvc = &*hrawsvc;
   }
 
   // MC performance tree.
@@ -1284,7 +1290,7 @@ void DXDisplay::analyze(const art::Event& event) {
     if ( prawdata == nullptr ) {
       cout << myname << "ERROR: Unable to find RawDigit vector data with label " << fRawDigitLabel << endl;
     } else {
-      m_hrawsvc->process(*prawdata, &event);
+      m_prawsvc->process(*prawdata, &event);
     }
   }  // end DoRawDigit
 

@@ -13,6 +13,7 @@
 #include "TDirectory.h"
 #include "TH2.h"
 #include "TCanvas.h"
+#include "TFile.h"
 #include "DrawResult.h"
 #include "TPaletteAxis.h"
 #include "palette.h"
@@ -21,6 +22,7 @@
 #include "dxhist.h"
 #include "dxlabel.h"
 #include "dxprint.h"
+#include "dxopen.h"
 
 using std::string;
 using std::ostringstream;
@@ -61,6 +63,7 @@ DrawResult draw(std::string name ="help", int how =0, double zmax =0.0,
   double xh1 = 0.05;
   double xh2 = 0.94;
   TObject* pobj = 0;
+  gDXFile->cd("DXDisplay");
   gDirectory->GetObject(name.c_str(), pobj);
   if ( pobj == 0 ) {
     size_t i1 = name.find('h') + 1;
@@ -71,6 +74,8 @@ DrawResult draw(std::string name ="help", int how =0, double zmax =0.0,
       string savedir = gDirectory->GetPath();
       if ( gDirectory->cd(sevt.c_str()) ) {
         gDirectory->GetObject(name.c_str(), pobj);
+      } else {
+        cout << myname << "Directory not found in " << gDirectory->GetPath() << endl;
       }
       gDirectory->cd(savedir.c_str());
     } else {

@@ -6,13 +6,13 @@
 // Root macro top open a DXDISPLAY file and move to the
 // corresponding directory.
 
+#include "dxopen.h"
 #include "dxlabel.h"
+
 int dxopen(string ifname);
 int dxopen(TFile* pfile);
 int dxopen(TObjArray* pobjs);
 int dxopen();
-
-TFile* gDXFile = 0;
 
 // Open a file by name.
 int dxopen(string ifname) {
@@ -36,16 +36,17 @@ int dxopen(TFile* pfile) {
   if ( pfile == 0 ) return 2;
   pfile->cd();
   if ( ! pfile->cd("DXDisplay") ) {
-    cout << myname << "Closing non-DXDisplay file " << pfile->GetName() << endl;
-    pfile->Close();
+    cout << myname << "Skipping non-DXDisplay file " << pfile->GetName() << endl;
+    //pfile->Close();
     return 3;
   }
   gFile = pfile;
-  if ( gDXFile != 0 && gDXFile != pfile ) {
+  if ( gDXFile != nullptr && gDXFile != pfile ) {
     cout << myname << "Closing DXDisplay file " << gDXFile->GetName() << endl;
     gDXFile->Close();
   }
   gDXFile = pfile;
+  gDXFile->cd("DXDisplay");
   if ( mcptree("McParticleTree") ) mcptree()->SetMarkerStyle(2);
   if ( perftree("McPerfTree") ) perftree()->SetMarkerStyle(2);
   // Set the label name by stripping the directory path and suffix from the file name.
@@ -74,6 +75,7 @@ int dxopen(TObjArray* pobjs) {
     int rstat = dxopen(fname);
     if ( rstat == 0 ) {
       pobjs->RemoveAt(iobj);
+      
       return 0;
     }
   }

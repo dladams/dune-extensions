@@ -45,10 +45,13 @@ fi
 
 # Find the input file.
 DATADIR=$HOME/data/dune
+THISDIR=`pwd`
 INFILE=
 if [ -n "$INNAME" ]; then
-  if [ $INFILE=run13843 ]; then
+  if [ $INNAME = run13843 ]; then
     INFILE=$DATADIR/sliced35t/lbne_r013843_sr01_20160229T180430_20160504T002939_split.root
+  elif [ $INNAME = recowire_35tdata_run13843_nevt1 ]; then
+    INFILE=$THISDIR/jobs/$INNAME/${INNAME}_event.root
   else
     echo Invalid input file specifier: $INFILE
     exit 1
@@ -65,7 +68,8 @@ if [ -z "$FCLNAME" ]; then
   echo Conguration name must be provided
   exit 3
 fi
-FCLFILE=`pwd`/$FCLNAME.fcl
+FCLFILE=$FCLNAME.fcl
+FCLPATH=`pwd`/$FCLFILE
 if [ ! -r $FCLFILE  ]; then
   echo FCL file not found: $FCLFILE
   exit 4
@@ -77,7 +81,8 @@ if [ -n "$INNAME" ]; then BASE=${BASE}_$INNAME; fi
 if [ -n "$NEVT" ]; then BASE=${BASE}_nevt$NEVT; fi
 if [ -n "$NSKIP" ]; then BASE=${BASE}_skip$NSKIP; fi
 RUNDIR=`pwd`/jobs/$BASE
-OUTFILE=$RUNDIR/$BASE.root
+OUTROOTFILE=$RUNDIR/$BASE.root
+OUTEVTFILE=$RUNDIR/${BASE}_event.root
 LOG=$RUNDIR/$BASE.log
 
 # Check and clean run directory.
@@ -99,6 +104,12 @@ if [ ! -r $RUNDIR ]; then
   }
 fi
 
+# Copy the configuration file to the run directory.
+cp $FCLPATH $RUNDIR || {
+  echo Unable to find configuration file.
+  exit 6
+}
+
 # Create run command.
 COM=lar
 hash $COM || {
@@ -115,11 +126,13 @@ fi
 if [ -n "$NSKIP" ]; then
   COM="$COM --nskip $NSKIP"
 fi
-if [ -n "$OUTFILE" ]; then
-  COM="$COM -T $OUTFILE"
+if [ -n "$OUTROOTFILE" ]; then
+  COM="$COM -T $OUTROOTFILE"
 fi
 if [ -n "$EVTOUT" ]; then
-  COM="$COM -s $BASE.evt"
+  COM="$COM -o $OUTEVTFILE"
+else
+  COM="$COM --no-output"
 fi
 
 # Change to run directory.
@@ -143,7 +156,7 @@ fi
 # Dump configuration.
 echo Dumping FCL
 FCLDUMP=${FCLFILE}dump
-fcldump $FCLFILE 5 >$FCLDUMP
+fcldump $FCLFILE 10 >$FCLDUMP
 echo "         FCL dump: $FCLDUMP"
 echo "          Job log: $LOG"
 if [ -n "$EVTOUT" ]; then
