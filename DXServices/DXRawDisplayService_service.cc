@@ -20,8 +20,6 @@
 
 #include "lardataobj/RawData/RawDigit.h"
 #include "lardataobj/RawData/raw.h"
-#include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
-#include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 #include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
 
 // ROOT includes.
@@ -318,7 +316,7 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
     }
     // Skip bad channels.
     if ( m_BadChannelFlag == 1 ) {
-      if ( pcsp->IsBad(ichanon) ) {
+      if ( pcsp->IsBad(ichan) ) {
         if ( dbg >=2 ) cout << myname << "Skipping bad channel on/off = " << ichanon << "/" << ichan << endl;
         continue;
       }
