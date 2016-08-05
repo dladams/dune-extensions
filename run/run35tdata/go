@@ -12,6 +12,7 @@ NSKIP=
 CLEAN=
 EVTOUT=
 BG=
+COMMANDLINE="$0 $*"
 while getopts hi:n:s:ceb OPT; do
   case $OPT in
   h) HELP=true;;
@@ -27,7 +28,7 @@ shift $(( OPTIND-1 ))
 FCLNAME=$1
 
 if [ -n "$HELP" ]; then
-  echo "Usage: $0 [-i $INNAME] [-n NEVT] [-s NSKIP] -c FCLNAME"
+  echo "Usage: $0 [-i $INNAME] [-n NEVT] [-s NSKIP] [-c] [-e] [-b] FCLNAME"
   echo "       $0 -h"
   echo "  INNAME = input file specifier"
   echo "    NEVT = # events to process"
@@ -52,9 +53,15 @@ if [ -n "$INNAME" ]; then
     INFILE=$DATADIR/sliced35t/lbne_r013843_sr01_20160229T180430_20160504T002939_split.root
   elif [ $INNAME = recowire_35tdata_run13843_nevt1 ]; then
     INFILE=$THISDIR/jobs/$INNAME/${INNAME}_event.root
+  elif [ $INNAME = wireprod_35tdata_old_run13843_nevt1 ]; then
+    INFILE=$THISDIR/jobs/$INNAME/${INNAME}_event.root
   else
-    echo Invalid input file specifier: $INFILE
-    exit 1
+    # Try existing job.
+    INFILE=$THISDIR/jobs/$INNAME/${INNAME}_event.root
+    if [ ! -r $INFILE ]; then
+      echo "Unable to find input file: $INFILE"
+      exit 1
+    fi
   fi
   if [ ! -r $INFILE ]; then
     echo Input file not found: $INFILE
@@ -140,6 +147,11 @@ cd $RUNDIR || {
   echo Unable to change to run directory: $RUNDIR
   exit 6
 }
+
+echo $COMMANDLINE >./command
+chmod +x ./command
+echo $COM >./run
+chmod +x ./run
 
 # Run job.
 echo $COM | tee $LOG

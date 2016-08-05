@@ -1302,6 +1302,7 @@ void DXDisplay::analyze(const art::Event& event) {
     // See $LARDATA_DIR/include/RecoBase/Wire.h
     art::Handle< vector<recob::Wire> > wiresHandle;
     try {
+      if ( fdbg > 1 ) cout << myname << "Fetching wires with label " << fWireProducerLabel << endl;
       event.getByLabel(fWireProducerLabel, wiresHandle);
       if ( fdbg > 1 ) cout << myname << "Deconvoluted channel count: " << wiresHandle->size() << endl;
 

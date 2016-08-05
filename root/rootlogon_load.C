@@ -61,6 +61,7 @@
   gROOT->ProcessLine(".L fix2dcanvas.cxx+");
   gROOT->ProcessLine(".L dxhist.cxx+");
   gROOT->ProcessLine(".L dxlabel.cxx+");
+  gROOT->ProcessLine(".L dxopen.cxx+");
   gROOT->ProcessLine(".L dxprint.cxx+");
   gROOT->ProcessLine(".L DrawResult.cxx+");
   gROOT->ProcessLine(".L draw.cxx+");
@@ -78,7 +79,6 @@
   gROOT->ProcessLine(".L ex2dhist.C");
   //gROOT->ProcessLine(".L detlar.cxx+");
   gROOT->ProcessLine(".L drawTracks.C");
-  gROOT->ProcessLine(".L dxopen.C");
 
   gROOT->ProcessLine(".L $DUNETPC_INC/dune/ArtSupport/aclic_ArtServiceHelper.h+");
 

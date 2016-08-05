@@ -1,13 +1,23 @@
-// dune_extensions/root/dxopen.C
+// dune_extensions/root/dxopen.cxx
 //
 // David Adams
 // November 2015
 //
-// Root macro top open a DXDISPLAY file and move to the
+// Root macro to open a DXDISPLAY file and move to the
 // corresponding directory.
 
+#include <string>
+#include <iostream>
+#include "TFile.h"
+#include "TTree.h"
+#include "TObjArray.h"
 #include "dxopen.h"
 #include "dxlabel.h"
+#include "gettree.h"
+
+using std::string;
+using std::cout;
+using std::endl;
 
 int dxopen(string ifname);
 int dxopen(TFile* pfile);

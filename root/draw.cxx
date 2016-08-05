@@ -1,4 +1,4 @@
-// draw.C
+// draw.cxx
 //
 // David Adams
 // October 2015
@@ -6,15 +6,15 @@
 // Root function to draw the channel-tick histograms produced
 // by the dune_extensions package.
 
-#include <string>
+#include "draw.h"
 #include <iostream>
 #include <sstream>
 #include <iomanip>
 #include "TDirectory.h"
+#include "TROOT.h"
 #include "TH2.h"
 #include "TCanvas.h"
 #include "TFile.h"
-#include "DrawResult.h"
 #include "TPaletteAxis.h"
 #include "palette.h"
 #include "addaxis.h"
@@ -31,8 +31,8 @@ using std::endl;
 using std::hex;
 using std::dec;
 
-DrawResult draw(std::string name ="help", int how =0, double zmax =0.0,
-                double xmin =0.0, double xmax =0.0, double ymin =0.0, double ymax =0.0) {
+DrawResult draw(std::string name, int how, double zmax,
+                double xmin, double xmax, double ymin, double ymax) {
   DrawResult res;
   // Record the histogram name.
   dxhist(name);
@@ -62,8 +62,12 @@ DrawResult draw(std::string name ="help", int how =0, double zmax =0.0,
   }
   double xh1 = 0.05;
   double xh2 = 0.94;
-  TObject* pobj = 0;
-  gDXFile->cd("DXDisplay");
+  TObject* pobj = nullptr;
+  if ( gDXFile != nullptr ) {
+    gDXFile->cd("DXDisplay");
+  } else {
+    cout << myname << "WARNING: gDXFile is null." << endl;
+  }
   gDirectory->GetObject(name.c_str(), pobj);
   if ( pobj == 0 ) {
     size_t i1 = name.find('h') + 1;
@@ -183,8 +187,18 @@ DrawResult draw(std::string name ="help", int how =0, double zmax =0.0,
     ostringstream sshname;
     sshname << "hdraw" << hcount;
     string hname = sshname.str();
+    const char* dname = hname.c_str();
     cout << "Creating histogram " << hname << endl;
+    gROOT->cd();
+    if ( !gDirectory->mkdir(dname) || !gDirectory->cd(dname) ) {
+      cout << "Unable to create or move to directory " << dname << endl;
+      cout << "Current directory is " << gDirectory->GetName() << endl;
+      res.status = 5;
+      return res;
+    }
+    cout << myname << "Created histogram directory: " << gDirectory->GetName() << endl;
     phdraw = dynamic_cast<TH2*>(phnew->Clone(hname.c_str()));
+    //phdraw->SetDirectory(nullptr);
     // Set axis parameters.
     //ph2->SetTitleOffset(toff);   // Sets x-axis label!!
     phdraw->SetTickLength(0.010, "X");
@@ -288,7 +302,7 @@ DrawResult draw(std::string name ="help", int how =0, double zmax =0.0,
   TPaletteAxis* ppalax = dynamic_cast<TPaletteAxis*>(phdraw->GetListOfFunctions()->FindObject("palette")); 
   if ( ppalax == 0 ) {
     cout << myname << "Unable to retrieve palette." << endl;
-    res.status = 5;
+    res.status = 6;
     return res;
   }
   //cout << "Palette axis: " << hex << long(ppalax) << dec << endl;

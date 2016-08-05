@@ -50,5 +50,8 @@ ARG=
 if [ -n "$INFILE" ]; then
   ARG='dxopen.C("'$INFILE'")'
 fi
+ 
+# Root6 seems to expect this symbol to be defined as part of include path.
+export CPP0X_INC=.
 
 root.exe $ARG $*
