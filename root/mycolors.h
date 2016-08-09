@@ -9,6 +9,7 @@ namespace {
   int myblue  = mycols[1];
   int myred   = mycols[0];
   int mygreen = mycols[2];
+  int mybrown = mycols[3];
 }
 
 #endif

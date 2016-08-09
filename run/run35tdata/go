@@ -6,7 +6,7 @@
 # script to run lar id a dediated directory.
 
 HELP=
-INNAME=run13843
+INNAME=
 NEVT=
 NSKIP=
 CLEAN=
@@ -88,9 +88,12 @@ if [ -n "$INNAME" ]; then BASE=${BASE}_$INNAME; fi
 if [ -n "$NEVT" ]; then BASE=${BASE}_nevt$NEVT; fi
 if [ -n "$NSKIP" ]; then BASE=${BASE}_skip$NSKIP; fi
 RUNDIR=`pwd`/jobs/$BASE
-OUTROOTFILE=$RUNDIR/$BASE.root
-OUTEVTFILE=$RUNDIR/${BASE}_event.root
-LOG=$RUNDIR/$BASE.log
+#OUTROOTFILE=$RUNDIR/$BASE.root
+#OUTEVTFILE=$RUNDIR/${BASE}_event.root
+#LOG=$RUNDIR/$BASE.log
+OUTROOTFILE=$BASE.root
+OUTEVTFILE=${BASE}_event.root
+LOG=$BASE.log
 
 # Check and clean run directory.
 if [ -r $RUNDIR ]; then
@@ -169,11 +172,15 @@ fi
 echo Dumping FCL
 FCLDUMP=${FCLFILE}dump
 fcldump $FCLFILE 10 >$FCLDUMP
+
+echo
+echo "    Run directory: $RUNDIR"
+echo "              FCL: $FCLFILE"
 echo "         FCL dump: $FCLDUMP"
 echo "          Job log: $LOG"
 if [ -n "$EVTOUT" ]; then
-  echo "Output event file: $BASE.evt"
+  echo "Output event file: $OUTEVTFILE"
 else
   echo No output event file.
 fi
-echo " Output root file: $OUTFILE"
+echo " Output root file: $OUTROOTFILE"
