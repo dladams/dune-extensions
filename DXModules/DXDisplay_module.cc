@@ -1323,12 +1323,12 @@ void DXDisplay::analyze(const art::Event& event) {
           auto sigs = wire.Signal();
           const auto& roisigs = wire.SignalROI();
           TH2* ph = dcohists[irop];
-          if ( fdbg > 3 ) cout << myname << "Deconvoluted channel " << ichan
-                              << " (ROP-chan = " << irop << "-" << iropchan << ")"
-                              << " with view " << wire.View()
-                              << " has " << sigs.size() << " signals"
-                              << " and " << roisigs.size() << " ROIs"
-                              << "." << endl;
+          if ( fdbg >= 3 ) cout << myname << "Deconvoluted channel " << ichan
+                               << " (ROP-chan = " << irop << "-" << iropchan << ")"
+                               << " with view " << wire.View()
+                               << " has " << sigs.size() << " signals"
+                               << " and " << roisigs.size() << " ROIs"
+                               << "." << endl;
           for ( unsigned int tick=0; tick<sigs.size(); ++tick ) {
             double wt = roisigs[tick];
             if ( wt == 0 ) continue;

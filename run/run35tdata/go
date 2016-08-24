@@ -51,10 +51,18 @@ INFILE=
 if [ -n "$INNAME" ]; then
   if [ $INNAME = run13843 ]; then
     INFILE=$DATADIR/sliced35t/lbne_r013843_sr01_20160229T180430_20160504T002939_split.root
+  elif [ $INNAME = charlotte ]; then
+    INFILE=$DATADIR/prodgenie_nu_dune10kt_workspace__20151202T151027_merged.root
   elif [ $INNAME = recowire_35tdata_run13843_nevt1 ]; then
     INFILE=$THISDIR/jobs/$INNAME/${INNAME}_event.root
   elif [ $INNAME = wireprod_35tdata_old_run13843_nevt1 ]; then
     INFILE=$THISDIR/jobs/$INNAME/${INNAME}_event.root
+  elif [ $INNAME = genmu_dune35t_detsim ]; then
+    INFILE=$DATADIR/refs/oldreco/genmu_dune35t_detsim_event.root
+  elif [ $INNAME = gencomics_dune35t_detsim ]; then
+    INFILE=$DATADIR/refs/oldreco/${INNAME}_event.root
+  elif [ $INNAME = detsim_genmu_dune35t ]; then
+    INFILE=$DATADIR/refs/oldreco/${INNAME}_event.root
   else
     # Try existing job.
     INFILE=$THISDIR/jobs/$INNAME/${INNAME}_event.root
@@ -85,7 +93,7 @@ fi
 # Build base name for run directory and output files.
 BASE=$FCLNAME
 if [ -n "$INNAME" ]; then BASE=${BASE}_$INNAME; fi
-if [ -n "$NEVT" ]; then BASE=${BASE}_nevt$NEVT; fi
+#if [ -n "$NEVT" ]; then BASE=${BASE}_nevt$NEVT; fi
 if [ -n "$NSKIP" ]; then BASE=${BASE}_skip$NSKIP; fi
 RUNDIR=`pwd`/jobs/$BASE
 #OUTROOTFILE=$RUNDIR/$BASE.root
@@ -166,14 +174,19 @@ if [ -n "$BG" ]; then
   echo Job started
 else
   $COM 2>&1 | tee -a $LOG
+  RSTAT=$?
+  echo Job complete.
+  echo Return status: $RSTAT
 fi
 
 # Dump configuration.
+echo
 echo Dumping FCL
 FCLDUMP=${FCLFILE}dump
 fcldump $FCLFILE 10 >$FCLDUMP
 
 echo
+echo Summary
 echo "    Run directory: $RUNDIR"
 echo "              FCL: $FCLFILE"
 echo "         FCL dump: $FCLDUMP"

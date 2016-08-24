@@ -29,13 +29,20 @@ public:
 
   // Compare histogram with same name in the two files.
   // Returns the number of differing bins (nbad).
-  int compare(std::string hname);
+  // Bins are different if fdiff > fdiffmax.
+  // fdiff = abs(x1-x2)/(0.5*abs(x1+x2))
+  // If pmaxfdiff, the max fdiff is stored there.
+  int compare(std::string hname, double fdiffmax =0.0, double* pmaxfdiff =nullptr);
 
-  // Make comparison for all 35t planes: apa0u, ..., apa3z2
+  // Make comparison for all planes: apa0u, ..., apa3z2
+  // For detector sdet = "35t" or "fd126".
   // Returns the number of channels that differ.
   // If evt1 > 0, comparison is made for hevt1_hpre, ..., hevt2_hpre
   // Then returns the number of histograms that differ.
-  int compare35t(std::string hpre, int evt1=0, int evt2=1);
+  int compareall(std::string sdet, std::string hpre, int evt1=0, int evt2=1, double fdiffmax =0.0);
+
+  // Print the configuration.
+  void print() const;
 
   // Data.
   std::string fname1;
