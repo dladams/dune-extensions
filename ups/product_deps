@@ -13,7 +13,6 @@ fcldir product_dir job
 #
 product         version
 dunetpc 	v06_04_00
-#art_extensions  v00_00_07
 gcc		v4_9_3a
 cetbuildtools   v4_18_01 - only_for_build
 end_product_list
