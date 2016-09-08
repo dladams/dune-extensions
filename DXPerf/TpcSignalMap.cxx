@@ -6,7 +6,7 @@
 #include <cmath>
 #include "TH2.h"
 #include "nusimdata/SimulationBase/MCParticle.h"
-#include "larsimobj/Simulation/SimChannel.h"
+#include "lardataobj/Simulation/SimChannel.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "larcore/Geometry/Geometry.h"
 #include "DXUtil/reducedPDG.h"

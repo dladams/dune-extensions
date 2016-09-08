@@ -8,7 +8,7 @@
 #include <iomanip>
 #include "canvas/Persistency/Provenance/EventID.h"
 #include "art/Framework/Services/Optional/TFileService.h"
-#include "larsimobj/Simulation/SimChannel.h"
+#include "lardataobj/Simulation/SimChannel.h"
 #include "TTree.h"
 #include "DXGeometry/GeoHelper.h"
 

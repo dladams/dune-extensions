@@ -19,5 +19,5 @@ cet_test(test_MCTrajectoryFollower SOURCES test_MCTrajectoryFollower.cxx
 )
 
 cet_test(test_SimChannelTupler SOURCES test_SimChannelTupler.cxx
-  LIBRARIES DXPerf dune_ArtSupport larsimobj_Simulation
+  LIBRARIES DXPerf dune_ArtSupport lardataobj_Simulation
 )

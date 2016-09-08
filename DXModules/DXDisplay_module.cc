@@ -57,7 +57,7 @@
 // LArSoft includes
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::View_t, geo::SignalType, geo::WireID
 #include "larcore/Geometry/Geometry.h"
-#include "larsimobj/Simulation/SimChannel.h"
+#include "lardataobj/Simulation/SimChannel.h"
 #include "larsim/Simulation/LArG4Parameters.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/Wire.h"

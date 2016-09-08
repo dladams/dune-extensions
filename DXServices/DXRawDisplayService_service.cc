@@ -295,11 +295,11 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
   bool isOnlineOrdered = true;
   bool isOfflineOrdered = true;
   if ( dbg > 4 ) cout << myname << "Looping over digits." << endl;
-  for ( AdcChannelDataMap::value_type chprepdig : prepdigs ) {
+  for ( const AdcChannelDataMap::value_type& chprepdig : prepdigs ) {
     ++m_NDigitsProcessed;
     // Extract and check prep data.
     AdcChannel ichan        =  chprepdig.first;
-    AdcChannelData& prepdig = chprepdig.second;
+    const AdcChannelData& prepdig = chprepdig.second;
     const AdcSignalVector& sigs =  prepdig.samples;
     const AdcFlagVector& flags  =  prepdig.flags;
     const raw::RawDigit& digit  = *prepdig.digit;
@@ -343,8 +343,17 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
       if ( ph_rms != nullptr ) cout << " " << ph_rms->GetName();
       cout << endl;
     }
-    // Apply zero suppression.
-    if ( psfs != nullptr ) psfs->find(prepdig);
+    // If requested, apply zero suppression.
+    // This requires making temporary channel data.
+    const AdcChannelData* pprepdig = &prepdig;
+    AdcChannelData* pprepdigtmp = nullptr;
+    if ( psfs != nullptr ) {
+      pprepdigtmp = new AdcChannelData;
+      pprepdigtmp->channel = prepdig.channel;
+      pprepdigtmp->samples = prepdig.samples;
+      psfs->find(*pprepdigtmp);
+      pprepdig = pprepdigtmp;
+    }
     // Loop over ticks.
     int icnt = 0;
     double tsum = 0.0;
@@ -356,7 +365,7 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
     unsigned int ntick_bin_nominal = 0;
     for ( unsigned int tick=0; tick<nsig; ++tick ) {
       double wt = sigs[tick];
-      double wtzs = m_DoZSROPs ? prepdig.signal[tick]*wt : 0.0;
+      double wtzs = m_DoZSROPs ? pprepdig->signal[tick]*wt : 0.0;
       ++icnt;
       tsum += wt;
       tsumsq += wt*wt;
@@ -405,6 +414,7 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
         ntick_bin_nominal = 0;
       }
     }  // end loop over ticks
+    delete pprepdigtmp;
     // Channel stats.
     double tcnt = icnt;
     double mean = -1.e6;
