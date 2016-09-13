@@ -90,6 +90,7 @@ GeoHelper::GeoHelper(std::string gname, bool useChannels, Status dbg)
     // Taken from dunetpc/dune/Geometry/geometry_dune.fcl (v04_21_01)
     //spar = "SortingParameters: { DetectorVersion: \"" + gname + "\"}";
     spar = "DetectorVersion: \"" + gname + "\"";
+    spar += "\nChannelsPerOpDet: 12";  // See https://cdcvs.fnal.gov/redmine/issues/13842
     cout << myname << "fcl: " << spar << endl;
     fhicl::make_ParameterSet(spar, parset);
     shared_ptr<geo::ChannelMapAlg> pChannelMap;
