@@ -54,6 +54,7 @@ dxdisplay_default: {
 
   # Wire container.
   WireLabel:        "caldata"
+  WireName:         ""
 
   # The same for reference and performance clusters:
   RefClusterLabel:  "clustercheat"

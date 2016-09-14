@@ -237,6 +237,7 @@ private:
   string fSimulationProducerLabel;     // The name of the producer that tracked simulated particles through the detector
   string fHitProducerLabel;            // The name of the producer that created hits
   string fWireProducerLabel;           // The name of the producer that created wires
+  string fWireProducerName;            // The name assigned to the wire data product.
   string fClusterProducerLabel;        // The name of the producer that created clusters
   string fRefClusterProducerLabel;     // The name of the producer that created reference clusters
   string fTrackProducerLabel;          // The name of the producer that created tracks
@@ -488,6 +489,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   fRawDigitLabel                 = p.get<string>("RawDigitLabel");
   fHitProducerLabel              = p.get<string>("HitLabel");
   fWireProducerLabel             = p.get<string>("WireLabel");
+  fWireProducerName              = p.get<string>("WireName");
   fClusterProducerLabel          = p.get<string>("ClusterLabel");
   fRefClusterProducerLabel       = p.get<string>("RefClusterLabel");
   fTrackProducerLabel            = p.get<string>("TrackLabel");
@@ -559,6 +561,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
     cout << prefix << setw(wlab) << "RawDigitLabel" << sep << fRawDigitLabel << endl;
     cout << prefix << setw(wlab) << "HitLabel" << sep << fHitProducerLabel << endl;
     cout << prefix << setw(wlab) << "WireLabel" << sep << fWireProducerLabel << endl;
+    cout << prefix << setw(wlab) << "WireName" << sep << fWireProducerName << endl;
     cout << prefix << setw(wlab) << "ClusterLabel" << sep << fClusterProducerLabel << endl;
     cout << prefix << setw(wlab) << "RefClusterLabel" << sep << fRefClusterProducerLabel << endl;
     cout << prefix << setw(wlab) << "UseGammaNotPi0" << sep << fUseGammaNotPi0 << endl;
@@ -1302,8 +1305,12 @@ void DXDisplay::analyze(const art::Event& event) {
     // See $LARDATA_DIR/include/RecoBase/Wire.h
     art::Handle< vector<recob::Wire> > wiresHandle;
     try {
-      if ( fdbg > 1 ) cout << myname << "Fetching wires with label " << fWireProducerLabel << endl;
-      event.getByLabel(fWireProducerLabel, wiresHandle);
+      if ( fdbg > 1 ) {
+        cout << myname << "Fetching wires with label " << fWireProducerLabel;
+        if ( fWireProducerName.size() ) cout << " and name " << fWireProducerName;
+        cout << endl;
+      }
+      event.getByLabel(fWireProducerLabel, fWireProducerName, wiresHandle);
       if ( fdbg > 1 ) cout << myname << "Deconvoluted channel count: " << wiresHandle->size() << endl;
 
       // Create the deconvoluted signal histograms.
@@ -1346,7 +1353,9 @@ void DXDisplay::analyze(const art::Event& event) {
         }
       }  // end DoDeconvolutedSignalHists
     } catch(...) {
-      cout << myname << "ERROR: Unable to fetch deconvoluted data with label " << fWireProducerLabel << endl;
+      cout << myname << "ERROR: Unable to fetch deconvoluted data with label " << fWireProducerLabel;
+      if ( fWireProducerName.size() ) cout << " and name " << fWireProducerName;
+      cout << endl;
     }
     removeEventHists();
   }  // end DoWires
