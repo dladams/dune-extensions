@@ -3,10 +3,12 @@
 #include "FFTHist.h"
 #include <string>
 #include <iostream>
+#include <sstream>
 #include "TH2F.h"
 #include "TFFTRealComplex.h"
 
 using std::string;
+using std::ostringstream;
 
 //**********************************************************************
 
@@ -27,7 +29,9 @@ FFTHist::FFTHist(TH2* phin, int atmin, int atmax, double ftick)
   }
   // Frequency histogram.
   {
-    string hname = htime0->GetName();
+    ostringstream sshname;
+    sshname << htime0->GetName() << "_" << tmin << "_" << tmax;
+    string hname = sshname.str();
     hname += "_freq";
     string htitl = "FFT mag of ";
     htitl += htime0->GetTitle();
@@ -35,10 +39,29 @@ FFTHist::FFTHist(TH2* phin, int atmin, int atmax, double ftick)
     hfreq->GetXaxis()->SetTitle(flab.c_str());
     hfreq->GetYaxis()->SetTitle(htime0->GetYaxis()->GetTitle());
     hfreq->SetStats(0);
-    hfreq->SetContour(40);
+    hfreq->SetContour(20);
+    hfreq->SetMinimum(0.0);
     double fzmax = 100;
     hfreq->GetZaxis()->SetRangeUser(-fzmax, fzmax);
     hfreq->SetStats(0);
+  }
+  // Power histogram.
+  {
+    ostringstream sshname;
+    sshname << htime0->GetName() << "_" << tmin << "_" << tmax;
+    string hname = sshname.str();
+    hname += "_power";
+    string htitl = "FFT power of ";
+    htitl += htime0->GetTitle();
+    hpower = new TH2F(hname.c_str(), htitl.c_str(), nk, 0, kmax, nc, 0, nc);
+    hpower->GetXaxis()->SetTitle(flab.c_str());
+    hpower->GetYaxis()->SetTitle(htime0->GetYaxis()->GetTitle());
+    hpower->SetStats(0);
+    hpower->SetContour(20);
+    hpower->SetMinimum(0.0);
+    double fzmax = 100;
+    hpower->GetZaxis()->SetRangeUser(-fzmax, fzmax);
+    hpower->SetStats(0);
   }
   // Phase histogram.
   {
@@ -113,6 +136,7 @@ FFTHist::FFTHist(TH2* phin, int atmin, int atmax, double ftick)
         while ( phase > pi ) phase -= twopi;
       }
       hfreq->SetBinContent(ibin, mag);
+      hpower->SetBinContent(ibin, mag*mag);
       hphase->SetBinContent(ibin, phase);
       pow += magsq;
       if ( ik!=0 && ik!=nk-1 ) pow += magsq;

@@ -63,6 +63,7 @@
   gROOT->ProcessLine(".L dxlabel.cxx+");
   gROOT->ProcessLine(".L dxopen.cxx+");
   gROOT->ProcessLine(".L dxprint.cxx+");
+  gROOT->ProcessLine(".L FFTHist.cxx+");
   gROOT->ProcessLine(".L DrawResult.cxx+");
   gROOT->ProcessLine(".L draw.cxx+");
   gROOT->ProcessLine(".L draw1d.cxx+");
@@ -71,7 +72,6 @@
   gROOT->ProcessLine(".L HistoCompare.cxx+");
   gROOT->ProcessLine(".L slidingWindow.cxx+");
   gROOT->ProcessLine(".L corrHist.cxx+");
-  gROOT->ProcessLine(".L FFTHist.cxx+");
   gROOT->ProcessLine(".L PFHist.cxx+");
   gROOT->ProcessLine(".L RestrictedDFT.cxx+");
 

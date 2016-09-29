@@ -23,6 +23,7 @@ public:
   double tmin, tmax;  // Tick range used for FFT
   TH2* htime0;        // Input signal histogram (channel vs. tick).
   TH2* hfreq;
+  TH2* hpower;
   TH2* hphase;
   TH1* hptime;
   TH1* hpfreq;

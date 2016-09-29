@@ -9,18 +9,56 @@
 #define DrawResult_H
 
 #include <vector>
+#include "FFTHist.h"
+
 class TH1;
 class TH2;
 
 struct DrawResult {
+  double tmin;
+  double tmax;
   int status = 0;
-  TH2* hdraw = 0;
-  TH1* hdrawx = 0;
-  TH1* hdrawy = 0;
+  TH2* hdraw = nullptr;
+  TH1* hdrawx = nullptr;
+  TH1* hdrawy = nullptr;
   std::vector<TH1*> hdrawxChan;
+  std::vector<TH1*> hfreqChan;
+  std::vector<TH1*> htpwrChan;
+  std::vector<TH1*> hfpwrChan;
+  FFTHist* pfft = nullptr;
+
+  // Ctor.
+  DrawResult() =default;
+  DrawResult(int atmin, int atmax);
+
+  // Signal vs. channel vs tick.
+  TH2* time() const;
+
+  // Signal vs. tick summed over channels.
   TH1* ticks() const;
+
+  // Signal vs. channel summed over ticks.
   TH1* channels() const;
-  TH1* ticksForChannel(unsigned int chan) const;
+
+  // Signal vs. tick for one channel.
+  TH1* timeChannel(unsigned int chan) const;
+
+  // Fetch the frequency spectrum for all channels.
+  TH2* freq();
+
+  // Fetch the power spectrum for all channels.
+  TH2* power();
+
+  // Fetch the frequency spectrum for a particular channel.
+  TH1* freqChannel(unsigned int chan);
+
+  // Fetch the power vs. frequency spectrum for a particular channel.
+  TH1* powerChannel(unsigned int chan);
+
+  // Fetch the power vs. frequency spectrum for a particular channel.
+  TH1* timePowerChannel(unsigned int chan);
+
+
 };
 
 #endif

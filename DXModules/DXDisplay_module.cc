@@ -1311,14 +1311,14 @@ void DXDisplay::analyze(const art::Event& event) {
         cout << endl;
       }
       event.getByLabel(fWireProducerLabel, fWireProducerName, wiresHandle);
-      if ( fdbg > 1 ) cout << myname << "Deconvoluted channel count: " << wiresHandle->size() << endl;
+      if ( fdbg > 1 ) cout << myname << "Prepared channel count: " << wiresHandle->size() << endl;
 
       // Create the deconvoluted signal histograms.
       if ( fDoDeconvolutedSignalHists ) {
         vector<TH2*> dcohists;
         for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
           TH2* ph = hcreateDco.create("dco" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
-                                       "Deconvoluted signals for " + geohelp.ropName(irop));
+                                       "Prepared signals for " + geohelp.ropName(irop));
           dcohists.push_back(ph);
           m_eventhists.push_back(ph);
         }
@@ -1330,7 +1330,7 @@ void DXDisplay::analyze(const art::Event& event) {
           auto sigs = wire.Signal();
           const auto& roisigs = wire.SignalROI();
           TH2* ph = dcohists[irop];
-          if ( fdbg >= 3 ) cout << myname << "Deconvoluted channel " << ichan
+          if ( fdbg >= 3 ) cout << myname << "Prepared channel " << ichan
                                << " (ROP-chan = " << irop << "-" << iropchan << ")"
                                << " with view " << wire.View()
                                << " has " << sigs.size() << " signals"

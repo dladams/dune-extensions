@@ -152,6 +152,7 @@ if [ -n "$EVTOUT" ]; then
 else
   COM="$COM --no-output"
 fi
+COM="$COM --memcheck-db mem.dat"
 
 # Change to run directory.
 cd $RUNDIR || {

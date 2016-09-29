@@ -33,7 +33,7 @@ using std::dec;
 
 DrawResult draw(std::string name, int how, double zmax,
                 double xmin, double xmax, double ymin, double ymax) {
-  DrawResult res;
+  DrawResult res(xmin, xmax);
   // Record the histogram name.
   dxhist(name);
   // Build label.
@@ -241,6 +241,7 @@ DrawResult draw(std::string name, int how, double zmax,
     if ( xmax > xmin ) hprx->GetXaxis()->SetRangeUser(xmin, xmax);
     string ytitle;
     hprx->GetYaxis()->SetTitle(ylabprx.c_str());
+    hprx->SetStats(0);
     res.hdrawx = hprx;
     // Make a tick-projection histogram for each channel.
     string hname1;
@@ -261,6 +262,7 @@ DrawResult draw(std::string name, int how, double zmax,
       hprx->SetTitle(sstitle.str().c_str());
       if ( xmax > xmin ) hprx->GetXaxis()->SetRangeUser(xmin, xmax);
       hprx->GetYaxis()->SetTitle(ylabprx.c_str());
+      hprx->SetStats(0);
       res.hdrawxChan.push_back(hprx);
     }
     // Make a channel-projection histogram.
@@ -271,6 +273,7 @@ DrawResult draw(std::string name, int how, double zmax,
     sstpry << hpry->GetTitle();
     if ( xmax > xmin ) sstpry << " ticks " << xmin << "-" << xmax-1;
     hpry->SetTitle(sstpry.str().c_str());
+    hpry->SetStats(0);
     res.hdrawy = hpry;
     cout << "Channel projection histogram: " << hpry_name << endl;
     cout << "Time projection histogram: " << hprx_name << endl;
