@@ -80,6 +80,7 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
   m_NTickPerBin            = pset.get<unsigned int>("NTickPerBin");
   m_NChanPerBin            = pset.get<unsigned int>("NChanPerBin");
   m_DoROPs                 = pset.get<bool>("DoROPs");
+  m_DoADC                  = pset.get<bool>("DoADC");
   m_DoAll                  = pset.get<bool>("DoAll");
   m_DoAllOnline            = pset.get<bool>("DoAllOnline");
   m_DoAllFlag              = pset.get<bool>("DoAllFlag");
@@ -102,6 +103,7 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
     cout << myname << "             NTickPerBin: " << m_NTickPerBin << endl;
     cout << myname << "             NChanPerBin: " << m_NChanPerBin << endl;
     cout << myname << "                  DoROPs: " << m_DoROPs << endl;
+    cout << myname << "                   DoADC: " << m_DoADC << endl;
     cout << myname << "                   DoAll: " << m_DoAll << endl;
     cout << myname << "             DoAllOnline: " << m_DoAllOnline << endl;
     cout << myname << "               DoAllFlag: " << m_DoAllFlag << endl;
@@ -231,6 +233,12 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
       m_eventhists.push_back(ph);
     }
   }
+  TH2* phalladc = nullptr;
+  if ( m_DoADC ) {
+    phalladc = hcreateAll.create("adcall", 0, geohelp.geometry()->Nchannels(),
+                                 "ADC signals for full detector");
+    m_eventhists.push_back(phalladc);
+  }
   TH2* phallraw = nullptr;
   if ( m_DoAll ) {
     phallraw = hcreateAll.create("rawall", 0, geohelp.geometry()->Nchannels(),
@@ -300,6 +308,7 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
     // Extract and check prep data.
     AdcChannel ichan        =  chprepdig.first;
     const AdcChannelData& prepdig = chprepdig.second;
+    const AdcCountVector& adcs =  prepdig.raw;
     const AdcSignalVector& sigs =  prepdig.samples;
     const AdcFlagVector& flags  =  prepdig.flags;
     const raw::RawDigit& digit  = *prepdig.digit;
@@ -364,6 +373,7 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
     unsigned int ntick_bin = 0;
     unsigned int ntick_bin_nominal = 0;
     for ( unsigned int tick=0; tick<nsig; ++tick ) {
+      double adc = adcs[tick];
       double wt = sigs[tick];
       double wtzs = m_DoZSROPs ? pprepdig->signal[tick]*wt : 0.0;
       ++icnt;
@@ -386,6 +396,7 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
           if ( phzs != nullptr ) fill2dhist(phzs, tick, iropchan, wtzs, err);
           double allwt = wt;
           if ( fAbsAll ) allwt = fabs(allwt);
+          if ( phalladc != nullptr )   fill2dhist(phalladc, tick, ichan, adc, 0.0);
           if ( phallraw != nullptr )   fill2dhist(phallraw, tick, ichan, allwt, err);
           if ( phallrawon != nullptr ) fill2dhist(phallrawon, tick, ichanon, allwt, err);
           tsum_bin += wt;

@@ -7,8 +7,9 @@
 // the Root command line. Note that the required libraries
 // must be loaded in rootlogon_load.C.
 
-{
+#include "dxopen.h"
 
+void rootlogon_setup() {
   // Set the detector boundaries.
   drawpars::set35t();
   drawpars::set10ktw();

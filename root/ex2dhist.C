@@ -4,6 +4,9 @@
 //
 // I would like the lower left to be filled.
 
+#include "fix2dcanvas.h"
+#include "addaxis.h"
+
 int ex2dhist() {
   TH2* ph2= new TH2F("h2", "z = x + y;x;y", 200, -10, 10, 200, -10, 10);
   for ( int j=-100; j<100; ++j ) {

@@ -13,6 +13,7 @@ dxdraw: {
   NTickPerBin:       1
   NChanPerBin:       1
   DoROPs:        false
+  DoADC:         false
   DoAll:          true
   DoAllFlag:      true
   DoAllOnline:   false

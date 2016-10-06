@@ -3,6 +3,7 @@
 #include "DrawResult.h"
 #include <string>
 #include <iostream>
+#include <sstream>
 #include "TH2.h"
 
 using std::string;
@@ -152,7 +153,7 @@ TH1* DrawResult::timePowerChannel(unsigned int chan) {
     sshname << chan;
     string hname = sshname.str();
     TH1* pht = timeChannel(chan);
-    ph = new TH1F(hname.c_str(), pht->getTitle(), tmax-tmin, tmin, tmax);
+    ph = new TH1F(hname.c_str(), pht->GetTitle(), tmax-tmin, tmin, tmax);
     for ( int ibin=1; ibin<=ph->GetNbinsX(); ++ibin ) {
       double sig = ph->GetBinContent(ibin);
       ph->SetBinContent(ibin, sig*sig);

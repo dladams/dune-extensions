@@ -29,9 +29,9 @@
   gSystem->AddIncludePath("-I$LARCORE_INC");
   gSystem->AddIncludePath("-I$LAREVT_INC");
   gSystem->AddIncludePath("-I$DUNETPC_INC");
-  gSystem->AddIncludePath("-I$ART_EXTENSIONS_INC");
-  gSystem->AddIncludePath("-I$ART_INC");
-  gSystem->AddIncludePath("-I$DUNE_EXTENSIONS_INC");
+  //gSystem->AddIncludePath("-I$ART_EXTENSIONS_INC");
+  //gSystem->AddIncludePath("-I$ART_INC");
+  //gSystem->AddIncludePath("-I$DUNE_EXTENSIONS_INC");
 
   gSystem->AddDynamicPath("-L$FHICLCPP_LIB -lfhiclcpp");
 
@@ -49,7 +49,8 @@
   if ( arch.substr(0,3) == "mac" ) libext = "dylib";
   for ( int ilib=0; ilib<libs.size(); ++ilib ) {
     string lib = libs[ilib] + "." + libext;
-    gSystem->AddLinkedLibs(lib.c_str());
+    string libres = gSystem->ExpandPathName(lib.c_str());
+    gSystem->AddLinkedLibs(libres.c_str());
   }
 
   gROOT->ProcessLine(".L $DUNE_EXTENSIONS_INC/DXGeometry/PlanePosition.h+");
@@ -74,7 +75,6 @@
   gROOT->ProcessLine(".L corrHist.cxx+");
   gROOT->ProcessLine(".L PFHist.cxx+");
   gROOT->ProcessLine(".L RestrictedDFT.cxx+");
-
 
   gROOT->ProcessLine(".L ex2dhist.C");
   //gROOT->ProcessLine(".L detlar.cxx+");

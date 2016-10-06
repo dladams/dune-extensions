@@ -19,7 +19,8 @@
 //   NTickPerBin    - Rebin factor for the tick axis.
 //   NChanPerBin    - Rebin factor for the channel axis.
 //   DoROPs         - Make a channel-tick histogram for each readout plane for each event.
-//   DoAll          - Make a channel-tick histogram for the full detector for each event.
+//   DoADC          - Make a channel-tick histogram of the raw ADC count for the full detector for each event.
+//   DoAll          - Make a channel-tick histogram of pedestal-subtracted signal for the full detector for each event.
 //   DoAllOnline    - Make a channel-tick histogram for the full detector with online channel ordering for each event.
 //   DoAllFlag      - Make a channel-tick histogram of flags for the full detector for each event.
 //   DoZSROPs       - Make a zero-suppressed channel-tick histogram for each readout plane for each event.
@@ -93,6 +94,7 @@ private:
   unsigned int m_NTickPerBin;
   unsigned int m_NChanPerBin;
   bool m_DoROPs;
+  bool m_DoADC;
   bool m_DoAll;
   bool m_DoAllOnline;
   bool m_DoAllFlag;
