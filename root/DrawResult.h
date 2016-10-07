@@ -17,11 +17,15 @@ class TH2;
 struct DrawResult {
   double tmin;
   double tmax;
+  double sigmin = 0;
+  double sigmax = 4096;
+  int nsig = -1;
   int status = 0;
   TH2* hdraw = nullptr;
   TH1* hdrawx = nullptr;
   TH1* hdrawy = nullptr;
   std::vector<TH1*> hdrawxChan;
+  std::vector<TH1*> hsigChan;
   std::vector<TH1*> hfreqChan;
   std::vector<TH1*> htpwrChan;
   std::vector<TH1*> hfpwrChan;
@@ -31,7 +35,7 @@ struct DrawResult {
   DrawResult() =default;
   DrawResult(int atmin, int atmax);
 
-  // Signal vs. channel vs tick.
+  // Signal vs. channel vs. tick.
   TH2* time() const;
 
   // Signal vs. tick summed over channels.
@@ -42,6 +46,9 @@ struct DrawResult {
 
   // Signal vs. tick for one channel.
   TH1* timeChannel(unsigned int chan) const;
+
+  // Histogram of signal for all ticks for one channel.
+  TH1* signalChannel(unsigned int chan);
 
   // Fetch the frequency spectrum for all channels.
   TH2* freq();

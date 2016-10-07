@@ -1,0 +1,25 @@
+services.Geometry: {
+  DisableWiresInG4: true
+  GDML: "dune35t4apa_v5.gdml"
+  Name: "dune35t4apa_v5"
+  ROOT: "dune35t4apa_v5"
+  SortingParameters: { DetectorVersion: "dune35t4apa_v5" } 
+  SurfaceY: 0
+}
+services.ExptGeoHelperInterface: {
+  service_provider: "DUNEGeometryHelper"
+}
+services.ChannelMapService: {
+  LogLevel: 1
+  FileName: "35tTPCChannelMap_v6.txt"
+}
+services.AdcNoiseRemovalService: {
+  service_provider: Dune35tNoiseRemovalService
+           LogLevel: 1
+       GroupingFlag: 0
+     SkipStuckCodes: false
+        SkipSignals: false
+  CorrectStuckCodes: true
+         ShowGroups: 2
+  ShowGroupsChannel: 4
+}

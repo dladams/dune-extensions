@@ -1,0 +1,6 @@
+#include "services_dune.fcl"
+services: @local::dune35tdata_reco_services
+services.RawDigitPrepService.DoNoiseRemoval: false
+services.RawDigitPrepService.DoDeconvolution: false
+services.RawDigitPrepService.DoIntermediateStates: true
+services.AdcChannelDataCopyService.CopyFlags: true

@@ -1,0 +1,10 @@
+# recowire-35tsim.fcl
+
+# David Adams
+# July 2016
+
+#include "standard_reco_dune35tsim.fcl"
+
+physics.reco: ["caldata"]
+
+#services.AdcWireBuildingService.LogLevel: 2

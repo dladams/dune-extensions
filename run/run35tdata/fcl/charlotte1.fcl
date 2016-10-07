@@ -1,0 +1,6 @@
+# charlotte1.fcl
+
+#include "standard_detsim_dune10kt_workspace.fcl"
+
+process_name: detsim2
+

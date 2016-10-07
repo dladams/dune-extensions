@@ -1,0 +1,4 @@
+#include "geometry_dune.fcl"
+service.Geometry: @local::dune35t_geo
+#services.Geometry: @local::dune10kt_geo
+

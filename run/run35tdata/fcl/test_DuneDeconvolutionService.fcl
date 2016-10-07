@@ -1,0 +1,6 @@
+#include "services_dune.fcl"
+services.user: @local::dune35t_services
+services.AdcDeconvolutionService: {
+  service_provider: DuneDeconvolutionService
+  LogLevel:              1
+}

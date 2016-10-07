@@ -1,0 +1,6 @@
+# dump_adcnr_dune35tlegacy.fcl
+
+#include "dataprep_dune.fcl"
+
+service.AdcNoiseRemovalService: @local::adcnr_dune35tlegacy
+service.AdcNoiseRemovalService.ShowGroups: 2

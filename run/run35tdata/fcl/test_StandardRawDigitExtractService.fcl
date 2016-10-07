@@ -1,0 +1,7 @@
+services.RawDigitExtractService: {
+  service_provider: StandardRawDigitExtractService
+  LogLevel: 1
+  PedestalOption: 1
+  FlagStuckOff: true
+  FlagStuckOn: true
+}

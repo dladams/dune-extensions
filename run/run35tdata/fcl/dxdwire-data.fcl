@@ -1,0 +1,47 @@
+# dxdwire.fcl
+
+# David Adams
+# July 2016
+
+# Build DXD histograms for Wire data.
+
+#include "dxdisplay_module.fcl"
+#include "services_dune.fcl"
+
+process_name: dxrun
+
+services: {
+  TimeTracker:       {}
+  @table::dune35tdata_reco_services
+}
+
+#source: @local::split_events
+#source.ADCsOverThreshold: 100
+
+physics: {
+
+  #define the output stream, there could be more than one if using filters 
+  stream1:  [ out1 ]
+
+  analyzers: {
+    DXDisplay: @local::dxdisplay_default
+  }
+
+  analysis: [ DXDisplay ]
+
+  end_paths: [ stream1, analysis ]
+}
+
+outputs: {
+  out1: {
+    dataTier: "raw"
+    module_type: RootOutput
+    fileName:    "dxdwire.root" 
+    #default file name, can override from command line with -o or --output
+  }
+}
+
+physics.analyzers.DXDisplay.DoEventTree:               true
+physics.analyzers.DXDisplay.DoDeconvolutedSignalHists: true
+physics.analyzers.DXDisplay.TdcTickMax:               15000
+physics.analyzers.DXDisplay.DebugLevel: 2

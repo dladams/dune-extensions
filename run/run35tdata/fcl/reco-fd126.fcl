@@ -1,0 +1,6 @@
+# recowire-fd126.fcl
+
+# David Adams
+# September 2016
+
+#include "standard_reco_dune10kt_1x2x6.fcl"

@@ -1,0 +1,12 @@
+# recowire-35tm.fcl
+
+# David Adams
+# September 2016
+
+#include "standard_reco_dune35tsim_milliblock.fcl"
+
+process_name: Reco2
+
+physics.reco: ["rns", "ophit", "opflash", "t0counter", "hitcheat", "clustercheat", "trackcheat", "gaushit", "dcheat", "fasthit", "dbclusterdc", "lineclusterdc", "costrkdc", "mctrutht0dc", "photont0costrkdc", "calodc", "pandoradc", "particlestitcherdc", "mctrutht0pandoradc", "photont0pandoradc", "pandoracalodc", "pmtrackdc", "mctrutht0pmtrackdc", "photont0pmtrackdc", "pmtrackcalodc", "pmtrajfitdc", "mctrutht0pmtrajfitdc", "photont0pmtrajfitdc", "pmtrajfitcalodc", "blurredclusterdc", "emshowerdc", "hit35t", "dbcluster", "linecluster", "costrk", "mctrutht0", "photont0costrk", "calo", "pandora", "particlestitcher", "mctrutht0pandora", "photont0pandora", "pandoracalo", "pmtrack", "mctrutht0pmtrack", "photont0pmtrack", "pmtrackcalo", "pmtrajfit", "mctrutht0pmtrajfit", "photont0pmtrajfit", "pmtrajfitcalo", "blurredcluster", "emshower"]
+
+#services.AdcWireBuildingService.LogLevel: 2

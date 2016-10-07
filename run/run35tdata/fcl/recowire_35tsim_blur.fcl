@@ -1,0 +1,8 @@
+# recowire_35tdata_blur.fcl
+
+# David Adams
+# July 2016
+
+#include "reco_dune35tsim_blur.fcl"
+
+physics.reco: ["caldata"]

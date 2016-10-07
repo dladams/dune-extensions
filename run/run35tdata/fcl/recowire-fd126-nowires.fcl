@@ -1,0 +1,16 @@
+# recowire-fd126.fcl
+
+# David Adams
+# August 2016
+
+#include "standard_reco_dune10kt_1x2x6.fcl"
+
+physics.reco: ["caldata"]
+
+services.RawDigitPrepService.DoWires:  false
+
+#services.RawDigitPrepService.LogLevel:        3
+#services.RawDigitPrepService.DoDump:       true
+#services.RawDigitPrepService.DumpChannel: 17463
+#services.RawDigitPrepService.DumpTick:     4491
+

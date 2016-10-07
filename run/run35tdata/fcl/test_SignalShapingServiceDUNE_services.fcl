@@ -1,0 +1,4 @@
+#include "services_dune.fcl"
+services: {
+user: @local::dune35t_services
+}

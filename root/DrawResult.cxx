@@ -44,6 +44,41 @@ TH1* DrawResult::timeChannel(unsigned int chan) const {
 
 //**********************************************************************
 
+TH1* DrawResult::signalChannel(unsigned int chan) {
+  const string myname = "DrawResult::signalChannel: ";
+  if ( chan >= hdrawxChan.size() ) return 0;
+  if ( hsigChan.size() <= chan ) hsigChan.resize(chan+1, nullptr);
+  TH1*& phsig = hsigChan[chan];
+  if ( phsig == nullptr ) {
+    TH1* phtim = hdrawxChan[chan];
+    if ( phtim == nullptr ) {
+      cout << myname << "Time spectrum not found for channel " << chan << endl;
+      return nullptr;
+    }
+    string hname = string(phtim->GetName()) + "_signal";
+    string htitl = "Signal for " + string(phtim->GetName());
+    int nbin = nsig;
+    double xmin = sigmin;
+    double xmax = sigmax;
+    if ( nbin == -1 ) {
+      double dsig = sigmin;
+      if ( dsig <= 0.0 ) dsig = 1.0;
+      xmin = phtim->GetMinimum();
+      xmax = phtim->GetMaximum() + dsig;
+      nbin = (xmax - xmin)/dsig;
+    }
+    phsig = new TH1F(hname.c_str(), htitl.c_str(), nbin, xmin, xmax);
+    phsig->GetXaxis()->SetTitle(phtim->GetYaxis()->GetTitle());
+    phsig->GetYaxis()->SetTitle("Count");
+    for ( int ibin=1; ibin<=phtim->GetNbinsX(); ++ibin ) {
+      phsig->Fill(phtim->GetBinContent(ibin));
+    } 
+  }
+  return phsig;
+}
+
+//**********************************************************************
+
 TH2* DrawResult::freq() {
   const string myname = "DrawResult::freq: ";
   if ( pfft == nullptr ) {

@@ -1,0 +1,13 @@
+# recowire-35tdata-nomit-nonr-nodco-noroi.fcl
+
+# David Adams
+# July 2016
+
+#include "standard_reco_dune35tdata.fcl"
+
+physics.reco: ["caldata"]
+
+services.RawDigitPrepService.DoMitigation:    false
+services.RawDigitPrepService.DoNoiseRemoval:  false
+services.RawDigitPrepService.DoDeconvolution: false
+services.RawDigitPrepService.DoROI:           false

@@ -1,0 +1,6 @@
+#include "services_dune.fcl"
+services: @local::dune35t_services
+services.AdcRoiBuildingService: {
+  service_provider: KeepAllRoiBuildingService
+  LogLevel:       -1
+}

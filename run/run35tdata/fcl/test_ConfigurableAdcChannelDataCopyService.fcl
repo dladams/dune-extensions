@@ -1,0 +1,7 @@
+services.AdcChannelDataCopyService: {
+  service_provider: ConfigurableAdcChannelDataCopyService
+  LogLevel:              1
+  CopyChannel: true
+  CopyPedestal: true
+  CopySamples: true
+}

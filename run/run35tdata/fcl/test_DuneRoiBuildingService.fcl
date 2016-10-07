@@ -1,0 +1,10 @@
+#include "services_dune.fcl"
+services.user: @local::dune35t_services
+services.AdcRoiBuildingService: {
+  service_provider: DuneRoiBuildingService
+  NSigmaStart:  4.0
+  NSigmaEnd:    1.0
+  PadLow:         5
+  PadHigh:       10
+  LogLevel:       -1
+}

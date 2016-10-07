@@ -1,0 +1,10 @@
+services.AdcSuppressService: {
+  service_provider: Legacy35tZeroSuppressService
+  AdcThreshold: 30.0
+  TickRange: 4
+  MinTickGap: 2
+  SuppressStickyBits: false
+}
+services.AdcSignalFindingService: {
+  service_provider: AdcSuppressSignalFindingService
+}

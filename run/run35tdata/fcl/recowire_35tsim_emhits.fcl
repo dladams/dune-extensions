@@ -1,0 +1,8 @@
+# recowire_35tdata_emhits.fcl
+
+# David Adams
+# July 2016
+
+#include "reco_dune35tsim_emhits.fcl"
+
+physics.reco: ["caldata"]

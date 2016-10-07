@@ -1,0 +1,8 @@
+# recowire-fd126-45deg-nu.fcl
+
+# David Adams
+# August 2016
+
+#include "standard_reco_dune10kt_45deg_nu_1x2x6.fcl"
+
+physics.reco: ["caldata"]

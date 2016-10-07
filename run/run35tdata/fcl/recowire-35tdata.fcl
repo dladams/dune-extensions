@@ -1,0 +1,8 @@
+# recowire-35tdata.fcl
+
+# David Adams
+# July 2016
+
+#include "standard_reco_dune35tdata.fcl"
+
+physics.reco: ["caldata"]

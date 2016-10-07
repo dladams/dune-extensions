@@ -1,0 +1,8 @@
+# recowire-fdws-45deg.fcl
+
+# David Adams
+# August 2016
+
+#include "standard_reco_dune10kt_45deg_workspace.fcl"
+
+physics.reco: ["caldata"]

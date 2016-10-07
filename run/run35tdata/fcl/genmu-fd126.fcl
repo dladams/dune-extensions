@@ -1,0 +1,3 @@
+# genmu-fd126.fcl
+
+#include "prod_muminus_0.1-5.0GeV_isotropic_dune10kt_1x2x6.fcl"

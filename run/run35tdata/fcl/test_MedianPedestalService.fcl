@@ -1,0 +1,6 @@
+services.PedestalEvaluationService: {
+  service_provider: MedianPedestalService
+            LogLevel:    1
+  SkipFlaggedSamples: true
+         SkipSignals: true
+}
