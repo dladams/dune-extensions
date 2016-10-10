@@ -6,7 +6,7 @@
 class TFile;
 
 // Default DXDisplay file.
-TFile* gDXFile = nullptr;
+extern TFile* gDXFile;
 
 // Opens a file and set gFile nd gDXFile to point to
 // that file iff it is a DXDisplay file.

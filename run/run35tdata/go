@@ -84,9 +84,9 @@ if [ -z "$FCLNAME" ]; then
   exit 3
 fi
 FCLFILE=$FCLNAME.fcl
-FCLPATH=`pwd`/$FCLFILE
-if [ ! -r $FCLFILE  ]; then
-  echo FCL file not found: $FCLFILE
+FCLPATH=`pwd`/fcl/$FCLFILE
+if [ ! -r $FCLPATH  ]; then
+  echo FCL file not found: $FCLPATH
   exit 4
 fi
 

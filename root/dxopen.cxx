@@ -19,6 +19,8 @@ using std::string;
 using std::cout;
 using std::endl;
 
+TFile* gDXFile = nullptr;
+
 int dxopen(string ifname);
 int dxopen(TFile* pfile);
 int dxopen(TObjArray* pobjs);
