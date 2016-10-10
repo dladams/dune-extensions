@@ -1,6 +1,7 @@
 #include "draw.h"
 #include "DrawResult.h"
 #include "dxlabel.h"
+#include "mycolors.h"
 #include "TCanvas.h"
 #include "TText.h"
 #include "TH1.h"
@@ -19,10 +20,28 @@ using std::ostringstream;
 using std::fixed;
 using std::setprecision;
 
+bool howStuck(int adc) {
+  if ( 64*(adc/64) == adc ) return 1;
+  int adcn = adc + 1;
+  if ( 64*(adcn/64) == adcn ) return 2;
+  return 0;
+}
+
 int fig(int chan1, int chan2, string fout) {
   double zmax = 4000;
-  DrawResult res1 = draw("h1_adcall", 0, zmax);
-  DrawResult res2 = draw("h2_adcall", 0, zmax);
+  vector<int> evns = {1, 2, 3};
+  vector<string> sevns;
+  vector<DrawResult> ress;
+  for ( int evn : evns ) {
+    ostringstream ssevn;
+    ssevn << evn;
+    string sevn = ssevn.str();
+    sevns.push_back(sevn);
+    string hname = "h" + sevn + "_adcall";
+    DrawResult res = draw(hname, 0, zmax);
+    ress.push_back(std::move(res));
+  }
+  DrawResult& res1 = ress[0];
   TCanvas* pcan = nullptr;
   if ( fout.size() ) {
     ostringstream sslab;
@@ -52,15 +71,23 @@ int fig(int chan1, int chan2, string fout) {
       if ( chan < 0 ) return 0;
       if ( fout.size() == 0 ) pcan = new TCanvas;
     }
+    vector<TH1*> phsigs;
+    vector<TH1*> phstuckRanges;
+    for ( DrawResult& res : ress ) {
+      TH1* phstuckRange;
+      phsigs.push_back(res.signalChannel(chan), &phstuckRange);
+      phstuckRanges.push_back(phstuckRange);
+    }
+    TH1* ph1 = phsigs[0];
     if ( pcan == 0 ) pcan = new TCanvas;
-    TH1* ph1 = res1.signalChannel(chan);
-    TH1* ph2 = res2.signalChannel(chan);
     // Skip bad channels.
     if ( ph1->GetNbinsX() < 2 ) continue;
     // Set the maximum for the y-axis.
-    double ymax = ph1->GetMaximum();
-    double ymax2 = ph2->GetMaximum();
-    if ( ymax2 > ymax ) ymax = ymax2;
+    double ymax = 0.0;
+    for ( TH1* phsig : phsigs ) {
+      double ymaxnew = phsig->GetMaximum();
+      if ( ymaxnew > ymax ) ymax = ymaxnew;
+    }
     ymax *= 1.03;
     ph1->SetMaximum(ymax);
     // Suppress small counts at either end of spectrum if
@@ -87,10 +114,14 @@ int fig(int chan1, int chan2, string fout) {
     ph1->SetStats(0);
     ph1->GetXaxis()->SetTitle("ADC count");
     ph1->GetYaxis()->SetTitle("# ticks");
-    ph2->SetLineColor(1);
     ph1->SetLineWidth(2);
-    ph2->SetLineColor(2);
-    ph2->SetLineStyle(2);
+    for ( unsigned int ihst=0; ihst<phsigs.size(); ++ihst ) {
+      TH1* phsig = phsigs[ihst];
+      int icol = ihst % myncol;
+      int col = mycols[icol];
+      phsig->SetLineColor(col);
+      phsig->SetLineStyle(ihst+1);
+    }
     pcan->SetLeftMargin(0.12);
     pcan->SetRightMargin(0.06);
     ph1->GetYaxis()->SetTitleOffset(1.4);
@@ -99,13 +130,11 @@ int fig(int chan1, int chan2, string fout) {
     int adcmax = ph1->GetXaxis()->GetXmax();
     int sumTickStuck = 0;
     int sumTick = 0;
-    for ( int bin=1; bin<nbin; ++bin ) {
+    for ( int bin=1; bin<=nbin; ++bin ) {
       int adc = ph1->GetXaxis()->GetBinCenter(bin);
       int nTick = ph1->GetBinContent(bin);
       sumTick += nTick;
-      int adcn = adc + 1;
-      if ( 64*(adc/64) == adc ||
-           64*(adcn/64) == adcn ) {
+      if ( howStuck(adc) ) {
         sumTickStuck += nTick;
         TLine* pline = new TLine(adc+0.5, 0.0, adc+0.5, ymax);
         pline->SetLineStyle(3);
@@ -119,14 +148,19 @@ int fig(int chan1, int chan2, string fout) {
     string spstuck = sspstuck.str();
     cout << "Channel " << chan << ": stuck/total: " << sumTickStuck << "/" << sumTick
          << "(" << spstuck << "%)" << endl;
-    TLegend* pleg = new TLegend(0.79, 0.77, 0.91, 0.88);
-    pleg->AddEntry(ph1, "Event 1", "l");
-    pleg->AddEntry(ph2, "Event 2", "l");
+    double legymax = 0.88;
+    double legymin = legymax - 0.03 - 0.04*phsigs.size();
+    TLegend* pleg = new TLegend(0.79, legymin, 0.91, legymax);
+    for ( unsigned int ihst=0; ihst<phsigs.size(); ++ihst ) {
+      string slab = "Event " + sevns[ihst];
+      pleg->AddEntry(phsigs[ihst], slab.c_str(), "l");
+    }
     pleg->SetBorderSize(0);
     pleg->Draw();
     dxlabel()->Draw();
-    ph1->Draw("same");
-    ph2->Draw("same");
+    for ( TH1* phsig : phsigs ) {
+      phsig->Draw("same");
+    }
     pcan->Update();
     if ( fout.size() ) {
       ostringstream sstoclab;
@@ -135,6 +169,7 @@ int fig(int chan1, int chan2, string fout) {
     }
     ++nChanGood;
   }
+  dxlabel()->Draw();
   int nChanBad = nChan - nChanGood;
   pcan = new TCanvas;
   phstuck->Draw();
@@ -156,5 +191,6 @@ int fig(int chan1, int chan2, string fout) {
     string fname = fout + ")";
     pcan->Print(fname.c_str(), "Title:Conclusion");
   }
+  dxlabel()->Draw();
   return 1;
 }

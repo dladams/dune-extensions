@@ -26,6 +26,7 @@ struct DrawResult {
   TH1* hdrawy = nullptr;
   std::vector<TH1*> hdrawxChan;
   std::vector<TH1*> hsigChan;
+  std::vector<TH1*> hstuckRange;
   std::vector<TH1*> hfreqChan;
   std::vector<TH1*> htpwrChan;
   std::vector<TH1*> hfpwrChan;
@@ -48,7 +49,9 @@ struct DrawResult {
   TH1* timeChannel(unsigned int chan) const;
 
   // Histogram of signal for all ticks for one channel.
-  TH1* signalChannel(unsigned int chan);
+  // Optionally returns hstuckRange which is the distribution of
+  // consecutive stuck bits assuming the signal is direct from ADC.
+  TH1* signalChannel(unsigned int chan, TH1** pphstuckRange =nullptr);
 
   // Fetch the frequency spectrum for all channels.
   TH2* freq();

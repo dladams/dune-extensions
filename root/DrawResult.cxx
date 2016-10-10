@@ -12,6 +12,19 @@ using std::endl;
 
 //**********************************************************************
 
+namespace {
+
+int howStuck(int adc) {
+  if ( 64*(adc/64) == adc ) return 1;
+  int adcn = adc + 1;
+  if ( 64*(adcn/64) == adcn ) return 2;
+  return 0;
+}
+
+}
+
+//**********************************************************************
+
 DrawResult::DrawResult(int atmin, int atmax)
 : tmin(atmin), tmax(atmax) {
   if ( tmax <= tmin ) tmax = tmin = 0;
@@ -44,11 +57,17 @@ TH1* DrawResult::timeChannel(unsigned int chan) const {
 
 //**********************************************************************
 
-TH1* DrawResult::signalChannel(unsigned int chan) {
+TH1* DrawResult::signalChannel(unsigned int chan, TH1** pphstuckRange) {
   const string myname = "DrawResult::signalChannel: ";
   if ( chan >= hdrawxChan.size() ) return 0;
-  if ( hsigChan.size() <= chan ) hsigChan.resize(chan+1, nullptr);
+  if ( hsigChan.size() <= chan ) {
+    hsigChan.resize(chan+1, nullptr);
+    hstuckRange.resize(chan+1, nullptr);
+  }
   TH1*& phsig = hsigChan[chan];
+  TH1*& phstuckRange = hstuckRange[chan];
+  if ( pphstuckRange != nullptr ) *pphstuckRange = phstuckRange;
+  int maxStuck = 50;
   if ( phsig == nullptr ) {
     TH1* phtim = hdrawxChan[chan];
     if ( phtim == nullptr ) {
@@ -56,7 +75,9 @@ TH1* DrawResult::signalChannel(unsigned int chan) {
       return nullptr;
     }
     string hname = string(phtim->GetName()) + "_signal";
+    string hsname = string(phtim->GetName()) + "_stuckrange";
     string htitl = "Signal for " + string(phtim->GetName());
+    string hstitl = "Stuck-bit ranges for " + string(phtim->GetName());
     int nbin = nsig;
     double xmin = sigmin;
     double xmax = sigmax;
@@ -70,8 +91,25 @@ TH1* DrawResult::signalChannel(unsigned int chan) {
     phsig = new TH1F(hname.c_str(), htitl.c_str(), nbin, xmin, xmax);
     phsig->GetXaxis()->SetTitle(phtim->GetYaxis()->GetTitle());
     phsig->GetYaxis()->SetTitle("Count");
-    for ( int ibin=1; ibin<=phtim->GetNbinsX(); ++ibin ) {
-      phsig->Fill(phtim->GetBinContent(ibin));
+    phstuckRange = new TH1F(hsname.c_str(), hstitl.c_str(), maxStuck, 0, maxStuck);
+    phstuckRange->GetXaxis()->SetTitle("# contiguous ticks with stuck bits");
+    phstuckRange->GetYaxis()->SetTitle("Count");
+    int nstuck = 0;
+    bool isStuck = false;
+    int ntbin = phtim->GetNbinsX();
+    for ( int ibin=1; ibin<=ntbin; ++ibin ) {
+      bool isLast = ibin == ntbin;
+      double xadc = phtim->GetBinContent(ibin);
+      phsig->Fill(xadc);
+      unsigned short iadc = xadc + 0.01;
+      bool wasStuck = isStuck;
+      isStuck = howStuck(iadc);
+      if ( isStuck ) ++nstuck;    // # consecutive sticks
+      if ( wasStuck ) {
+        if ( ! isStuck || isLast ) {
+          phstuckRange->Fill(nstuck);
+        }
+      }
     } 
   }
   return phsig;
