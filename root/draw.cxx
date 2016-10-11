@@ -31,6 +31,8 @@ using std::endl;
 using std::hex;
 using std::dec;
 
+TCanvas* drawCanvas = nullptr;
+
 DrawResult draw(std::string name, int how, double zmax,
                 double xmin, double xmax, double ymin, double ymax) {
   DrawResult res(xmin, xmax);
@@ -92,7 +94,7 @@ DrawResult draw(std::string name, int how, double zmax,
     res.status = 1;
     return res;
   }
-  static TCanvas* pcan = 0;
+  TCanvas*& pcan = drawCanvas;
   static TH2* phdraw;
   TH2* phnew = dynamic_cast<TH2*>(pobj);
   if ( phnew == 0 ) {

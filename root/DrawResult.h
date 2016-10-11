@@ -51,6 +51,7 @@ struct DrawResult {
   // Histogram of signal for all ticks for one channel.
   // Optionally returns hstuckRange which is the distribution of
   // consecutive stuck bits assuming the signal is direct from ADC.
+  // This filled for each stuck bit, not just each stuck-bit range.
   TH1* signalChannel(unsigned int chan, TH1** pphstuckRange =nullptr);
 
   // Fetch the frequency spectrum for all channels.

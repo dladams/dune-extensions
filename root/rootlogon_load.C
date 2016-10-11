@@ -65,6 +65,7 @@
   gROOT->ProcessLine(".L dxopen.cxx+");
   gROOT->ProcessLine(".L dxprint.cxx+");
   gROOT->ProcessLine(".L FFTHist.cxx+");
+  gROOT->ProcessLine(".L howStuck.cxx+");
   gROOT->ProcessLine(".L DrawResult.cxx+");
   gROOT->ProcessLine(".L draw.cxx+");
   gROOT->ProcessLine(".L draw1d.cxx+");

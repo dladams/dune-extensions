@@ -1,6 +1,7 @@
 // DrawResult.cxx
 
 #include "DrawResult.h"
+#include "howStuck.h"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -9,19 +10,6 @@
 using std::string;
 using std::cout;
 using std::endl;
-
-//**********************************************************************
-
-namespace {
-
-int howStuck(int adc) {
-  if ( 64*(adc/64) == adc ) return 1;
-  int adcn = adc + 1;
-  if ( 64*(adcn/64) == adcn ) return 2;
-  return 0;
-}
-
-}
 
 //**********************************************************************
 
@@ -103,15 +91,17 @@ TH1* DrawResult::signalChannel(unsigned int chan, TH1** pphstuckRange) {
       phsig->Fill(xadc);
       unsigned short iadc = xadc + 0.01;
       bool wasStuck = isStuck;
+      if ( ! wasStuck ) nstuck = 0;
       isStuck = howStuck(iadc);
       if ( isStuck ) ++nstuck;    // # consecutive sticks
       if ( wasStuck ) {
         if ( ! isStuck || isLast ) {
-          phstuckRange->Fill(nstuck);
+          phstuckRange->Fill(nstuck, nstuck);
         }
       }
     } 
   }
+  if ( pphstuckRange != nullptr ) *pphstuckRange = phstuckRange;
   return phsig;
 }
 
