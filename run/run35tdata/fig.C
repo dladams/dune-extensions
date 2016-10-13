@@ -22,6 +22,7 @@ using std::cout;
 using std::ostringstream;
 using std::fixed;
 using std::setprecision;
+using std::setw;
 
 int myprec(double val) {
   if ( val < 2.e-8 ) return 1;
@@ -105,9 +106,17 @@ int fig(int chan1, int chan2, string fout) {
   }
   int nChan = 0;
   int nChanGood = 0;
+  int nChanR5gtp05 = 0;
+  int nChanR5gtp10 = 0;
   TH1* phstuck = new TH1F("hstuck", "Stuck-bit fraction; Fraction; # Channels", 100, 0, 1.00001);
+  TH1* phsrate1 = new TH1F("hsrate1", "Stuck-bit rate integral above 1; R_{stuck}^{1}; # Channels", 100, 0, 1.00001);
+  TH1* phsrate5 = new TH1F("hsrate5", "Stuck-bit rate integral above 5; R_{stuck}^{5}; # Channels", 100, 0, 1.00001);
   phstuck->SetStats(0);
   phstuck->SetLineWidth(2);
+  phsrate1->SetStats(0);
+  phsrate1->SetLineWidth(2);
+  phsrate5->SetStats(0);
+  phsrate5->SetLineWidth(2);
   pcan = 0;
   for ( int chan=chan1; chan<=chan2; ++chan ) {
     //cout << "Channel " << chan << endl;
@@ -221,6 +230,8 @@ int fig(int chan1, int chan2, string fout) {
     }
     double fstuck = double(sumTickStuck)/double(sumTick);
     phstuck->Fill(fstuck);
+    phsrate1->Fill(srate1);
+    phsrate5->Fill(srate5);
     ostringstream sspstuck;
     sspstuck << fixed << setprecision(3) << fstuck;
     string spstuck = sspstuck.str();
@@ -269,28 +280,78 @@ int fig(int chan1, int chan2, string fout) {
       pcan->Print(fout.c_str(), sstoclab.str().c_str());
     }
     ++nChanGood;
+    if ( srate5 > 0.05 ) ++nChanR5gtp05;
+    if ( srate5 > 0.10 ) ++nChanR5gtp10;
   }
   dxlabel()->Draw();
   int nChanBad = nChan - nChanGood;
-  pcan = new TCanvas;
-  phstuck->Draw();
-  dxlabel()->Draw();
-  if ( fout.size() ) {
-    pcan->Print(fout.c_str(), "Title:Stuck bit fraction");
+  {
+    pcan = new TCanvas;
+    phstuck->Draw();
+    dxlabel()->Draw();
+    if ( fout.size() ) {
+      pcan->Print(fout.c_str(), "Title:Stuck bit fraction");
+    }
+  }
+  {
+    pcan = new TCanvas;
+    phsrate1->Draw();
+    dxlabel()->Draw();
+    if ( fout.size() ) {
+      pcan->Print(fout.c_str(), "Title:R 1");
+    }
+  }
+  {
+    pcan = new TCanvas;
+    phsrate5->Draw();
+    dxlabel()->Draw();
+    if ( fout.size() ) {
+      pcan->Print(fout.c_str(), "Title:R 5");
+    }
   }
   if ( fout.size() ) {
-    ostringstream sslab;
-    sslab << "Channels " << chan1 << " to " << chan2;
-    TText* ptxt = new TText(0.20, 0.50, sslab.str().c_str());
-    ostringstream sslab2;
-    sslab2 << "Bad/total channels: \n" << nChanBad << "/" << nChan;
-    TText* ptxt2 = new TText(0.20, 0.43, sslab2.str().c_str());
-    ptxt2->SetNDC();
-    TCanvas* pcan = new TCanvas();
-    ptxt->Draw();
-    ptxt2->Draw();
+    vector<string> slines;
+    {
+      ostringstream sslab;
+      sslab << "Summary for channels " << chan1 << " to " << chan2;
+      slines.push_back(sslab.str());
+    }
+    {
+      ostringstream sslab;
+      double rat = double(nChanBad)/nChan;
+      sslab << "                Bad/total channels: " << setw(4) << nChanBad << "/" << nChan
+            << " (" << fixed << setprecision(myprec(rat)) << rat << ")";
+      slines.push_back(sslab.str());
+    }
+    {
+      ostringstream sslab;
+      double rat = double(nChanR5gtp10)/nChan;
+      sslab << "(R_{stuck}^{5} > 0.10)/total channels: " << setw(4) << nChanR5gtp10 << "/" << nChan
+            << " (" << fixed << setprecision(myprec(rat)) << rat << ")";
+      slines.push_back(sslab.str());
+    }
+    {
+      ostringstream sslab;
+      double rat = double(nChanR5gtp05)/nChan;
+      sslab << "(R_{stuck}^{5} > 0.05)/total channels: " << setw(4) << nChanR5gtp05 << "/" << nChan
+            << " (" << fixed << setprecision(myprec(rat)) << rat << ")";
+      slines.push_back(sslab.str());
+    }
+    double xtxt = 0.15;
+    double ytxt = 0.70;
+    double dytxt = 0.08;
+    pcan = new TCanvas();
+    for ( string sline : slines ) {
+      cout << sline << endl;
+      TLatex* ptxt = new TLatex(xtxt, ytxt, sline.c_str());
+      ptxt->SetNDC();
+      //ptxt->SetTextFont(43);
+      ptxt->Print();
+      ptxt->Draw();
+      ytxt -= dytxt;
+    }
     string fname = fout + ")";
-    pcan->Print(fname.c_str(), "Title:Conclusion");
+    pcan->Print(fname.c_str(), "Title:Summary");
   }
   dxlabel()->Draw();
   return 1;
