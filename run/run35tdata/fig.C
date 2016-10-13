@@ -35,12 +35,17 @@ int myprec(double val) {
   else return 3;
 }
 
-int fig(int chan1, int chan2, string fout) {
+int fig(int chan1, int chan2, string fout, unsigned int evn1=1, unsigned int evn2=0) {
+  const string myname = "fig: ";
   double zmax = 4000;
-  vector<int> evns = {1, 2, 3, 4};
+  vector<int> evns;
+  {
+    unsigned int evn = evn1;
+    evns.push_back(evn);
+    while ( ++evn <= evn2 ) evns.push_back(evn);
+  }
   vector<string> sevns;
   vector<DrawResult> ress;
-  DrawResult& res1 = ress[0];
   // Draw title page.
   TCanvas* pcan = nullptr;
   if ( fout.size() ) {
@@ -101,8 +106,13 @@ int fig(int chan1, int chan2, string fout) {
     sevns.push_back(sevn);
     string hname = "h" + sevn + "_adcall";
     DrawResult res = draw(hname, 0, zmax);
+    if ( res.status ) {
+      cout << myname << "ERROR: Unable to find histogram " << hname << endl;
+      return 2;
+    }
     ress.push_back(std::move(res));
   }
+  DrawResult& res1 = ress[0];
   int nChan = 0;
   int nChanGood = 0;
   TH1* phstuck = new TH1F("hstuck", "Stuck-bit fraction; Fraction; # Channels", 100, 0, 1.00001);
@@ -117,7 +127,7 @@ int fig(int chan1, int chan2, string fout) {
       cout.flush();
       chan = -1;
       cin >> chan;
-      if ( chan < 0 ) return 0;
+      if ( chan < 0 ) return 2;
       if ( fout.size() == 0 ) pcan = new TCanvas;
     }
     vector<TH1*> phsigs;
@@ -293,5 +303,5 @@ int fig(int chan1, int chan2, string fout) {
     pcan->Print(fname.c_str(), "Title:Conclusion");
   }
   dxlabel()->Draw();
-  return 1;
+  return 0;
 }
