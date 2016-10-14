@@ -3,6 +3,7 @@
 #include "dxlabel.h"
 #include "mycolors.h"
 #include "howStuck.h"
+#include "TStyle.h"
 #include "TDatime.h"
 #include "TCanvas.h"
 #include "TText.h"
@@ -15,6 +16,8 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <vector>
+#include <map>
 
 using std::string;
 using std::cin;
@@ -23,6 +26,15 @@ using std::ostringstream;
 using std::fixed;
 using std::setprecision;
 using std::setw;
+using std::vector;
+using std::map;
+
+typedef vector<TH1*> HistVector;
+typedef vector<double> ValueVector;
+typedef map<int, HistVector>  EventHistMap;
+typedef map<int, ValueVector> EventValueMap;
+
+vector<DrawResult> figres;
 
 int myprec(double val) {
   if ( val < 2.e-8 ) return 1;
@@ -46,9 +58,12 @@ int fig(int chan1, int chan2, string fout, unsigned int evn1=1, unsigned int evn
     while ( ++evn <= evn2 ) evns.push_back(evn);
   }
   vector<string> sevns;
-  vector<DrawResult> ress;
+  vector<DrawResult>& ress = figres;
+  ress.clear();
+  TLegend* pleg = nullptr;
   // Draw title page.
   TCanvas* pcan = nullptr;
+  unsigned int nchan = chan2 - chan1 + 1;
   if ( fout.size() ) {
     TDatime date;
     string stime = date.AsString();
@@ -114,20 +129,69 @@ int fig(int chan1, int chan2, string fout, unsigned int evn1=1, unsigned int evn
     ress.push_back(std::move(res));
   }
   DrawResult& res1 = ress[0];
+  unsigned int nevt = ress.size();
+  // Assign colors and line styles for each event.
+  vector<int> evtcols;
+  vector<int> evtlines;
+  for ( unsigned int ievt=0; ievt<nevt; ++ievt ) {
+    int icol = ievt % myncol;
+    int col = mycols[icol];
+    evtcols.push_back(col);
+    evtlines.push_back(ievt+1);
+  }
+  // Set style for 1D plots..
+  double padLeftMargin = gStyle->GetPadLeftMargin();
+  double padRightMargin = gStyle->GetPadRightMargin();
+  gStyle->SetPadLeftMargin(0.12);
+  gStyle->SetPadRightMargin(0.06);
+  // Initialize channel counters.
   int nChan = 0;
   int nChanGood = 0;
   int nChanR5gtp05 = 0;
   int nChanR5gtp10 = 0;
+  // Create multi-channel histograms.
+  // ... Stuck-bit fraction for the first event
   TH1* phstuck = new TH1F("hstuck", "Stuck-bit fraction; Fraction; # Channels", 100, 0, 1.00001);
-  TH1* phsrate1 = new TH1F("hsrate1", "Stuck-bit rate integral above 1; R_{stuck}^{1}; # Channels", 100, 0, 1.00001);
-  TH1* phsrate5 = new TH1F("hsrate5", "Stuck-bit rate integral above 5; R_{stuck}^{5}; # Channels", 100, 0, 1.00001);
-  phstuck->SetStats(0);
-  phstuck->SetLineWidth(2);
-  phsrate1->SetStats(0);
-  phsrate1->SetLineWidth(2);
-  phsrate5->SetStats(0);
-  phsrate5->SetLineWidth(2);
-  pcan = 0;
+  // Channel distribution of R for each threshold and event.
+  vector<int> rthreshs = {1, 2, 3, 4, 5, 10, 50};
+  EventHistMap hsratedistmap;
+  for ( int rthresh : rthreshs ) {
+    for ( unsigned int ievt=0; ievt<nevt; ++ievt ) {
+      int evn = evns[ievt];
+      ostringstream sshname;
+      ostringstream sshtitl;
+      sshname << "hsrate" << rthresh << "dist_evt" << evn;
+      sshtitl << "Stuck-bit rate integral above " << rthresh << " for event " << evn
+              << "; R_{stuck}^{" << rthresh << "}; # Channels";
+      TH1* ph = new TH1F(sshname.str().c_str(), sshtitl.str().c_str(), 100, 0, 1.00001);
+      ph->SetStats(0);
+      if ( ievt == 0 ) ph->SetLineWidth(2);
+      ph->SetLineColor(evtcols[ievt]);
+      ph->SetLineStyle(evtlines[ievt]);
+      hsratedistmap[rthresh].push_back(ph);
+    }
+  }
+  // R vs. channel for each threshold and event.
+  EventHistMap hsratechanmap;
+  for ( int rthresh : rthreshs ) {
+    for ( unsigned int ievt=0; ievt<nevt; ++ievt ) {
+      int evn = evns[ievt];
+      ostringstream sshname;
+      ostringstream sshtitl;
+      sshname << "hsrate" << rthresh << "chan_evt" << evn;
+      sshtitl << "Stuck-bit rate integral above " << rthresh << " for event " << evn
+              << ";Channel;R_{stuck}^{" << rthresh << "}";
+      TH1* ph = new TH1F(sshname.str().c_str(), sshtitl.str().c_str(), nchan, chan1, chan2+1);
+      ph->SetStats(0);
+      if ( ievt == 0 ) ph->SetLineWidth(2);
+      ph->SetLineColor(evtcols[ievt]);
+      ph->SetLineStyle(evtlines[ievt]);
+      ph->GetYaxis()->SetRangeUser(0,1);
+      hsratechanmap[rthresh].push_back(ph);
+    }
+  }
+  // Loop over channels.
+  pcan = nullptr;
   for ( int chan=chan1; chan<=chan2; ++chan ) {
     //cout << "Channel " << chan << endl;
     ++nChan;
@@ -139,9 +203,10 @@ int fig(int chan1, int chan2, string fout, unsigned int evn1=1, unsigned int evn
       if ( chan < 0 ) return 2;
       if ( fout.size() == 0 ) pcan = new TCanvas;
     }
+    // Fetch the ADC and stuck range histograms.
     vector<TH1*> phsigs;
     vector<TH1*> phstuckRanges;
-    for ( unsigned int ievt=0; ievt<ress.size(); ++ievt ) {
+    for ( unsigned int ievt=0; ievt<nevt; ++ievt ) {
       DrawResult& res = ress[ievt];
       string slab = "Title:Event " + sevns[ievt];
       TH1* phstuckRange;
@@ -149,34 +214,40 @@ int fig(int chan1, int chan2, string fout, unsigned int evn1=1, unsigned int evn
       phstuckRanges.push_back(phstuckRange);
       // drawCanvas->Print(fout.c_str(), slab.c_str());   // Exhausts the memeory.
     }
+    // Skip empty channels.
     TH1* ph1 = phsigs[0];
-    unsigned int ntick = ress[0].timeChannel(chan)->GetNbinsX();
-    // Retch the stuck range rates.
-    TH1* phsr1 = phstuckRanges[0];
-    unsigned int nsr = phstuckRanges[0]->GetNbinsX();
-    double srate1 = phsr1->Integral(1, nsr+1)/ntick;
-    double srate5 = phsr1->Integral(5, nsr+1)/ntick;
-    double srate10 = phsr1->Integral(10, nsr+1)/ntick;
-    double srate50 = phsr1->Integral(50, nsr+1)/ntick;
-    ostringstream sssrate1;
-    ostringstream sssrate5;
-    ostringstream sssrate10;
-    ostringstream sssrate50;
-    sssrate1  << "R_{stuck}^{1} = " << fixed << setprecision(myprec(srate1)) << srate1;
-    sssrate5  << "R_{stuck}^{5} = " << fixed << setprecision(myprec(srate5)) << srate5;
-    sssrate10 << "R_{stuck}^{10} = " << fixed << setprecision(myprec(srate10)) << srate10;
-    sssrate50 << "R_{stuck}^{50} = " << fixed << setprecision(myprec(srate50)) << srate50;
-    vector<string> sratelines;
-    sratelines.push_back(sssrate1.str());
-    sratelines.push_back(sssrate5.str());
-    sratelines.push_back(sssrate10.str());
-    sratelines.push_back(sssrate50.str());
-    if ( pcan == 0 ) pcan = new TCanvas;
-    // Skip bad channels.
     if ( ph1->GetNbinsX() < 2 ) {
       cout << " Skipping bad channel " << chan << endl;
       continue;
     }
+    unsigned int ntick = ress[0].timeChannel(chan)->GetNbinsX();
+    // Evaluate the stuck range rates for each threshold and event.
+    TH1* phsr1 = phstuckRanges[0];
+    unsigned int nsr = phstuckRanges[0]->GetNbinsX();
+    EventValueMap sratemap;
+    for ( int rthresh : rthreshs ) {
+      for ( unsigned int ievt=0; ievt<evns.size(); ++ievt ) {
+        sratemap[rthresh].push_back(phstuckRanges[ievt]->Integral(rthresh+1, nsr+1)/ntick);
+      }
+    }
+    // Build the stuck rate lines to display on plot.
+    vector<string> sratelines;
+    {
+      ostringstream sssrate1;
+      ostringstream sssrate5;
+      ostringstream sssrate10;
+      ostringstream sssrate50;
+      sssrate1  << "R_{stuck}^{1} = "  << fixed << setprecision(myprec(sratemap[1][0]))  << sratemap[1][0];
+      sssrate5  << "R_{stuck}^{5} = "  << fixed << setprecision(myprec(sratemap[1][5]))  << sratemap[5][0];
+      sssrate10 << "R_{stuck}^{10} = " << fixed << setprecision(myprec(sratemap[1][10])) << sratemap[10][0];
+      sssrate50 << "R_{stuck}^{50} = " << fixed << setprecision(myprec(sratemap[1][50])) << sratemap[50][0];
+      sratelines.push_back(sssrate1.str());
+      sratelines.push_back(sssrate5.str());
+      sratelines.push_back(sssrate10.str());
+      sratelines.push_back(sssrate50.str());
+    }
+    // Create the canvas for this channel.
+    if ( pcan == 0 ) pcan = new TCanvas;
     // Set the maximum for the y-axis.
     double ymax = 0.0;
     for ( TH1* phsig : phsigs ) {
@@ -210,17 +281,15 @@ int fig(int chan1, int chan2, string fout, unsigned int evn1=1, unsigned int evn
     ph1->GetXaxis()->SetTitle("ADC count");
     ph1->GetYaxis()->SetTitle("# ticks");
     ph1->SetLineWidth(2);
-    for ( unsigned int ihst=0; ihst<phsigs.size(); ++ihst ) {
-      TH1* phsig = phsigs[ihst];
-      int icol = ihst % myncol;
-      int col = mycols[icol];
-      phsig->SetLineColor(col);
-      phsig->SetLineStyle(ihst+1);
+    for ( unsigned int ievt=0; ievt<nevt; ++ievt ) {
+      TH1* phsig = phsigs[ievt];
+      phsig->SetLineColor(evtcols[ievt]);
+      phsig->SetLineStyle(evtlines[ievt]);
     }
     // Build labels.
     // Draw canvas.
-    pcan->SetLeftMargin(0.12);
-    pcan->SetRightMargin(0.06);
+    //pcan->SetLeftMargin(0.12);
+    //pcan->SetRightMargin(0.06);
     ph1->GetYaxis()->SetTitleOffset(1.4);
     ph1->Draw();
     int adcmin = ph1->GetXaxis()->GetXmin();
@@ -240,8 +309,25 @@ int fig(int chan1, int chan2, string fout, unsigned int evn1=1, unsigned int evn
     }
     double fstuck = double(sumTickStuck)/double(sumTick);
     phstuck->Fill(fstuck);
-    phsrate1->Fill(srate1);
-    phsrate5->Fill(srate5);
+    for ( EventHistMap::value_type ihstvec : hsratedistmap ) {
+      int rthresh = ihstvec.first;
+      const HistVector& hdists = ihstvec.second;
+      for ( unsigned int ievt=0; ievt<nevt; ++ievt ) {
+        TH1* phdist = hdists[ievt];
+        phdist->Fill(sratemap[rthresh][ievt]);
+      }
+    }
+    TH1* phsrate5chan = hsratechanmap[5][0];
+    int chanbin = phsrate5chan->GetXaxis()->FindBin(chan+0.01);
+    double srate5 = sratemap[5][0];
+    for ( EventHistMap::value_type ihstvec : hsratechanmap ) {
+      int rthresh = ihstvec.first;
+      const HistVector& hchans = ihstvec.second;
+      for ( unsigned int ievt=0; ievt<nevt; ++ievt ) {
+        hchans[ievt]->SetBinContent(chanbin, sratemap[rthresh][ievt]);
+      }
+    }
+    // Display the stuck fraction for the first event.
     ostringstream sspstuck;
     sspstuck << fixed << setprecision(3) << fstuck;
     string spstuck = sspstuck.str();
@@ -272,12 +358,15 @@ int fig(int chan1, int chan2, string fout, unsigned int evn1=1, unsigned int evn
     }
     double legymax = 0.88;
     double legymin = legymax - 0.03 - 0.04*phsigs.size();
-    TLegend* pleg = new TLegend(0.79, legymin, 0.91, legymax);
-    for ( unsigned int ihst=0; ihst<phsigs.size(); ++ihst ) {
-      string slab = "Event " + sevns[ihst];
-      pleg->AddEntry(phsigs[ihst], slab.c_str(), "l");
+    if ( pleg == nullptr ) {
+      pleg = new TLegend(0.79, legymin, 0.91, legymax);
+      for ( unsigned int ihst=0; ihst<phsigs.size(); ++ihst ) {
+        string slab = "Event " + sevns[ihst];
+        pleg->AddEntry(phsigs[ihst], slab.c_str(), "l");
+      }
+      pleg->SetBorderSize(0);
+      pleg->SetFillStyle(0);
     }
-    pleg->SetBorderSize(0);
     pleg->Draw();
     dxlabel()->Draw();
     for ( TH1* phsig : phsigs ) {
@@ -294,7 +383,7 @@ int fig(int chan1, int chan2, string fout, unsigned int evn1=1, unsigned int evn
     if ( srate5 > 0.10 ) ++nChanR5gtp10;
   }
   dxlabel()->Draw();
-  int nChanBad = nChan - nChanGood;
+  int nChanMissing = nChan - nChanGood;
   {
     pcan = new TCanvas;
     phstuck->Draw();
@@ -303,22 +392,58 @@ int fig(int chan1, int chan2, string fout, unsigned int evn1=1, unsigned int evn
       pcan->Print(fout.c_str(), "Title:Stuck bit fraction");
     }
   }
+  dxlabel()->Draw();
+  // Add an R channel distribution plot for each threshold.
   {
-    pcan = new TCanvas;
-    phsrate1->Draw();
-    dxlabel()->Draw();
-    if ( fout.size() ) {
-      pcan->Print(fout.c_str(), "Title:R 1");
+   for ( EventHistMap::value_type ihstvec : hsratedistmap ) {
+      int rthresh = ihstvec.first;
+      const HistVector& hdists = ihstvec.second;
+      TH1* phdist1 = dynamic_cast<TH1*>(hdists[0]->Clone());
+      string titl = phdist1->GetTitle();
+      titl = titl.substr(0, titl.find(" for event "));
+      phdist1->SetTitle(titl.c_str());
+      pcan = new TCanvas;
+      phdist1->Draw();
+      for ( unsigned int ievt=1; ievt<nevt; ++ievt ) {
+        TH1* phdist = hdists[ievt];
+        phdist->Draw("same");
+      }
+      pleg->Draw();
+      dxlabel()->Draw();
+      ostringstream sstitl;
+      sstitl << "Title:R " << rthresh;
+      if ( fout.size() ) {
+        pcan->Print(fout.c_str(), sstitl.str().c_str());
+      }
     }
   }
+  dxlabel()->Draw();
+  // Add an R vs. channel plot for each threshold.
   {
-    pcan = new TCanvas;
-    phsrate5->Draw();
-    dxlabel()->Draw();
-    if ( fout.size() ) {
-      pcan->Print(fout.c_str(), "Title:R 5");
+   for ( EventHistMap::value_type ihstvec : hsratechanmap ) {
+      int rthresh = ihstvec.first;
+      const HistVector& hchans = ihstvec.second;
+      TH1* phchan1 = dynamic_cast<TH1*>(hchans[0]->Clone());
+      string titl = phchan1->GetTitle();
+      titl = titl.substr(0, titl.find(" for event "));
+      phchan1->SetTitle(titl.c_str());
+      pcan = new TCanvas;
+      phchan1->Draw();
+      for ( unsigned int ievt=1; ievt<nevt; ++ievt ) {
+        TH1* phchan = hchans[ievt];
+        phchan->Draw("same");
+      }
+      pcan->SetGridy();
+      pleg->Draw();
+      dxlabel()->Draw();
+      ostringstream sstitl;
+      sstitl << "Title:R^" << rthresh << " vs. channel";
+      if ( fout.size() ) {
+        pcan->Print(fout.c_str(), sstitl.str().c_str());
+      }
     }
   }
+  dxlabel()->Draw();
   if ( fout.size() ) {
     vector<string> slines;
     {
@@ -328,8 +453,8 @@ int fig(int chan1, int chan2, string fout, unsigned int evn1=1, unsigned int evn
     }
     {
       ostringstream sslab;
-      double rat = double(nChanBad)/nChan;
-      sslab << "                Bad/total channels: " << setw(4) << nChanBad << "/" << nChan
+      double rat = double(nChanMissing)/nChan;
+      sslab << "   Missing/total channels: " << setw(4) << nChanMissing << "/" << nChan
             << " (" << fixed << setprecision(myprec(rat)) << rat << ")";
       slines.push_back(sslab.str());
     }
@@ -364,5 +489,7 @@ int fig(int chan1, int chan2, string fout, unsigned int evn1=1, unsigned int evn
     pcan->Print(fname.c_str(), "Title:Summary");
   }
   dxlabel()->Draw();
+  gStyle->SetPadLeftMargin(padLeftMargin);
+  gStyle->SetPadRightMargin(padRightMargin);
   return 0;
 }

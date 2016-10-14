@@ -49,8 +49,12 @@ DATADIR=$HOME/data/dune
 THISDIR=`pwd`
 INFILE=
 if [ -n "$INNAME" ]; then
-  if [ $INNAME = run13843 ]; then
+  if [ $INNAME = run13843old ]; then
     INFILE=$DATADIR/sliced35t/lbne_r013843_sr01_20160229T180430_20160504T002939_split.root
+  elif [ $INNAME = run13843 ]; then
+    INFILE=$DATADIR/sliced35t/lbne_r013843_sr01_20160229T180430_20160709T061316_split.root
+  elif [ $INNAME = run17200 ]; then
+    INFILE=$DATADIR/sliced35t/lbne_r017200_sr01_20160318T003549_20160709T093137_split.root
   elif [ $INNAME = charlotte ]; then
     INFILE=$DATADIR/prodgenie_nu_dune10kt_workspace__20151202T151027_merged.root
   elif [ $INNAME = recowire_35tdata_run13843_nevt1 ]; then

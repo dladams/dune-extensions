@@ -200,6 +200,7 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
     allname = "|" + allname + "|";
     allzmin = 0.0;
   }
+  ChannelTickHistCreator hcreateAllAdc(tfsdir, sevt, m_TdcTickMin, m_TdcTickMax, allname, 0.0, 4000, 2*ncontour, m_NTickPerBin, m_NChanPerBin);
   ChannelTickHistCreator hcreateAll(tfsdir, sevt, m_TdcTickMin, m_TdcTickMax, allname, allzmin, zmax, 2*ncontour, m_NTickPerBin, m_NChanPerBin);
   ChannelTickHistCreator hcreateFlag(tfsdir, sevt, m_TdcTickMin, m_TdcTickMax, allname, 0.0, 8.0, 8, m_NTickPerBin, 1);
 
@@ -235,7 +236,7 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
   }
   TH2* phalladc = nullptr;
   if ( m_DoADC ) {
-    phalladc = hcreateAll.create("adcall", 0, geohelp.geometry()->Nchannels(),
+    phalladc = hcreateAllAdc.create("adcall", 0, geohelp.geometry()->Nchannels(),
                                  "ADC signals for full detector");
     m_eventhists.push_back(phalladc);
   }
