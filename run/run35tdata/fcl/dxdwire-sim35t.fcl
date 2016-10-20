@@ -53,7 +53,7 @@ physics.analyzers.DXDisplay.DebugLevel: 4
 services.RawDigitAnalysisService: @local::tools.rda_online
 services.RawDigitAnalysisService.LogLevel:           2
 services.RawDigitAnalysisService.DoMean:          true
-services.RawDigitAnalysisService.DoAllOnline:     true
+services.RawDigitAnalysisService.DoAllOnline:    false
 services.RawDigitAnalysisService.DoAll:           true
 services.RawDigitAnalysisService.DoAllFlag:       true
 services.RawDigitAnalysisService.DoROPs:          true

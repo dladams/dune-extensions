@@ -151,7 +151,7 @@ TH1* DrawResult::freqChannel(unsigned int chan) {
     if ( chan < 10 ) sshname << "0";
     sshname << chan;
     string hname = sshname.str();
-    ph = phfreq->ProjectionX(hname.c_str(), chan, chan);
+    ph = phfreq->ProjectionX(hname.c_str(), chan+1, chan+1);
     ph->SetStats(0);
     ostringstream sshtitle;
     sshtitle << ph->GetTitle() << " channel " << chan;
@@ -183,7 +183,7 @@ TH1* DrawResult::powerChannel(unsigned int chan) {
     if ( chan < 10 ) sshname << "0";
     sshname << chan;
     string hname = sshname.str();
-    ph = phfpwr->ProjectionX(hname.c_str(), chan, chan);
+    ph = phfpwr->ProjectionX(hname.c_str(), chan+1, chan+1);
     ph->SetStats(0);
     ostringstream sshtitle;
     sshtitle << ph->GetTitle() << " channel " << chan;

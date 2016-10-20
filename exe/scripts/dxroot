@@ -2,10 +2,12 @@
 
 HELP=
 INFILE=
-while getopts hi: OPT; do
+FLAGS=
+while getopts hi:b OPT; do
   case $OPT in
   h) HELP=true;;
   i) INFILE=$OPTARG;;
+  b) FLAGS="-b";;
   esac
 done
 shift $(( OPTIND-1 ))
@@ -16,6 +18,7 @@ if [ -n "$HELP" ]; then
   echo Options:
   echo "  -h: Show this message and exit."
   echo "  -i: Open DXDISPLAY file INFILE before processing ARGS"
+  echo "  -b: Run root in batch mode (no graphics)"
   exit 0
 fi
 
@@ -54,4 +57,4 @@ fi
 # Root6 seems to expect this symbol to be defined as part of include path.
 export CPP0X_INC=.
 
-root.exe $ARG $*
+root.exe $FLAGS $ARG $*

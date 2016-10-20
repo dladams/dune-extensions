@@ -120,6 +120,7 @@ tools.rda_online: {
   NChanPerBin:               1
   DoROPs:                false
   DoAll:                 false
+  DoADC:                 false
   DoAllOnline:            true
   DoMean:                 true
   UseChannelMap:          true
