@@ -9,6 +9,7 @@
 #include "DrawResult.h"
 #include "mycolors.h"
 #include "dxlabel.h"
+#include "addaxis.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TCanvas.h"
@@ -57,7 +58,7 @@ int fig_mcnoise(string sapa ="apa0z2", string sevtdat ="10", int useold =1) {
   unsigned int tick1 = 7000;
   unsigned int tick2 = 15000;
   string sticks = to_string(tick1) + "-" + to_string(tick2);
-  string stickslab = "[" + to_string(tick1) + ", " + to_string(tick2) + "]";
+  string stickslab = "[" + to_string(tick1) + ", " + to_string(tick2) + ")";
   double zmax = 100.0;
   const unsigned int nres = 2;
   string jnames[nres];
@@ -157,7 +158,7 @@ int fig_mcnoise(string sapa ="apa0z2", string sevtdat ="10", int useold =1) {
   ymin *= 0.8;
   ymax *= 1.2;
   // Configure first histogram
-  string stitle = "FFT power for " + sapa;
+  string stitle = "FFT power/channel for " + sapa + " ticks " + stickslab;
   ph1->SetTitle(stitle.c_str());
   ph1->SetMinimum(ymin);
   ph1->SetMaximum(ymax);
@@ -171,7 +172,9 @@ int fig_mcnoise(string sapa ="apa0z2", string sevtdat ="10", int useold =1) {
   pcan->SetLeftMargin(0.13);
   pcan->SetRightMargin(0.05);
   pcan->SetLogy();
+  // Draw the axis and titles.
   ph1->DrawCopy();
+  addaxis();
   for ( TH1* ph : hdats ) ph->Draw("same");
   // Draw the MC
   phmc->SetLineColor(myred);
@@ -179,7 +182,7 @@ int fig_mcnoise(string sapa ="apa0z2", string sevtdat ="10", int useold =1) {
   phmc->Draw("same");
   // Add legend.
   TLegend* pleg = new TLegend(0.35, 0.78, 0.85, 0.87);
-  string datlab = "Run 13843 event " + sevtdat + " " + stickslab;
+  string datlab = "Run 13843 event " + sevtdat;
   if ( ! allchan ) datlab += " " + schans;
   pleg->AddEntry(ph1, datlab.c_str(), "l");
   pleg->AddEntry(phmc, mclab.c_str(), "l");

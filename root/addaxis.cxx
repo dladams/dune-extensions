@@ -39,9 +39,22 @@ int addaxistop(double ticksize, int ndiv) {
   if ( gPad == 0 ) return 3;
   gPad->Update();
   gPad->GetRangeAxis(xmin, ymin, xmax, ymax);
-  TGaxis* paxnew = new TGaxis( gPad->GetUxmin(), gPad->GetUymax(),
-                               gPad->GetUxmax(), gPad->GetUymax(),
-                               xmin, xmax, 510, "-US");
+  double xax1 = gPad->GetUxmin();
+  double xax2 = gPad->GetUxmax();
+  double yax = gPad->GetUymax();
+  string sopt = "-US";
+  if ( gPad->GetLogx() ) {
+    xax1 = pow(10.0, xax1);
+    xax2 = pow(10.0, xax2);
+    xmin = pow(10.0, xmin);
+    xmax = pow(10.0, xmax);
+    sopt += "G";
+  }
+  if ( gPad->GetLogy() ) {
+    yax = pow(10.0, yax);
+  }
+  TGaxis* paxnew = new TGaxis(xax1, yax, xax2, yax,
+                              xmin, xmax, 510, sopt.c_str());
   if ( ticksize > 0 ) paxnew->SetTickSize(ticksize);
   if ( ndiv > 0 ) paxnew->SetNdivisions(ndiv);
   string name = "TopAxis";
@@ -86,9 +99,23 @@ int addaxisright(double ticksize, int ndiv) {
   if ( gPad == 0 ) return 3;
   gPad->Update();
   gPad->GetRangeAxis(xmin, ymin, xmax, ymax);
-  TGaxis* paxnew = new TGaxis( gPad->GetUxmax(), gPad->GetUymin(),
-                               gPad->GetUxmax(), gPad->GetUymax(),
-                               ymin, ymax, 510, "+US");
+  double xax = gPad->GetUxmax();
+  double yax1 = gPad->GetUymin();
+  double yax2 = gPad->GetUymax();
+  string sopt = "+US";
+  if ( gPad->GetLogx() ) {
+    xax = pow(10.0, xax);
+  }
+  if ( gPad->GetLogy() ) {
+    yax1 = pow(10.0, yax1);
+    yax2 = pow(10.0, yax2);
+    ymin = pow(10.0, ymin);
+    ymax = pow(10.0, ymax);
+    sopt += "G";
+  }
+  if ( gPad->GetLogy() ) sopt += "G";
+  TGaxis* paxnew = new TGaxis(xax, yax1, xax, yax2,
+                              ymin, ymax, 510, sopt.c_str());
   if ( ticksize > 0 ) paxnew->SetTickSize(ticksize);
   if ( ndiv > 0 ) paxnew->SetNdivisions(ndiv);
   string name = "RightAxis";

@@ -58,6 +58,7 @@ struct DrawResult {
   TH2* freq();
 
   // Fetch the power spectrum for all channels.
+  // Normalized so the integral is that for all channels and ticks.
   TH2* power();
 
   // Fetch the frequency spectrum for a particular channel.
