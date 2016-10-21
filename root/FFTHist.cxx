@@ -21,6 +21,7 @@ FFTHist::FFTHist(TH2* phin, int atmin, int atmax, double ftick)
   unsigned int nc = htime0->GetNbinsY();
   unsigned int nt = tmax - tmin;
   unsigned int nk = nt/2 + 1;   // Skip the conjugate frequencies
+  bool ntEven = 2*(nt/2) == nt;
   double kmax = nk;
   string flab = "Frequency #";
   if ( ftick > 0.0 ) {
@@ -122,6 +123,8 @@ FFTHist::FFTHist(TH2* phin, int atmin, int atmax, double ftick)
     pfft->Transform();
     pow = 0.0;
     for ( unsigned int ik=0; ik<nk; ++ik ) {
+      bool isConjugate = ik != 0;
+      if ( ik==nk-1 && ntEven ) isConjugate = true;
       unsigned int ibin = hfreq->GetBin(ik+1, ic+1);
       double vr;
       double vi;
@@ -136,7 +139,9 @@ FFTHist::FFTHist(TH2* phin, int atmin, int atmax, double ftick)
         while ( phase > pi ) phase -= twopi;
       }
       hfreq->SetBinContent(ibin, mag);
-      hpower->SetBinContent(ibin, mag*mag);
+      double power = mag*mag;
+      if ( isConjugate ) power += power;
+      hpower->SetBinContent(ibin, power);
       hphase->SetBinContent(ibin, phase);
       pow += magsq;
       if ( ik!=0 && ik!=nk-1 ) pow += magsq;

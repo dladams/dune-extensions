@@ -167,10 +167,13 @@ int fig_mcnoise(string sapa ="apa0z2", string sevtdat ="10", int useold =1) {
   sslaby << "(ADC counts)^{2}/(" << int(wbin+0.5) << " kHz)";
   string slaby = sslaby.str();
   ph1->GetYaxis()->SetTitle(slaby.c_str());
+  ph1->GetYaxis()->SetTitleOffset(1.20);
+  ph1->GetXaxis()->SetTitleOffset(1.20);
   // Draw data histograms.
   TCanvas* pcan = new TCanvas;
   pcan->SetLeftMargin(0.13);
   pcan->SetRightMargin(0.05);
+  pcan->SetLeftMargin(0.12);
   pcan->SetLogy();
   // Draw the axis and titles.
   ph1->DrawCopy();
@@ -181,7 +184,7 @@ int fig_mcnoise(string sapa ="apa0z2", string sevtdat ="10", int useold =1) {
   phmc->SetLineWidth(2);
   phmc->Draw("same");
   // Add legend.
-  TLegend* pleg = new TLegend(0.35, 0.78, 0.85, 0.87);
+  TLegend* pleg = new TLegend(0.60, 0.74, 0.95, 0.85);
   string datlab = "Run 13843 event " + sevtdat;
   if ( ! allchan ) datlab += " " + schans;
   pleg->AddEntry(ph1, datlab.c_str(), "l");
