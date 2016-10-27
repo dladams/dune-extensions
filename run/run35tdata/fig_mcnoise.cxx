@@ -20,7 +20,7 @@ using std::endl;
 using std::ostringstream;
 using std::vector;
 
-int fig_mcnoise(string sapa ="apa0z2", string sevtdat ="10", int useold =1) {
+int fig_mcnoise(string sapa ="apa0z2", int useold =1, double aymin =0.0, double aymax =0.0, int rundat =13843, int evtdat =0) {
   const string myname = "fig_mcnoise: ";
   cout << "\n" << myname << "Processing " << sapa << endl;
   vector<string> sapas;
@@ -50,13 +50,46 @@ int fig_mcnoise(string sapa ="apa0z2", string sevtdat ="10", int useold =1) {
   }
   if ( sapas.size() ) {
     for ( string newsapa : sapas ) {
-      int rstat = fig_mcnoise(newsapa, sevtdat, useold);
+      int rstat = fig_mcnoise(newsapa, useold, aymin, aymax, rundat, evtdat);
       if ( rstat ) return rstat;
     }
     return 0;
   }
   unsigned int tick1 = 7000;
   unsigned int tick2 = 15000;
+  string snamesuf;
+  if        ( rundat == 13843 ) {
+    tick1 = 7000;
+    if ( evtdat == 0 ) evtdat = 10;
+  } else if ( rundat == 13770 ) {
+    tick1 = 9000;
+    tick2 = 14000;
+    if ( evtdat == 0 ) evtdat = 6;
+  } else if ( rundat == 15634 ) {
+    tick1 = 9000;
+    tick2 = 14000;
+    if ( evtdat == 0 ) evtdat = 29;
+    if ( evtdat > 20 ) snamesuf = "_skip20";
+  } else if ( rundat == 15961 ) {
+    tick1 = 7000;
+    tick2 = 14000;
+    if ( evtdat == 0 ) evtdat = 5;
+  } else if ( rundat == 16363 ) {
+    tick1 = 9000;
+    if ( evtdat == 0 ) evtdat = 7;
+  } else if ( rundat == 17200 ) {
+    tick1 = 9000;
+    if ( evtdat == 0 ) evtdat = 1;
+  } else {
+    cout << myname << "Unknown run: " << rundat << endl;
+    return 1;
+  }
+  ostringstream ssrundat;
+  ssrundat << rundat;
+  string srundat = ssrundat.str();
+  ostringstream ssevtdat;
+  ssevtdat << evtdat;
+  string sevtdat = ssevtdat.str();
   string sticks = to_string(tick1) + "-" + to_string(tick2);
   string stickslab = "[" + to_string(tick1) + ", " + to_string(tick2) + ")";
   double zmax = 100.0;
@@ -68,14 +101,16 @@ int fig_mcnoise(string sapa ="apa0z2", string sevtdat ="10", int useold =1) {
   string& jname1 = jnames[0];
   hnames[0] = "h" + sevtdat + "_dco" + sapa;
   hnames[1] = "h1_dco" + sapa;
-  string srun = "13843";
-  jnames[0] = "dxdwire-data_recowire-35tdata-nodco_run" + srun;
+  jnames[0] = "dxdwire-data_recowire-35tdata-nodco_run" + srundat + snamesuf;;
   string mclab;
   string smc;
-  if ( useold ) {
+  if ( useold == 1 ) {
     jnames[1] = "dxdwire-sim35t-long_recowire-35tsim-nodco_detsim-35t-long-nozs_g4-35tsim_genmu-35t";
     mclab = "Production MC tune";
-    smc = "old";
+  } else if ( useold == 2 ) {
+    jnames[1] = "dxdwire-data_mcvito02";
+    mclab = "Vito MC 2";
+    smc = "mcvito02";
   } else {
     mclab = "New MC tune";
     jnames[1] = "dxdwire-sim35t-long_recowire-35tsim-nodco_detsim-35t-long-noisy-nozs_g4-35tsim_genmu-35t";
@@ -99,7 +134,7 @@ int fig_mcnoise(string sapa ="apa0z2", string sevtdat ="10", int useold =1) {
     ress[ires] = draw(hname, 1, zmax, tick1, tick2-1);
     if ( ress[ires].hdraw == nullptr ) {
       cout << myname << "ERROR: Unable to find histogram " << hname << " for " << jname << endl;
-      return 2;
+      return 0;
     }
     fhists[ires] = ress[ires].freq();
     if ( chan2 <= chan1 ) {
@@ -140,12 +175,16 @@ int fig_mcnoise(string sapa ="apa0z2", string sevtdat ="10", int useold =1) {
     ph->SetLineColor(myblue);
     ph->SetLineWidth(2);
     ph->SetLineStyle(3);
+    int ntick = resdat.tmax - resdat.tmin;
+    ph->Scale(1.0/ntick);
     if ( ph->GetMinimum() < ymin ) ymin = ph->GetMinimum();
     if ( ph->GetMaximum() > ymax ) ymax = ph->GetMaximum();
     hdats.push_back(ph);
     // MC.
     if ( phmc == nullptr ) {
       phmc = resmc.powerChannel(chan);
+      int ntick = resmc.tmax - resmc.tmin;
+      phmc->Scale(1.0/ntick);
       phmc->Rebin(rebin);
       if ( phmc->GetMinimum() < ymin ) ymin = phmc->GetMinimum();
       if ( phmc->GetMaximum() > ymax ) ymax = phmc->GetMaximum();
@@ -157,8 +196,12 @@ int fig_mcnoise(string sapa ="apa0z2", string sevtdat ="10", int useold =1) {
   }
   ymin *= 0.8;
   ymax *= 1.2;
+  if ( aymax > aymin ) {
+    ymin = aymin;
+    ymax = aymax;
+  }
   // Configure first histogram
-  string stitle = "FFT power/channel for " + sapa + " ticks " + stickslab;
+  string stitle = "FFT power/channel/tick for " + sapa + " ticks " + stickslab;
   ph1->SetTitle(stitle.c_str());
   ph1->SetMinimum(ymin);
   ph1->SetMaximum(ymax);
@@ -185,7 +228,7 @@ int fig_mcnoise(string sapa ="apa0z2", string sevtdat ="10", int useold =1) {
   phmc->Draw("same");
   // Add legend.
   TLegend* pleg = new TLegend(0.60, 0.74, 0.95, 0.85);
-  string datlab = "Run 13843 event " + sevtdat;
+  string datlab = "Run " + srundat + " event " + sevtdat;
   if ( ! allchan ) datlab += " " + schans;
   pleg->AddEntry(ph1, datlab.c_str(), "l");
   pleg->AddEntry(phmc, mclab.c_str(), "l");
@@ -194,7 +237,7 @@ int fig_mcnoise(string sapa ="apa0z2", string sevtdat ="10", int useold =1) {
   pleg->Draw();
   //dxlabel(mclab);
   // Print plot.
-  string fname = "mcnoise_run" + srun + "_event" + sevtdat + "_ticks" + sticks + "_" + sapa + "_mc" + smc;
+  string fname = "mcnoise_run" + srundat + "_event" + sevtdat + "_ticks" + sticks + "_" + sapa + "_mc" + smc;
   fname += ".png";
   pcan->Print(fname.c_str());
   return 0;
