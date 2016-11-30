@@ -12,8 +12,9 @@ NSKIP=
 CLEAN=
 EVTOUT=
 BG=
+FIXRAN=
 COMMANDLINE="$0 $*"
-while getopts hi:n:s:ceb OPT; do
+while getopts hi:n:s:cebf OPT; do
   case $OPT in
   h) HELP=true;;
   i) INNAME=$OPTARG;;
@@ -22,6 +23,7 @@ while getopts hi:n:s:ceb OPT; do
   c) CLEAN=true;;
   e) EVTOUT=true;;
   b) BG=true;;
+  f) FIXRAN=true;;
   esac
 done
 shift $(( OPTIND-1 ))
@@ -36,6 +38,7 @@ if [ -n "$HELP" ]; then
   echo "  -c to remove old run directory"
   echo "  -e to write out events"
   echo "  -b to run job in background"
+  echo "  -f to use a fixe random number seed"
   exit 0
 fi
 
@@ -49,7 +52,7 @@ DATADIR=$HOME/data/dune
 THISDIR=`pwd`
 INFILE=
 if [ -n "$INNAME" ]; then
-  if [ $INNAME = run13843old ]; then
+  if [ $INNAME = run13843 ]; then
     INFILE=$DATADIR/sliced35t/lbne_r013843_sr01_20160229T180430_20160504T002939_split.root
   elif [ $INNAME = run13770 ]; then
     INFILE=$DATADIR/sliced35t/lbne_r013770_sr01_20160229T022537_20160709T055234_split.root
@@ -141,6 +144,10 @@ cp $FCLPATH $RUNDIR || {
   echo Unable to find configuration file.
   exit 6
 }
+if [ -n "$FIXRAN" ]; then
+  echo "services.LArSeedService: @local::autoincrement_seedservice" >>$RUNDIR/$FCLFILE
+  echo "services.LArSeedService.baseSeed: 7777777" >>$RUNDIR/$FCLFILE
+fi
 
 # Create run command.
 COM=lar

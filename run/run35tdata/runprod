@@ -1,9 +1,12 @@
-./go -c -e -n 100 genmu-35t
-./go -c -e -n 10 -i genmu-35t g4-35tsim
-rm -rf jobs/detsim-35t-long-nozs_g4-35tsim_genmu-35t
-./go -c -e -i g4-35tsim_genmu-35t -n 10 detsim-35t-long-nozs
+if [ ! -r jobs/g4-35tsim_genmu-35t ]; then
+  ./go -f -c -e -n 100 genmu-35t
+  ./go -f -c -e -n 10 -i genmu-35t g4-35tsim
+fi
+if [ ! -r jobs/detsim-35t-long-nozs_g4-35tsim_genmu-35t ]; then
+  ./go -f -c -e -i g4-35tsim_genmu-35t -n 10 detsim-35t-long-nozs
+fi
 rm -rf jobs/recowire-35tsim-nodco_detsim-35t-long-nozs_g4-35tsim_genmu-35t
-./go -c -e -i detsim-35t-long-nozs_g4-35tsim_genmu-35t -n 1 recowire-35tsim-nodco
+./go -f -c -e -i detsim-35t-long-nozs_g4-35tsim_genmu-35t -n 10 recowire-35tsim-nodco
 rm -rf jobs/dxdwire-sim35t-long_recowire-35tsim-nodco_detsim-35t-long-nozs_g4-35tsim_genmu-35t
-./go -c -e -i recowire-35tsim-nodco_detsim-35t-long-nozs_g4-35tsim_genmu-35t -n 1 dxdwire-sim35t-long
+./go -f -c -e -i recowire-35tsim-nodco_detsim-35t-long-nozs_g4-35tsim_genmu-35t -n 1 dxdwire-sim35t-long
 

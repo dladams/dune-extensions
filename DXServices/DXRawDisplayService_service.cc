@@ -481,8 +481,21 @@ int DXRawDisplayService::process(const vector<RawDigit>& digs, const art::Event*
   const art::ServiceHandle<RawDigitPrepService> hrdp;
   // Prepare the raw data.
   AdcChannelDataMap prepdigs;
+  for ( unsigned int idig=0; idig<digs.size(); ++idig ) {
+    const raw::RawDigit& dig = digs[idig];
+    AdcChannel chan = dig.Channel();
+    if ( prepdigs.find(chan) != prepdigs.end() ) {
+      cout << myname << "WARNING: Skipping duplicate channel " << chan << "." << endl;
+      continue;
+    }
+    AdcChannelData& acd = prepdigs[chan];
+    acd.channel = chan;
+    acd.digitIndex = idig;
+    acd.digit = &dig;
+  }
+
   // Process the prepared digits.
-  if ( hrdp->prepare(digs, prepdigs) != 0 ) {
+  if ( hrdp->prepare(prepdigs) != 0 ) {
     cout << myname << "ERROR: Data prep failed!" << endl;
     return 1;
   }
