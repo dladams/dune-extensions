@@ -1267,12 +1267,12 @@ void DXDisplay::analyze(const art::Event& event) {
       if ( fdbg == 4 ) {
         for ( TrigMap::value_type tent : tmap ) {
           cout << myname << setw( 5) << tent.second
-                         << setw(15) << tent.first << endl;
+                         << setw(15) << tent.first/32 << "." << setw(2) << tent.first%32 << endl;
         }
       } else if ( fdbg >= 5 ) {
         for ( const ExternalTrigger& trig : *ptrigs ) {
           cout << myname << setw( 5) << trig.GetTrigID()
-                         << setw(15) << trig.GetTrigTime() << endl;
+                         << setw(15) << trig.GetTrigTime()/32 << endl;
         }
       }
       ftrigger = firstid;
