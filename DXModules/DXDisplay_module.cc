@@ -103,6 +103,7 @@
 #include <memory>
 
 // Local includes.
+#include "DXInterface/TriggerFilterService.h"
 #include "DXInterface/RawDigitAnalysisService.h"
 #include "DXUtil/reducedPDG.h"
 #include "DXUtil/intProcess.h"
@@ -212,6 +213,7 @@ private:
 
   // The parameters we'll read from the fcl file.
   int fdbg;                            // Debug level. Larger for more log noise.
+  bool fDoTriggerFilter;               // Do trigger filter.
   bool fDoTruth;                       // Read truth container.
   int  fDoMcParticleTree;              // Create the McParticle tree. (1=initial state only, 2=all)
   bool fSelectInitialState;            // Include only initial
@@ -335,7 +337,8 @@ private:
   //const lariov::DetPedestalProvider* m_pPedProv;
 
   // Analysis services.
-  const RawDigitAnalysisService* m_prawsvc;
+  const TriggerFilterService* m_ptrfsvc =nullptr;
+  const RawDigitAnalysisService* m_prawsvc =nullptr;
 
 }; // class DXDisplay
 
@@ -421,7 +424,14 @@ void DXDisplay::beginJob() {
     }
   }
 
+  if ( fDoTriggerFilter ) {
+    if (  fdbg >= 1 ) cout << myname << "Fetching trigger filter service." << endl;
+    art::ServiceHandle<TriggerFilterService> htrfsvc;
+    m_ptrfsvc = &*htrfsvc;
+  }
+
   if ( fDoRawDigit ) {
+    if (  fdbg >= 1 ) cout << myname << "Fetching raw digit analysis service." << endl;
     art::ServiceHandle<RawDigitAnalysisService> hrawsvc;
     m_prawsvc = &*hrawsvc;
   }
@@ -462,6 +472,7 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
   // Read parameters from the .fcl file. The names in the arguments
   // to p.get<TYPE> must match names in the .fcl file.
   fdbg                           = p.get<int>("DebugLevel");
+  fDoTriggerFilter               = p.get<bool>("DoTriggerFilter");
   fDoTruth                       = p.get<bool>("DoTruth");
   fDoMcParticleTree              = p.get<bool>("DoMcParticleTree");
   fDoSimChannelTree              = p.get<bool>("DoSimChannelTree");
@@ -620,17 +631,45 @@ void DXDisplay::reconfigure(fhicl::ParameterSet const& p) {
 void DXDisplay::analyze(const art::Event& event) {
   const string myname = "DXDisplay::analyze: ";
 
+  //************************************************************************
+  // Trigger filter.
+  //************************************************************************
+
+  // Fetch the trigger data if needed for selection or analysis.
+  const vector<raw::ExternalTrigger>* ptrigs = nullptr;
+  if ( fDoTriggerFilter || fDoTrigger ) {
+    // Get the triggers for the event.
+    art::Handle< vector<raw::ExternalTrigger> > triggerHandle;
+    event.getByLabel(fExternalTriggerLabel, triggerHandle);
+    ptrigs = triggerHandle.product();
+    if ( ptrigs == nullptr ) {
+      cout << myname << "ERROR: Unable to find ExternalTrigger vector data with label "
+           << fExternalTriggerLabel << endl;
+      return;
+    }
+  }
+
+  fevent  = event.id().event(); 
+  frun    = event.run();
+  if ( fDoTriggerFilter ) {
+    if ( fdbg >= 1 ) cout << myname << "Filtering run " << frun << "-" << fsubrun
+                          << ", event " << fevent << endl;
+    if ( m_ptrfsvc->keep(*ptrigs) <= 0 ) return;
+  }
+
+  //************************************************************************
+  // Initialization.
+  //************************************************************************
+
   // Access ART's TFileService, which will handle creating and writing
   // histograms and trees.
   art::ServiceHandle<art::TFileService> tfsHandle;
   art::TFileService* ptfs = &*tfsHandle;
 
   // Start by fetching some basic event information for trees and histogram labels.
-  fevent  = event.id().event(); 
-  frun    = event.run();
   fsubrun = event.subRun();
   if ( fdbg >= 1 ) cout << myname << "Processing run " << frun << "-" << fsubrun
-                       << ", event " << fevent << endl;
+                        << ", event " << fevent << endl;
   art::Timestamp timestamp = event.time();
   art::TimeValue_t thi = timestamp.timeHigh();
   art::TimeValue_t tlo = timestamp.timeLow();
@@ -1230,10 +1269,6 @@ void DXDisplay::analyze(const art::Event& event) {
   //************************************************************************
 
   if ( fDoTrigger ) {
-    // Get the triggers for the event.
-    art::Handle< vector<raw::ExternalTrigger> > triggerHandle;
-    event.getByLabel(fExternalTriggerLabel, triggerHandle);
-    const vector<raw::ExternalTrigger>* ptrigs = triggerHandle.product();
     if ( ptrigs == nullptr ) {
       cout << myname << "ERROR: Unable to find ExternalTrigger vector data with label "
            << fExternalTriggerLabel << endl;

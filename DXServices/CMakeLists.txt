@@ -7,10 +7,12 @@
 
 # Add plugin for each service.
 
+simple_plugin(DXTriggerFilterService "service")
+
 simple_plugin(DXRawDisplayService "service"
   DXUtil
   DXGeometry
-             )
+)
 
 install_fhicl()
 #add_subdirectory(test)

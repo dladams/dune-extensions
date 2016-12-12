@@ -9,6 +9,7 @@ dxdisplay_default: {
   DebugLevel:   1
 
   # Control flags.
+  DoTriggerFilter:                false
   DoTruth:                        false
   DoMcParticleTree:               false
   DoSimChannelTree:               false
