@@ -67,7 +67,7 @@ int DXTriggerFilterService::keep(const std::vector<raw::ExternalTrigger>& extrig
         if ( trigin == trig ) {
           ++m_keep;
           if ( m_LogLevel >= 2 ) cout << myname << "Keeping trigger " << trig << endl;
-          return 1;
+          return trig;
         } else {
           if ( m_LogLevel >= 3 ) cout << myname << "Rejecting trigger " << trigin << endl;
         }

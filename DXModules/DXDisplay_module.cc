@@ -282,15 +282,19 @@ private:
   TTree* fMcPerfTree;
 
   // The variables that go into the event summary tree.
+  // A trigger from counters 7 and 30 would have ftrigctr1=1 and ftrigctr2=2.
+  // See https://cdcvs.fnal.gov/redmine/projects/35ton/wiki/TSU_Counter_Locations.
   int fevent;
   int frun;
   int fsubrun;
   int fthi;
   int ftlo;
-  int ftrigger;
-  int ftrigtick;
+  int ftrigger;    // trigger ID (111, 112, ...)
+  int ftrigtick;   // TPC tick where trigger occurred
   int fntrigptb;   // # PTB triggers
   int fntrigctr;   // # trig counters
+  int ftrigctr1;   // Offset for E or N counter closest in time to trigger.
+  int ftrigctr2;   // Offset for W or S counter closest in time to trigger.
 
   // The variables that go into the performance tree.
   int fprf_pdg;                  // PDG ID
@@ -409,7 +413,7 @@ void DXDisplay::beginJob() {
 
   // MC performance tree.
   if ( fDoEventTree ) {
-    if (  fdbg >= 1 ) cout << myname << "Creating event sunnary tree." << endl;
+    if (  fdbg >= 1 ) cout << myname << "Creating event summary tree." << endl;
     fMcPerfTree = tfs->make<TTree>("EventTree", "Event tree");
     fMcPerfTree->Branch("event",    &fevent,          "event/I");
     fMcPerfTree->Branch("subrun",   &fsubrun,         "subrun/I");
@@ -417,10 +421,12 @@ void DXDisplay::beginJob() {
     fMcPerfTree->Branch("thi",      &fthi,            "thi/I");
     fMcPerfTree->Branch("tlo",      &ftlo,            "tlo/I");
     if ( fDoTrigger ) {
-      fMcPerfTree->Branch("trigger",      &ftrigger,        "trigger/I");
+      fMcPerfTree->Branch("trigger",       &ftrigger,        "trigger/I");
       fMcPerfTree->Branch("trigtick",      &ftrigtick,       "trigtick/I");
       fMcPerfTree->Branch("ntrigptb",      &fntrigptb,       "ntrigptb/I");
       fMcPerfTree->Branch("ntrigctr",      &fntrigctr,       "ntrigctr/I");
+      fMcPerfTree->Branch("trigctr1",      &ftrigctr1,       "trigctr1/I");
+      fMcPerfTree->Branch("trigctr2",      &ftrigctr2,       "trigctr2/I");
     }
   }
 
@@ -651,10 +657,12 @@ void DXDisplay::analyze(const art::Event& event) {
 
   fevent  = event.id().event(); 
   frun    = event.run();
+  unsigned int triggerID = 0;
   if ( fDoTriggerFilter ) {
     if ( fdbg >= 1 ) cout << myname << "Filtering run " << frun << "-" << fsubrun
                           << ", event " << fevent << endl;
-    if ( m_ptrfsvc->keep(*ptrigs) <= 0 ) return;
+    triggerID = m_ptrfsvc->keep(*ptrigs);
+    if ( triggerID <= 0 ) return;
   }
 
   //************************************************************************
@@ -1283,6 +1291,8 @@ void DXDisplay::analyze(const art::Event& event) {
       int firsttime = tmap.begin()->first;
       fntrigptb = 0;
       fntrigctr = 0;
+      ftrigctr1 = -99;
+      ftrigctr2 = -99;
       for ( TrigMap::value_type tent : tmap ) {
         int time = tent.first;
         int id = tent.second;
@@ -1312,6 +1322,76 @@ void DXDisplay::analyze(const art::Event& event) {
       }
       ftrigger = firstid;
       ftrigtick = firsttime/32;
+      unsigned int ctr1off = 0;
+      unsigned int ctr2off = 0;
+      unsigned int nctr = 0;
+      if ( ftrigger == 111 ) {
+        nctr = 10;
+        ctr1off = 6;
+        ctr2off = 28;
+      }
+      // If this is an EW or NS trigger, find the counters that made the trigger
+      // and record their offsets in ctr1off and ctr2off;
+      if ( nctr ) {
+        int dtmax = 100*32;
+        // Loop over map entries below (itrml) and above (itrmh) the trigger.
+        // Start by finding the iterator for the trigger.
+        pair<TrigMap::const_iterator, TrigMap::const_iterator> itrms = tmap.equal_range(firsttime);
+        TrigMap::const_iterator itrml = tmap.end();
+        TrigMap::const_iterator itrmh = tmap.end();
+        for ( itrml=itrms.first; itrml!=itrms.second; ++itrml ) {
+          if ( itrml->second == ftrigger ) break;
+        }
+        if ( itrml == tmap.end() ) {
+          cout << myname << "ERROR: Trigger ID not found!" << endl;
+        } else {
+          itrmh = itrml;
+          bool donel = itrml == tmap.begin();
+          if ( ! donel ) --itrml;
+          ++itrmh;
+          bool doneh = itrmh == tmap.end();
+          while ( !donel || !doneh ) {
+            int dtiml = donel ? 10*dtmax : firsttime - itrml->first;
+            int dtimh = doneh ? 10*dtmax : itrmh->first - firsttime;
+            bool dohigh = !doneh && (donel || dtimh < dtiml);
+            TrigMap::const_iterator itrm = tmap.end();
+            if ( dohigh ) {
+              if ( dtimh > dtmax ) {
+                doneh = true;
+              } else {
+                itrm = itrmh;
+                ++itrmh;
+                doneh = itrmh == tmap.end();
+              }
+            } else {
+              if ( dtiml > dtmax ) {
+                donel = true;
+              } else {
+                itrm = itrml;
+                donel = itrml == tmap.begin();
+                if ( ! donel ) --itrml;
+              }
+            }
+            if ( itrm != tmap.end() ) {
+              unsigned int ctr = itrm->second;
+              if ( ctr >= ctr1off && ctr < ctr1off+nctr ) {
+                if ( ftrigctr1 < 0 ) ftrigctr1 = ctr - ctr1off;
+              } else if ( ctr >= ctr2off && ctr < ctr2off+nctr ) {
+                if ( ftrigctr2 < 0 ) ftrigctr2 = ctr - ctr2off;
+              }
+            }
+            if ( ftrigctr1 >= 0 && ftrigctr2 >= 0 ) break;
+          }
+        }
+      }
+      if ( fdbg >=2 ) {
+        cout << myname << "Trigger: " << ftrigger << endl;
+        cout << myname << "Trigger tick: " << ftrigtick << endl;
+        cout << myname << "# Trigger PTB: " << fntrigptb << endl;
+        cout << myname << "# Trigger counter: " << fntrigctr << endl;
+        cout << myname << "Trigger ctr off EN: " << ftrigctr1 << endl;
+        cout << myname << "Trigger ctr off WS: " << ftrigctr2 << endl;
+      }
     }
   }
 

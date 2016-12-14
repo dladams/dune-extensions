@@ -45,16 +45,17 @@ TH1* DrawResult::timeChannel(unsigned int chan) const {
 
 //**********************************************************************
 
-TH1* DrawResult::signalChannel(unsigned int chan, TH1** pphstuckRange) {
+TH1* DrawResult::signalChannel(unsigned int chan, TH1** pphstuckRange, TH1** pphsameRange) {
   const string myname = "DrawResult::signalChannel: ";
   if ( chan >= hdrawxChan.size() ) return 0;
   if ( hsigChan.size() <= chan ) {
     hsigChan.resize(chan+1, nullptr);
     hstuckRange.resize(chan+1, nullptr);
+    hsameRange.resize(chan+1, nullptr);
   }
   TH1*& phsig = hsigChan[chan];
   TH1*& phstuckRange = hstuckRange[chan];
-  if ( pphstuckRange != nullptr ) *pphstuckRange = phstuckRange;
+  TH1*& phsameRange = hsameRange[chan];
   int maxStuck = 50;
   if ( phsig == nullptr ) {
     TH1* phtim = hdrawxChan[chan];
@@ -64,8 +65,10 @@ TH1* DrawResult::signalChannel(unsigned int chan, TH1** pphstuckRange) {
     }
     string hname = string(phtim->GetName()) + "_signal";
     string hsname = string(phtim->GetName()) + "_stuckrange";
+    string hrname = string(phtim->GetName()) + "_samerange";
     string htitl = "Signal for " + string(phtim->GetName());
     string hstitl = "Stuck-bit ranges for " + string(phtim->GetName());
+    string hrtitl = "Same-value ranges for " + string(phtim->GetName());
     int nbin = nsig;
     double xmin = sigmin;
     double xmax = sigmax;
@@ -82,9 +85,14 @@ TH1* DrawResult::signalChannel(unsigned int chan, TH1** pphstuckRange) {
     phstuckRange = new TH1F(hsname.c_str(), hstitl.c_str(), maxStuck, 0, maxStuck);
     phstuckRange->GetXaxis()->SetTitle("# contiguous ticks with stuck bits");
     phstuckRange->GetYaxis()->SetTitle("Count");
+    phsameRange = new TH1F(hrname.c_str(), hrtitl.c_str(), maxStuck, 0, maxStuck);
+    phsameRange->GetXaxis()->SetTitle("# contiguous ticks with same value");
+    phsameRange->GetYaxis()->SetTitle("Count");
     int nstuck = 0;
     bool isStuck = false;
     int ntbin = phtim->GetNbinsX();
+    double xadcLast = -1.e20;
+    unsigned int nsame = 0;
     for ( int ibin=1; ibin<=ntbin; ++ibin ) {
       bool isLast = ibin == ntbin;
       double xadc = phtim->GetBinContent(ibin);
@@ -99,9 +107,21 @@ TH1* DrawResult::signalChannel(unsigned int chan, TH1** pphstuckRange) {
           phstuckRange->Fill(nstuck, nstuck);
         }
       }
+      bool isSame = xadc == xadcLast;
+      // If value has changed, fill for the last bin.
+      if ( nsame > 0 ) {
+        if ( !isSame ) {
+          for ( unsigned int ifil=0; ifil<nsame; ++ifil ) phsameRange->Fill(nsame);
+        }
+      }
+      nsame = isSame ? nsame+1 : 1;
+      // If this is the last, fill for this bin.
+      if ( isLast ) phsameRange->Fill(nsame, nsame);
+      xadcLast = xadc;
     } 
   }
   if ( pphstuckRange != nullptr ) *pphstuckRange = phstuckRange;
+  if ( pphsameRange != nullptr ) *pphsameRange = phsameRange;
   return phsig;
 }
 
