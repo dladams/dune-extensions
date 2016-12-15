@@ -250,3 +250,35 @@ TH1* DrawResult::timePowerChannel(unsigned int chan) {
 }
 
 //**********************************************************************
+
+TH1* DrawResult::mean() {
+  const string myname = "DrawResult::mean: ";
+  if ( hmean == nullptr ) {
+    if ( hdraw == nullptr ) return nullptr;
+    unsigned int ncha = hdrawxChan.size();
+    string hname = string(hdraw->GetName()) + "_mean";
+    string htitl = string(hdraw->GetTitle()) + " mean ADC count";
+    hmean = new TH1F(hname.c_str(), htitl.c_str(), ncha, 0, ncha);
+    hname = string(hdraw->GetName()) + "_rms";
+    htitl = string(hdraw->GetTitle()) + " RMS ADC count";
+    hrms = new TH1F(hname.c_str(), htitl.c_str(), ncha, 0, ncha);
+    for ( unsigned int icha=0; icha<hdrawxChan.size(); ++icha ) {
+      TH1* ph = signalChannel(icha);
+      double mean = ph->GetMean();
+      double rms = ph->GetRMS();
+      hmean->SetBinContent(icha+1, mean);
+      hrms->SetBinContent(icha+1, rms);
+    }
+  }
+  return hmean;
+}
+
+//**********************************************************************
+
+TH1* DrawResult::rms() {
+  const string myname = "DrawResult::ran: ";
+  if ( hrms == nullptr ) mean();
+  return hrms;
+}
+
+//**********************************************************************

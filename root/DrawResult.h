@@ -32,6 +32,8 @@ struct DrawResult {
   std::vector<TH1*> htpwrChan;
   std::vector<TH1*> hfpwrChan;
   FFTHist* pfft = nullptr;
+  TH1* hmean = nullptr;
+  TH1* hrms = nullptr;
 
   // Ctor.
   DrawResult() =default;
@@ -73,6 +75,11 @@ struct DrawResult {
   // Fetch the power vs. frequency spectrum for a particular channel.
   TH1* timePowerChannel(unsigned int chan);
 
+  // Fetch the mean signal in each channel.
+  TH1* mean();
+
+  // Fetch the mean RMS in each channel.
+  TH1* rms();
 
 };
 
