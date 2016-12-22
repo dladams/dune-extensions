@@ -45,17 +45,24 @@ TH1* DrawResult::timeChannel(unsigned int chan) const {
 
 //**********************************************************************
 
-TH1* DrawResult::signalChannel(unsigned int chan, TH1** pphstuckRange, TH1** pphsameRange) {
+TH1* DrawResult::signalChannel(unsigned int chan,
+                               TH1** pphstuckRange,
+                               TH1** pphsameRange,
+                               TH1** pphmod) {
   const string myname = "DrawResult::signalChannel: ";
   if ( chan >= hdrawxChan.size() ) return 0;
   if ( hsigChan.size() <= chan ) {
     hsigChan.resize(chan+1, nullptr);
+    hsinChan.resize(chan+1, nullptr);
     hstuckRange.resize(chan+1, nullptr);
     hsameRange.resize(chan+1, nullptr);
+    hmodChan.resize(chan+1, nullptr);
   }
   TH1*& phsig = hsigChan[chan];
+  TH1*& phsin = hsinChan[chan];
   TH1*& phstuckRange = hstuckRange[chan];
   TH1*& phsameRange = hsameRange[chan];
+  TH1*& phmod = hmodChan[chan];
   int maxStuck = 50;
   if ( phsig == nullptr ) {
     TH1* phtim = hdrawxChan[chan];
@@ -64,11 +71,15 @@ TH1* DrawResult::signalChannel(unsigned int chan, TH1** pphstuckRange, TH1** pph
       return nullptr;
     }
     string hname = string(phtim->GetName()) + "_signal";
+    string hbname = string(phtim->GetName()) + "_signst";
     string hsname = string(phtim->GetName()) + "_stuckrange";
     string hrname = string(phtim->GetName()) + "_samerange";
-    string htitl = "Signal for " + string(phtim->GetName());
-    string hstitl = "Stuck-bit ranges for " + string(phtim->GetName());
-    string hrtitl = "Same-value ranges for " + string(phtim->GetName());
+    string hmname = string(phtim->GetName()) + "_mod64";
+    string htitl = "Signal for " + string(phtim->GetTitle());
+    string hbtitl = "Not-sticky signal for " + string(phtim->GetTitle());
+    string hstitl = "Stuck-bit ranges for " + string(phtim->GetTitle());
+    string hrtitl = "Same-value ranges for " + string(phtim->GetTitle());
+    string hmtitl = "Mod64 " + string(phtim->GetTitle());
     int nbin = nsig;
     double xmin = sigmin;
     double xmax = sigmax;
@@ -82,12 +93,19 @@ TH1* DrawResult::signalChannel(unsigned int chan, TH1** pphstuckRange, TH1** pph
     phsig = new TH1F(hname.c_str(), htitl.c_str(), nbin, xmin, xmax);
     phsig->GetXaxis()->SetTitle(phtim->GetYaxis()->GetTitle());
     phsig->GetYaxis()->SetTitle("Count");
+    phsin = new TH1F(hbname.c_str(), hbtitl.c_str(), nbin, xmin, xmax);
+    phsin->GetXaxis()->SetTitle(phtim->GetYaxis()->GetTitle());
+    phsin->GetYaxis()->SetTitle("Count");
     phstuckRange = new TH1F(hsname.c_str(), hstitl.c_str(), maxStuck, 0, maxStuck);
     phstuckRange->GetXaxis()->SetTitle("# contiguous ticks with stuck bits");
     phstuckRange->GetYaxis()->SetTitle("Count");
     phsameRange = new TH1F(hrname.c_str(), hrtitl.c_str(), maxStuck, 0, maxStuck);
     phsameRange->GetXaxis()->SetTitle("# contiguous ticks with same value");
     phsameRange->GetYaxis()->SetTitle("Count");
+    phmod = new TH1F(hmname.c_str(), hmtitl.c_str(), 64, 0, 64);
+    string slab = "mod64(" + string(phtim->GetYaxis()->GetTitle()) + ")";
+    phmod->GetXaxis()->SetTitle(phtim->GetYaxis()->GetTitle());
+    phmod->GetYaxis()->SetTitle("Count");
     int nstuck = 0;
     bool isStuck = false;
     int ntbin = phtim->GetNbinsX();
@@ -97,10 +115,13 @@ TH1* DrawResult::signalChannel(unsigned int chan, TH1** pphstuckRange, TH1** pph
       bool isLast = ibin == ntbin;
       double xadc = phtim->GetBinContent(ibin);
       phsig->Fill(xadc);
-      unsigned short iadc = xadc + 0.01;
+      unsigned short iadc = havePedestal ? xadc + pedestal(chan) : xadc + 0.001;
+      phmod->Fill(iadc%64);
       bool wasStuck = isStuck;
       if ( ! wasStuck ) nstuck = 0;
       isStuck = howStuck(iadc);
+      if ( ! isStuck ) phsin->Fill(xadc);
+      if ( ! isStuck ) phstuckRange->Fill(-1);
       if ( isStuck ) ++nstuck;    // # consecutive sticks
       if ( wasStuck ) {
         if ( ! isStuck || isLast ) {
@@ -108,6 +129,7 @@ TH1* DrawResult::signalChannel(unsigned int chan, TH1** pphstuckRange, TH1** pph
         }
       }
       bool isSame = xadc == xadcLast;
+      if ( isStuck ) isSame = false;
       // If value has changed, fill for the last bin.
       if ( nsame > 0 ) {
         if ( !isSame ) {
@@ -122,7 +144,54 @@ TH1* DrawResult::signalChannel(unsigned int chan, TH1** pphstuckRange, TH1** pph
   }
   if ( pphstuckRange != nullptr ) *pphstuckRange = phstuckRange;
   if ( pphsameRange != nullptr ) *pphsameRange = phsameRange;
+  if ( pphmod != nullptr ) *pphmod = phmod;
   return phsig;
+}
+
+//**********************************************************************
+
+TH1* DrawResult::stuckChannel(unsigned int chan) {
+  TH1* ph = nullptr;
+  signalChannel(chan, &ph, nullptr, nullptr);
+  return ph;
+}
+
+//**********************************************************************
+
+TH1* DrawResult::sameChannel(unsigned int chan) {
+  TH1* ph = nullptr;
+  signalChannel(chan, nullptr, &ph, nullptr);
+  return ph;
+}
+
+//**********************************************************************
+
+TH1* DrawResult::modChannel(unsigned int chan) {
+  TH1* ph = nullptr;
+  signalChannel(chan, nullptr, nullptr, &ph);
+  if ( ph != nullptr ) ph->SetStats(0);
+  return ph;
+}
+
+//**********************************************************************
+
+TH1* DrawResult::signstChannel(unsigned int chan) {
+  signalChannel(chan, nullptr, nullptr, nullptr);
+  TH1* ph = hsinChan.size() > chan ? hsinChan[chan] : nullptr;
+  if ( ph != nullptr ) ph->SetStats(0);
+  return ph;
+}
+
+//**********************************************************************
+
+TH1* DrawResult::chanstat() {
+  return hchanstat;
+}
+
+//**********************************************************************
+
+int DrawResult::chanstat(unsigned int chan) {
+  return chanstats.size() > chan ? chanstats[chan] : -1;
 }
 
 //**********************************************************************
@@ -249,6 +318,7 @@ TH1* DrawResult::timePowerChannel(unsigned int chan) {
   return ph;
 }
 
+
 //**********************************************************************
 
 TH1* DrawResult::mean() {
@@ -259,9 +329,25 @@ TH1* DrawResult::mean() {
     string hname = string(hdraw->GetName()) + "_mean";
     string htitl = string(hdraw->GetTitle()) + " mean ADC count";
     hmean = new TH1F(hname.c_str(), htitl.c_str(), ncha, 0, ncha);
+    hmean->GetXaxis()->SetTitle("Channel");
+    hmean->GetYaxis()->SetTitle("Mean [ADC counts]");
+    hmean->SetMinimum(-50.0);
+    hmean->SetMinimum( 50.0);
+    hmean->SetStats(0);
     hname = string(hdraw->GetName()) + "_rms";
-    htitl = string(hdraw->GetTitle()) + " RMS ADC count";
+    htitl = string(hdraw->GetTitle());
+    string::size_type ipos = htitl.find("signals");
+    if ( ipos != string::npos ) {
+      htitl.replace(ipos+6, 1, " RMS");
+    } else {
+      htitl += ": RMS";
+    }
     hrms = new TH1F(hname.c_str(), htitl.c_str(), ncha, 0, ncha);
+    hrms->GetXaxis()->SetTitle("Channel");
+    hrms->GetYaxis()->SetTitle("RMS [ADC counts]");
+    hrms->SetStats(0);
+    hrms->SetMinimum(0.0);
+    hrms->SetMaximum(50.0);
     for ( unsigned int icha=0; icha<hdrawxChan.size(); ++icha ) {
       TH1* ph = signalChannel(icha);
       double mean = ph->GetMean();
@@ -276,9 +362,252 @@ TH1* DrawResult::mean() {
 //**********************************************************************
 
 TH1* DrawResult::rms() {
-  const string myname = "DrawResult::ran: ";
   if ( hrms == nullptr ) mean();
   return hrms;
+}
+//**********************************************************************
+
+TH1* DrawResult::meanNotSticky() {
+  const string myname = "DrawResult::meanNotSticky: ";
+  if ( hmen == nullptr ) {
+    if ( hdraw == nullptr ) return nullptr;
+    unsigned int ncha = hdrawxChan.size();
+    string hname = string(hdraw->GetName()) + "_meanns";
+    string htitl = string(hdraw->GetTitle()) + " mean not-sticky ADC count";
+    hmen = new TH1F(hname.c_str(), htitl.c_str(), ncha, 0, ncha);
+    hmen->GetXaxis()->SetTitle("Channel");
+    hmen->GetYaxis()->SetTitle("Mean [ADC counts]");
+    hmen->SetMinimum(-50.0);
+    hmen->SetMinimum( 50.0);
+    hmen->SetStats(0);
+    hname = string(hdraw->GetName()) + "_rmsns";
+    htitl = string(hdraw->GetTitle());
+    string::size_type ipos = htitl.find("signals");
+    if ( ipos != string::npos ) {
+      htitl.replace(ipos+6, 1, " Not-sticky RMS");
+    } else {
+      htitl += ": not-sticky RMS";
+    }
+    hrmn = new TH1F(hname.c_str(), htitl.c_str(), ncha, 0, ncha);
+    hrmn->GetXaxis()->SetTitle("Channel");
+    hrmn->GetYaxis()->SetTitle("RMS [ADC counts]");
+    hrmn->SetStats(0);
+    hrmn->SetMinimum(0.0);
+    hrmn->SetMaximum(50.0);
+    for ( unsigned int icha=0; icha<hdrawxChan.size(); ++icha ) {
+      TH1* ph = signstChannel(icha);
+      double mean = ph->GetMean();
+      double rms = ph->GetRMS();
+      hmen->SetBinContent(icha+1, mean);
+      hrmn->SetBinContent(icha+1, rms);
+    }
+  }
+  return hmen;
+}
+
+//**********************************************************************
+
+TH1* DrawResult::rmsNotSticky() {
+  if ( hrmn == nullptr ) meanNotSticky();
+  return hrmn;
+}
+//**********************************************************************
+
+TH1* DrawResult::stuck(int a_stuckthresh) {
+  const string myname = "DrawResult::stuck: ";
+  if ( a_stuckthresh >= 0 && a_stuckthresh != stuckthresh ) {
+    stuckthresh = a_stuckthresh;
+  }
+  if ( stuckthresh < 0 ) return nullptr;
+  unsigned int nthresh = stuckthresh + 1;
+  if ( nthresh > hstuckThresh.size() ) hstuckThresh.resize(nthresh+1, nullptr);
+  TH1*& phstuck = hstuckThresh[stuckthresh];
+  if ( phstuck == nullptr ) {
+    if ( hdraw == nullptr ) return nullptr;
+    unsigned int ncha = hdrawxChan.size();
+    ostringstream ssname;
+    ssname << string(hdraw->GetName()) + "_stuck" << stuckthresh;
+    string hname = ssname.str();
+    ostringstream sstitl;
+    sstitl << hdraw->GetTitle() << " stuck range " << stuckthresh;
+    string htitl = sstitl.str();
+    phstuck = new TH1F(hname.c_str(), htitl.c_str(), ncha, 0, ncha);
+    phstuck->GetXaxis()->SetTitle("Channel");
+    phstuck->GetYaxis()->SetTitle("Fraction");
+    phstuck->SetMinimum(0.0);
+    phstuck->SetMaximum(1.0);
+    phstuck->SetStats(0);
+    for ( unsigned int icha=0; icha<hdrawxChan.size(); ++icha ) {
+      TH1* ph = stuckChannel(icha);
+      unsigned int nbin = ph->GetNbinsX();
+      double num = ph->Integral(stuckthresh+1, nbin+1);
+      double den = ph->Integral(0, nbin+1);
+      double frac = den>0 ? num/den : -1.0;
+      phstuck->SetBinContent(icha+1, frac);
+    }
+  }
+  return phstuck;
+}
+
+//**********************************************************************
+
+TH1* DrawResult::same(int a_samethresh) {
+  const string myname = "DrawResult::mean: ";
+  if ( a_samethresh >= 0 && a_samethresh != samethresh ) {
+    samethresh = a_samethresh;
+  }
+  if ( samethresh < 0 ) return nullptr;
+  unsigned int nthresh = samethresh + 1;
+  if ( nthresh > hsameThresh.size() ) hsameThresh.resize(nthresh+1, nullptr);
+  TH1*& phsame = hsameThresh[samethresh];
+  if ( phsame == nullptr ) {
+    if ( hdraw == nullptr ) return nullptr;
+    unsigned int ncha = hdrawxChan.size();
+    ostringstream ssname;
+    ssname << string(hdraw->GetName()) + "_same" << samethresh;
+    string hname = ssname.str();
+    ostringstream sstitl;
+    sstitl << hdraw->GetTitle() << " same range " << samethresh;
+    string htitl = sstitl.str();
+    phsame = new TH1F(hname.c_str(), htitl.c_str(), ncha, 0, ncha);
+    phsame->GetXaxis()->SetTitle("Channel");
+    phsame->GetYaxis()->SetTitle("Fraction");
+    phsame->SetMinimum(0.0);
+    phsame->SetMaximum(1.0);
+    phsame->SetStats(0);
+    for ( unsigned int icha=0; icha<hdrawxChan.size(); ++icha ) {
+      TH1* ph = sameChannel(icha);
+      unsigned int nbin = ph->GetNbinsX();
+      double num = ph->Integral(samethresh+1, nbin+1);
+      double den = ph->Integral(0, nbin+1);
+      double frac = den>0 ? num/den : -1.0;
+      phsame->SetBinContent(icha+1, frac);
+    }
+  }
+  return phsame;
+}
+
+//**********************************************************************
+
+double DrawResult::pedestal(unsigned int chan) {
+  const string myname = "DrawResult::pedestal: ";
+  if ( pedestals.size() > chan ) return pedestals[chan];
+  return 0.0;
+}
+
+//**********************************************************************
+
+TH2* DrawResult::rmsWindow(unsigned int a_wtick, unsigned int a_ntick, TH2** pphmean) {
+  int wtick = a_wtick ? a_wtick : 0;
+  int ntick = a_ntick ? a_ntick : wtick;
+  rmsWindowWtick = wtick;
+  rmsWindowNtick = ntick;
+  if ( wtick == 0 ) return nullptr;
+  TH2* phsig = time();
+  ostringstream sshname;
+  sshname << phsig->GetName() << "_rmsw_" << wtick << "_" << ntick;
+  string hname = sshname.str();
+  ostringstream sshnameMean;
+  sshnameMean << phsig->GetName() << "_meanw_" << wtick << "_" << ntick;
+  string hnameMean = sshnameMean.str();
+  string htitl = "Binned RMS for " + string(phsig->GetTitle());
+  string htitlMean = "Binned mean for " + string(phsig->GetTitle());
+  TH2*& phrms = hrmsWindow[hname];
+  TH2*& phmea = hmeanWindow[hname];
+  if ( pphmean != nullptr ) *pphmean = phmea;
+  if ( phrms != nullptr ) return phrms;
+  int nbinsig = phsig->GetNbinsX();
+  int nbin = nbinsig/wtick;
+  int nchan = phsig->GetNbinsY();
+  if ( nbin <= 0 || nchan <= 0 ) return nullptr;
+  double xmin = phsig->GetXaxis()->GetXmin();
+  double xmax = xmin + nbin*wtick;
+  double ymin = phsig->GetYaxis()->GetXmin();
+  double ymax = phsig->GetYaxis()->GetXmax();
+  unsigned int chan0 = 0;
+  int lotick = (wtick - ntick)/2;
+  int hitick = lotick + ntick;
+  phrms = new TH2F(hname.c_str(), htitl.c_str(), nbin, xmin, xmax, nchan, ymin, ymax);
+  phrms->SetStats(0);
+  phrms->SetMinimum(0.0);
+  phrms->SetMaximum(100.0);
+  phmea = new TH2F(hnameMean.c_str(), htitlMean.c_str(), nbin, xmin, xmax, nchan, ymin, ymax);
+  phmea->SetStats(0);
+  phmea->SetMinimum(-100.0);
+  phmea->SetMaximum( 100.0);
+  for ( int iy=0; iy<nchan; ++iy ) {
+    for ( int ix=0; ix<nbin; ++ix ) {
+      int binout = phrms->GetBin(ix+1, iy+1);
+      int tick0 = xmin + ix*wtick;
+      int tick1 = tick0 + lotick;
+      if ( tick1 < 0 ) tick1 = 0;
+      int tick2 = tick0 + hitick;
+      if ( tick2 > nbinsig ) tick2 = nbinsig;
+      double ntick = tick2 - tick1;
+      double sum = 0.0;
+      double sumsq = 0.0;
+      for ( int tick=tick1; tick<tick2; ++tick ) {
+        int bin = phsig->GetBin(tick+1, iy+1);
+        double sig = phsig->GetBinContent(bin);
+        sum += sig;
+        sumsq += sig*sig;
+      }
+      double mean = sum/ntick;
+      double rmssq = sumsq/ntick - mean*mean;
+      double rms = sqrt(rmssq);
+      phrms->SetBinContent(binout, rms);
+      phmea->SetBinContent(binout, mean);
+    }
+  }
+  return phrms;
+}
+  
+//**********************************************************************
+
+TH2* DrawResult::meanWindow(unsigned int a_wtick, unsigned int a_ntick) {
+  TH2* ph = nullptr;
+  rmsWindow(a_wtick, a_ntick, &ph);
+  return ph;
+}
+
+//**********************************************************************
+
+TH1* DrawResult::rmsWindowChan(unsigned int chan, unsigned int a_wtick, unsigned int a_ntick) {
+  unsigned int wtick = a_wtick;
+  unsigned int ntick = a_ntick;
+  if ( wtick == 0 ) {
+    wtick = rmsWindowWtick;
+    ntick = rmsWindowNtick;
+  }
+  TH2* phrms = rmsWindow(wtick, ntick);
+  ostringstream sshname;
+  sshname << phrms->GetName() << "_chan" << chan;
+  string hname = sshname.str();
+  TH1*& ph = hrmsWindowChan[hname];
+  if ( ph != nullptr ) return ph;
+  int bin = chan + 1;
+  ph = phrms->ProjectionX(hname.c_str(), bin, bin);
+  ph->SetStats(0);
+  ph->SetMinimum(0.0);
+  ph->SetMaximum(100.0);
+  return ph;
+}
+
+//**********************************************************************
+
+TH1* DrawResult::meanWindowChan(unsigned int chan) {
+  TH2* phrms = meanWindow(rmsWindowWtick, rmsWindowNtick);
+  ostringstream sshname;
+  sshname << phrms->GetName() << "_chan" << chan;
+  string hname = sshname.str();
+  TH1*& ph = hmeanWindowChan[hname];
+  if ( ph != nullptr ) return ph;
+  int bin = chan + 1;
+  ph = phrms->ProjectionX(hname.c_str(), bin, bin);
+  ph->SetStats(0);
+  ph->SetMinimum(-100.0);
+  ph->SetMaximum( 100.0);
+  return ph;
 }
 
 //**********************************************************************

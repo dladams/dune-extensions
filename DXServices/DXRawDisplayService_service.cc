@@ -86,6 +86,7 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
   m_DoAllFlag              = pset.get<bool>("DoAllFlag");
   m_DoZSROPs               = pset.get<bool>("DoZSROPs");
   m_DoMean                 = pset.get<bool>("DoMean");
+  m_DoChannelStatus        = pset.get<bool>("DoChannelStatus");
   m_NchanMeanRms           = pset.get<int>("NchanMeanRms");
   m_UseChannelMap          = pset.get<bool>("UseChannelMap");
   m_BadChannelFlag         = pset.get<int>("BadChannelFlag");
@@ -112,6 +113,7 @@ DXRawDisplayService::DXRawDisplayService(const fhicl::ParameterSet& pset)
     cout << myname << "            NchanMeanRms: " << m_NchanMeanRms << endl;
     cout << myname << "           UseChannelMap: " << m_UseChannelMap << endl;
     cout << myname << "          BadChannelFlag: " << m_BadChannelFlag << endl;
+    cout << myname << "         DoChannelStatus: " << m_DoChannelStatus << endl;
     cout << myname << "           SkipStuckBits: " << m_SkipStuckBits << endl;
     cout << myname << "            MaxEventsLog: " << m_MaxEventsLog << endl;
     cout << myname << "            MaxDigitsLog: " << m_MaxDigitsLog << endl;
@@ -158,7 +160,7 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
 
   // Fetch the channel status service.
   const ChannelStatusProvider* pcsp = nullptr;
-  if ( m_BadChannelFlag > 0 ) {
+  if ( m_BadChannelFlag > 0 || m_DoChannelStatus ) {
     art::ServiceHandle<ChannelStatusService> cssHandle;
     pcsp = cssHandle->GetProviderPtr();
     if ( pcsp == nullptr ) {
@@ -213,7 +215,9 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
   int nchan = m_pgh->geometry()->Nchannels();
 
   // Create histograms.
-  vector<TH2*> rophists;
+  vector<TH2*> rophists_sig;
+  vector<TH1*> pedhists;
+  vector<TH1*> badhists;
   vector<TH2*> rophists_zs;
   if ( dbg > 2 ) cout << myname << "Creating raw data histograms." << endl;
   if ( m_DoROPs ) {
@@ -221,8 +225,27 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
       TH2* ph = hcreateRop.create("raw" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
                                       "Raw signals for " + geohelp.ropName(irop));
       if ( dbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
-      rophists.push_back(ph);
+      rophists_sig.push_back(ph);
       m_eventhists.push_back(ph);
+      // Pedestal hists.
+      string hpedname = string(ph->GetName()) + "_ped";
+      string hpedtitl = "Pedestals for " + string(ph->GetTitle());
+      unsigned int nchan = ph->GetNbinsY();
+      TH1* phped = tfsdir.make<TH1F>(hpedname.c_str(), hpedtitl.c_str(), nchan, 0, nchan);
+      phped->GetXaxis()->SetTitle("Channel");
+      phped->GetYaxis()->SetTitle("Pedestal [ADC counts]");
+      pedhists.push_back(phped);
+      m_eventhists.push_back(phped);
+      // Bad channel hists.
+      if ( m_DoChannelStatus ) {
+        string hbadname = string(ph->GetName()) + "_badchan";
+        string hbadtitl = "Channel status for " + string(ph->GetTitle());
+        TH1* phbad = tfsdir.make<TH1F>(hbadname.c_str(), hbadtitl.c_str(), nchan, 0, nchan);
+        phbad->GetXaxis()->SetTitle("Channel");
+        phbad->GetYaxis()->SetTitle("Status (0=ok, 1=bad, 2=noisy)");
+        badhists.push_back(phbad);
+        m_eventhists.push_back(phbad);
+      }
     }
   }
   if ( m_DoZSROPs ) {
@@ -312,6 +335,7 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
     const AdcCountVector& adcs =  prepdig.raw;
     const AdcSignalVector& sigs =  prepdig.samples;
     const AdcFlagVector& flags  =  prepdig.flags;
+    AdcSignal pedestal = prepdig.pedestal;
     const raw::RawDigit& digit  = *prepdig.digit;
     unsigned int nsig = digit.Samples();
     if ( sigs.size() != nsig || flags.size() != nsig ) {
@@ -338,21 +362,32 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
     unsigned int iropchan = ichan - geohelp.ropFirstChannel(irop);
     if ( dbg > 5 ) cout << myname << "      ROP channel: " << iropchan << endl;
     // Set the ROP histogram pointers.
-    TH2* ph = nullptr;
+    TH2* phrop = nullptr;
+    TH1* phped = nullptr;
     TH2* phzs = nullptr;
     TH2* ph_mean = nullptr;
     TH2* ph_rms = nullptr;
-    if ( rophists.size() > irop ) ph = rophists[irop];
+    TH1* phbad = nullptr;
+    if ( rophists_sig.size() > irop ) phrop = rophists_sig[irop];
+    if ( pedhists.size() > irop ) phped = pedhists[irop];
+    if ( badhists.size() > irop ) phbad = badhists[irop];
+    if ( m_DoChannelStatus ) {
+      int val = 0;
+      if ( pcsp->IsBad(ichan)   ) val += 1;
+      if ( pcsp->IsNoisy(ichan) ) val += 2;
+      phbad->SetBinContent(iropchan+1, val);
+    }
     if ( rophists_zs.size() > irop ) phzs = rophists_zs[irop];
     if ( rophists_mean.size() > irop ) ph_mean = rophists_mean[irop];
     if ( rophists_rms.size() > irop ) ph_rms = rophists_rms[irop];
     if ( dbg >= 5 ) {
       cout << myname << "ROP hists for channel " << ichan << ":";
-      if ( ph != nullptr ) cout << " " << ph->GetName();
+      if ( phrop != nullptr ) cout << " " << phrop->GetName();
       if ( ph_mean != nullptr ) cout << " " << ph_mean->GetName();
       if ( ph_rms != nullptr ) cout << " " << ph_rms->GetName();
       cout << endl;
     }
+    if ( phped != nullptr ) phped->SetBinContent(iropchan+1, pedestal);
     // If requested, apply zero suppression.
     // This requires making temporary channel data.
     const AdcChannelData* pprepdig = &prepdig;
@@ -393,7 +428,7 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
           if ( isFixed ) err = 100.0;
           if ( isInterpolated ) err = 2.0;
           if ( isExtrapolated ) err = 5.0;
-          if ( ph != nullptr ) fill2dhist(ph, tick, iropchan, wt, err);
+          if ( phrop != nullptr ) fill2dhist(phrop, tick, iropchan, wt, err);
           if ( phzs != nullptr ) fill2dhist(phzs, tick, iropchan, wtzs, err);
           double allwt = wt;
           if ( fAbsAll ) allwt = fabs(allwt);
@@ -454,7 +489,7 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
   // Display the contents of each raw data histogram.
   if ( dbg >= 2 ) {
     cout << myname << "Summary of raw data histograms:" << endl;
-    for ( TH2* ph : rophists ) {
+    for ( TH2* ph : rophists_sig ) {
       summarize2dHist(ph, myname, wnam, 4, 7);
     }
     for ( TH2* ph : rophists_zs ) {

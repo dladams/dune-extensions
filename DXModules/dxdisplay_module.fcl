@@ -121,9 +121,13 @@ tools.rda_online: {
   NChanPerBin:               1
   DoROPs:                false
   DoAll:                 false
+  DoAllFlag:             false
   DoADC:                 false
-  DoAllOnline:            true
-  DoMean:                 true
+  DoAllOnline:           false
+  DoMean:                false
+  DoZSROPs:              false
+  DoChannelStatus:       false
+  NchanMeanRms:            100
   UseChannelMap:          true
   BadChannelFlag:            0
   MaxEventsLog:              1

@@ -13,22 +13,23 @@
 //     hE_rawapaAAA -    Raw data for APA AAA
 //
 // Properties:
-//   LogLevel       - 0=no msgs, 1=init only, 2+=every call to process
-//   TdcTickMin     - Lower limit for the tick axis.
-//   TdcTickMax     - Upper limit for the tick axis.
-//   NTickPerBin    - Rebin factor for the tick axis.
-//   NChanPerBin    - Rebin factor for the channel axis.
-//   DoROPs         - Make a channel-tick histogram for each readout plane for each event.
-//   DoADC          - Make a channel-tick histogram of the raw ADC count for the full detector for each event.
-//   DoAll          - Make a channel-tick histogram of pedestal-subtracted signal for the full detector for each event.
-//   DoAllOnline    - Make a channel-tick histogram for the full detector with online channel ordering for each event.
-//   DoAllFlag      - Make a channel-tick histogram of flags for the full detector for each event.
-//   DoZSROPs       - Make a zero-suppressed channel-tick histogram for each readout plane for each event.
-//   DoMean         - Make a channel mean +/- RMS histogram for each event.
-//   NchanMeanRms   - if >0, make 2D channel vs. tick  mean and RMS histos with channel bin size of NchanMeanRms.
-//   UseChannelMap  - Use service to convert offline to online channels (otherwise they are assumed to be the same)
-//   BadChannelFlag - 0 - Use bad channels as they are
-//                    1 - Set pedestal-subtracted ADC counts to zero
+//   LogLevel        - 0=no msgs, 1=init only, 2+=every call to process
+//   TdcTickMin      - Lower limit for the tick axis.
+//   TdcTickMax      - Upper limit for the tick axis.
+//   NTickPerBin     - Rebin factor for the tick axis.
+//   NChanPerBin     - Rebin factor for the channel axis.
+//   DoROPs          - Make a channel-tick histogram for each readout plane for each event.
+//   DoADC           - Make a channel-tick histogram of the raw ADC count for the full detector for each event.
+//   DoAll           - Make a channel-tick histogram of pedestal-subtracted signal for the full detector for each event.
+//   DoAllOnline     - Make a channel-tick histogram for the full detector with online channel ordering for each event.
+//   DoAllFlag       - Make a channel-tick histogram of flags for the full detector for each event.
+//   DoZSROPs        - Make a zero-suppressed channel-tick histogram for each readout plane for each event.
+//   DoMean          - Make a channel mean +/- RMS histogram for each event.
+//   NchanMeanRms    - if >0, make 2D channel vs. tick  mean and RMS histos with channel bin size of NchanMeanRms.
+//   UseChannelMap   - Use service to convert offline to online channels (otherwise they are assumed to be the same)
+//   BadChannelFlag  - 0 - Use bad channels as they are
+//                     1 - Set pedestal-subtracted ADC counts to zero
+//   DoChannelStatus - Create channel status histograms.
 //   MaxEventsLog - Maximum # of events (calls to process) to log.
 //   MaxDigitsLog - Maximum # of digits (calls to process) to log.
 
@@ -100,6 +101,7 @@ private:
   bool m_DoAllFlag;
   bool m_DoZSROPs;
   bool m_DoMean;
+  bool m_DoChannelStatus;
   float m_NchanMeanRms;
   bool m_UseChannelMap;
   int m_BadChannelFlag;

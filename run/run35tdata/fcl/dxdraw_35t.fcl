@@ -52,13 +52,8 @@ physics.analyzers.DXDisplay.DebugLevel: 2
 
 services.RawDigitAnalysisService: @local::tools.rda_online
 services.RawDigitAnalysisService.LogLevel:           2
-services.RawDigitAnalysisService.DoMean:          true
-services.RawDigitAnalysisService.DoAllOnline:     true
-services.RawDigitAnalysisService.DoAll:           true
-services.RawDigitAnalysisService.DoAllFlag:       true
 services.RawDigitAnalysisService.DoROPs:          true
-services.RawDigitAnalysisService.DoZSROPs:       false
-services.RawDigitAnalysisService.NchanMeanRms:     100
+services.RawDigitAnalysisService.DoChannelStatus: true
 services.RawDigitAnalysisService.TdcTickMax:     15000
 services.RawDigitAnalysisService.BadChannelFlag:     0 # 1=skip bad channels
 services.RawDigitAnalysisService.SkipStuckBits:  false

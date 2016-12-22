@@ -71,6 +71,8 @@ DrawResult draw(std::string name, int how, double zmax,
     cout << myname << "WARNING: gDXFile is null." << endl;
   }
   gDirectory->GetObject(name.c_str(), pobj);
+  TH1* phped = nullptr;
+  TH1* phbad = nullptr;
   if ( pobj == 0 ) {
     size_t i1 = name.find('h') + 1;
     size_t i2 = name.find('_');
@@ -80,6 +82,14 @@ DrawResult draw(std::string name, int how, double zmax,
       string savedir = gDirectory->GetPath();
       if ( gDirectory->cd(sevt.c_str()) ) {
         gDirectory->GetObject(name.c_str(), pobj);
+        string pedname = name + "_ped";
+        TObject* pobjped = nullptr;
+        gDirectory->GetObject(pedname.c_str(), pobjped);
+        phped = dynamic_cast<TH1*>(pobjped);
+        string badname = name + "_badchan";
+        TObject* pobjbad = nullptr;
+        gDirectory->GetObject(badname.c_str(), pobjbad);
+        phbad = dynamic_cast<TH1*>(pobjbad);
       } else {
         cout << myname << "Directory not found in " << gDirectory->GetPath() << endl;
       }
@@ -93,6 +103,19 @@ DrawResult draw(std::string name, int how, double zmax,
     cout << myname << "Object not found: " << name << endl;
     res.status = 1;
     return res;
+  }
+  // Record the pedestals.
+  if ( phped != nullptr ) {
+    for ( int ibin=1; ibin<=phped->GetNbinsX(); ++ibin ) {
+      res.pedestals.push_back(phped->GetBinContent(ibin));
+    }
+  }
+  // Record the channel status histogram and the status for each channel.
+  res.hchanstat = phbad;
+  if ( phbad != nullptr ) {
+    for ( int ibin=1; ibin<=phbad->GetNbinsX(); ++ibin ) {
+      res.chanstats.push_back(phbad->GetBinContent(ibin));
+    }
   }
   TCanvas*& pcan = drawCanvas;
   static TH2* phdraw;
@@ -317,5 +340,8 @@ DrawResult draw(std::string name, int how, double zmax,
   // Add top and right axis.
   addaxis(phdraw);
   res.hdraw = phdraw;
+  if ( name.find("_raw") ) res.havePedestal = true;
+  res.name = name;
+  res.filename = gDXFile->GetName();
   return res;
 }

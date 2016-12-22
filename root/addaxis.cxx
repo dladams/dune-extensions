@@ -116,7 +116,7 @@ int addaxisright(double ticksize, int ndiv) {
   if ( gPad->GetLogy() ) sopt += "G";
   TGaxis* paxnew = new TGaxis(xax, yax1, xax, yax2,
                               ymin, ymax, 510, sopt.c_str());
-  if ( ticksize > 0 ) paxnew->SetTickSize(ticksize);
+  if ( ticksize > 0 ) paxnew->SetTickLength(ticksize);
   if ( ndiv > 0 ) paxnew->SetNdivisions(ndiv);
   string name = "RightAxis";
   paxnew->SetName(name.c_str());
@@ -124,14 +124,13 @@ int addaxisright(double ticksize, int ndiv) {
   for ( int iobj=0; iobj<pobjs->GetEntries(); ++iobj ) {
     TGaxis* paxold = dynamic_cast<TGaxis*>(pobjs->At(iobj));
     if ( paxold != 0 ) {
-      
       if ( paxold->GetName() == name ) {
         pobjs->RemoveAt(iobj);
         break;
       }
     }
   }
-  paxnew->Draw();
+  paxnew->Draw("");
   return 0;
 }
 
