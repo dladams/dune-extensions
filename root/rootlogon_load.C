@@ -76,6 +76,7 @@
   gROOT->ProcessLine(".L corrHist.cxx+");
   gROOT->ProcessLine(".L PFHist.cxx+");
   gROOT->ProcessLine(".L RestrictedDFT.cxx+");
+  gROOT->ProcessLine(".L TruncatedHist.cxx+");
 
   gROOT->ProcessLine(".L ex2dhist.C");
   //gROOT->ProcessLine(".L detlar.cxx+");
