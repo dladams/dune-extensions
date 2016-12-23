@@ -23,7 +23,10 @@ public:
   double nrms() const;
 
   // Return the truncated histogram.
-  TH1* hist;
+  TH1* hist();
+
+  // Return the # iteration used in the truncation.
+  int nloop() const;
 
 private:
 
