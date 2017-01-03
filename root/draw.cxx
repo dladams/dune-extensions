@@ -343,5 +343,6 @@ DrawResult draw(std::string name, int how, double zmax,
   if ( name.find("_raw") ) res.havePedestal = true;
   res.name = name;
   res.filename = gDXFile->GetName();
+  cout << myname << "Done." << endl;
   return res;
 }

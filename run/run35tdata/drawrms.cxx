@@ -7,6 +7,7 @@
 #include "TH1.h"
 #include "TROOT.h"
 #include "TFile.h"
+#include "TLegend.h"
 
 #include <iostream>
 using std::cout;
@@ -25,6 +26,11 @@ void drawrms(DrawResult& res) {
   phrms->GetYaxis()->SetTickLength(0.013);
   phrms->SetMaximum(50);
   phrms->SetLineWidth(2);
+  TH1* phrmt = res.rmsTruncated();
+  phrmt->SetStats(0);
+  phrmt->SetLineWidth(2);
+  phrmt->SetLineColor(3);
+  phrmt->SetLineStyle(3);
   TH1* phrmn = res.rmsNotSticky();
   phrmn->SetStats(0);
   phrmn->SetLineWidth(2);
@@ -39,12 +45,27 @@ void drawrms(DrawResult& res) {
   phbad->Draw("same");
   phrms->Draw("same");
   phrmn->Draw("same");
+  phrmt->Draw("same");
   phrms->Draw("axis same");
   string ifname = res.filename;
   string::size_type ipos = ifname.find("_run");
   string::size_type jpos = ifname.find("_", ipos+1);
   string rname = ifname.substr(ipos+1, jpos-ipos-1);
   string fname = "rms_" + rname + "_" + res.name + ".png";
+  // Add legend.
+  TLegend* pleg = new TLegend(0.06, 0.69, 0.20, 0.87);
+  string labrms = "RMS all";
+  string labrmn = "RMS not sticky";
+  string labrmt = "RMS truncated";
+  string labbad = "Bad";
+  pleg->AddEntry(phrms, labrms.c_str(), "l");
+  pleg->AddEntry(phrmn, labrmn.c_str(), "l");
+  pleg->AddEntry(phrmt, labrmt.c_str(), "l");
+  pleg->AddEntry(phbad, labbad.c_str(), "f");
+  pleg->SetBorderSize(0);
+  pleg->SetFillStyle(0);
+  pleg->Draw();
+  // Add axes.
   addaxis(phrms);
   pcan->Print(fname.c_str());
 }

@@ -2,6 +2,7 @@
 
 #include "DrawResult.h"
 #include "howStuck.h"
+#include "TruncatedHist.h"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -348,12 +349,21 @@ TH1* DrawResult::mean() {
     hrms->SetStats(0);
     hrms->SetMinimum(0.0);
     hrms->SetMaximum(50.0);
+    hrmt = new TH1F(hname.c_str(), htitl.c_str(), ncha, 0, ncha);
+    hrmt->GetXaxis()->SetTitle("Channel");
+    hrmt->GetYaxis()->SetTitle("Truncated RMS [ADC counts]");
+    hrmt->SetStats(0);
+    hrmt->SetMinimum(0.0);
+    hrmt->SetMaximum(50.0);
     for ( unsigned int icha=0; icha<hdrawxChan.size(); ++icha ) {
       TH1* ph = signalChannel(icha);
       double mean = ph->GetMean();
       double rms = ph->GetRMS();
       hmean->SetBinContent(icha+1, mean);
       hrms->SetBinContent(icha+1, rms);
+      TruncatedHist th(ph, 4.0);
+      double rmt = th.hist()->GetRMS();
+      hrmt->SetBinContent(icha+1, rmt);
     }
   }
   return hmean;
@@ -365,6 +375,13 @@ TH1* DrawResult::rms() {
   if ( hrms == nullptr ) mean();
   return hrms;
 }
+//**********************************************************************
+
+TH1* DrawResult::rmsTruncated() {
+  if ( hrmt == nullptr ) mean();
+  return hrmt;
+}
+
 //**********************************************************************
 
 TH1* DrawResult::meanNotSticky() {

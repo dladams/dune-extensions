@@ -44,6 +44,7 @@ struct DrawResult {
   FFTHist* pfft = nullptr;
   TH1* hmean = nullptr;
   TH1* hrms = nullptr;
+  TH1* hrmt = nullptr;
   TH1* hmen = nullptr;      // Mean w/o sticky codes
   TH1* hrmn = nullptr;      // RMS w/o sticky codes
   std::vector<TH1*> hstuckThresh;
@@ -116,10 +117,13 @@ struct DrawResult {
   // Fetch the RMS in each channel.
   TH1* rms();
 
+  // Fetch the 4-sigma truncated RMS in each channel.
+  TH1* rmsTruncated();
+
   // Fetch the not-stuck mean signal in each channel.
   TH1* meanNotSticky();
 
-  // Fetch the not-stuck RMS in each channel.
+  // Fetch the 4-sigma truncated RMS in each channel.
   TH1* rmsNotSticky();
 
   // Fetch the fraction of ticks in a contiguous group of hstuckthresh or more.
