@@ -361,7 +361,7 @@ TH1* DrawResult::mean() {
       double rms = ph->GetRMS();
       hmean->SetBinContent(icha+1, mean);
       hrms->SetBinContent(icha+1, rms);
-      TruncatedHist th(ph, 4.0);
+      TruncatedHist th(ph, truncsigma);
       double rmt = th.hist()->GetRMS();
       hrmt->SetBinContent(icha+1, rmt);
     }
@@ -401,7 +401,7 @@ TH1* DrawResult::meanNotSticky() {
     htitl = string(hdraw->GetTitle());
     string::size_type ipos = htitl.find("signals");
     if ( ipos != string::npos ) {
-      htitl.replace(ipos+6, 1, " Not-sticky RMS");
+      htitl.replace(ipos+6, 1, " not-sticky RMS");
     } else {
       htitl += ": not-sticky RMS";
     }
@@ -411,12 +411,21 @@ TH1* DrawResult::meanNotSticky() {
     hrmn->SetStats(0);
     hrmn->SetMinimum(0.0);
     hrmn->SetMaximum(50.0);
+    hrnt = new TH1F(hname.c_str(), htitl.c_str(), ncha, 0, ncha);
+    hrnt->GetXaxis()->SetTitle("Channel");
+    hrnt->GetYaxis()->SetTitle("Truncated RMS [ADC counts]");
+    hrnt->SetStats(0);
+    hrnt->SetMinimum(0.0);
+    hrnt->SetMaximum(50.0);
     for ( unsigned int icha=0; icha<hdrawxChan.size(); ++icha ) {
       TH1* ph = signstChannel(icha);
       double mean = ph->GetMean();
       double rms = ph->GetRMS();
       hmen->SetBinContent(icha+1, mean);
       hrmn->SetBinContent(icha+1, rms);
+      TruncatedHist th(ph, truncsigma);
+      double rmt = th.hist()->GetRMS();
+      hrnt->SetBinContent(icha+1, rmt);
     }
   }
   return hmen;
@@ -427,6 +436,13 @@ TH1* DrawResult::meanNotSticky() {
 TH1* DrawResult::rmsNotSticky() {
   if ( hrmn == nullptr ) meanNotSticky();
   return hrmn;
+}
+
+//**********************************************************************
+
+TH1* DrawResult::rmsTruncatedNotSticky() {
+  if ( hrnt == nullptr ) meanNotSticky();
+  return hrnt;
 }
 //**********************************************************************
 

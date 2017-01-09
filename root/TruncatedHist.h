@@ -13,7 +13,7 @@ class TruncatedHist {
 public:
 
   // Ctor.
-  TruncatedHist(TH1* ph, double a_nrms);
+  TruncatedHist(TH1* ph, double a_nrms, bool dbg =false);
 
   // Dtor.
   // Deletes the tuncated histogram.

@@ -2,26 +2,34 @@
 
 #include "TruncatedHist.h"
 #include "TH1.h"
+#include <string>
 #include <iostream>
 
+using std::string;
 using std::abs;
+using std::cout;
+using std::endl;
 
 //**********************************************************************
 
-TruncatedHist::TruncatedHist(TH1* ph, double a_nrms)
+TruncatedHist::TruncatedHist(TH1* phin, double a_nrms, bool dbg)
 : m_ph(nullptr), m_nrms(a_nrms), m_nloop(0) {
-  m_ph = dynamic_cast<TH1*>(ph->Clone());
+  const string myname = "TruncatedHist::ctor: ";
+  m_ph = dynamic_cast<TH1*>(phin->Clone());
   m_ph->SetDirectory(0);
   double dif = 1;
   while ( ++m_nloop < 20 ) {
-    double mean = ph->GetMean();
-    double rms = ph->GetRMS();
+    double mean = m_ph->GetMean();
+    double rms = m_ph->GetRMS();
     double x1 = mean - m_nrms*rms;
     double x2 = mean + m_nrms*rms;
     m_ph->GetXaxis()->SetRangeUser(x1,x2);
     double drmsmax = 1.e-4*(x2 - x1);
-    double newrms = ph->GetRMS();
+    double newrms = m_ph->GetRMS();
     double drms = std::abs(newrms - rms);
+    if ( dbg ) {
+      cout << myname << "Loop " << m_nloop << ": RMS=" << newrms << endl;
+    }
     if ( drms < drmsmax ) break;
   }
 }

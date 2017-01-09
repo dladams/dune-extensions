@@ -128,7 +128,7 @@ DrawResult draw(std::string name, int how, double zmax,
   if ( phnew->GetEntries() == 0 ) {
     cout << myname << "Histogram is empty: " << name << endl;
     res.status = 3;
-    return res;
+    //return res;
   }
   // Early draw to make palette available
   double zmin = phnew->GetMinimum();
@@ -328,15 +328,17 @@ DrawResult draw(std::string name, int how, double zmax,
   // Set palette parameters. First draw to make sure palette is present.
   gPad->Update();
   TPaletteAxis* ppalax = dynamic_cast<TPaletteAxis*>(phdraw->GetListOfFunctions()->FindObject("palette")); 
-  if ( ppalax == 0 ) {
-    cout << myname << "Unable to retrieve palette." << endl;
-    res.status = 6;
-    return res;
-  }
+  //if ( ppalax == 0 ) {
+  //  cout << myname << "Unable to retrieve palette." << endl;
+  //  res.status = 6;
+  //  return res;
+  //}
   //cout << "Palette axis: " << hex << long(ppalax) << dec << endl;
-  ppalax->SetX1NDC(palx1);
-  ppalax->SetX2NDC(palx2);
-  ppalax->SetTitleOffset(paltoff);
+  if ( ppalax != nullptr ) {
+    ppalax->SetX1NDC(palx1);
+    ppalax->SetX2NDC(palx2);
+    ppalax->SetTitleOffset(paltoff);
+  }
   // Add top and right axis.
   addaxis(phdraw);
   res.hdraw = phdraw;

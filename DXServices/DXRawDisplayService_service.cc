@@ -242,7 +242,10 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
         string hbadtitl = "Channel status for " + string(ph->GetTitle());
         TH1* phbad = tfsdir.make<TH1F>(hbadname.c_str(), hbadtitl.c_str(), nchan, 0, nchan);
         phbad->GetXaxis()->SetTitle("Channel");
-        phbad->GetYaxis()->SetTitle("Status (0=ok, 1=bad, 2=noisy)");
+        phbad->GetYaxis()->SetTitle("Status (-1=missing, 0=ok, 1=bad, 2=noisy)");
+        for ( int ich=1; ich<=phbad->GetNbinsX(); ++ich ) {
+          phbad->SetBinContent(ich, -1);
+        }
         badhists.push_back(phbad);
         m_eventhists.push_back(phbad);
       }
