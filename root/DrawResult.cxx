@@ -332,9 +332,17 @@ TH1* DrawResult::mean() {
     hmean = new TH1F(hname.c_str(), htitl.c_str(), ncha, 0, ncha);
     hmean->GetXaxis()->SetTitle("Channel");
     hmean->GetYaxis()->SetTitle("Mean [ADC counts]");
-    hmean->SetMinimum(-50.0);
-    hmean->SetMinimum( 50.0);
     hmean->SetStats(0);
+    hmean->SetMinimum(limmeanlo);
+    hmean->SetMaximum(limmeanhi);
+    hname = string(hdraw->GetName()) + "_meantrunc";
+    htitl = string(hdraw->GetTitle()) + " truncated mean ADC count";
+    hmet = new TH1F(hname.c_str(), htitl.c_str(), ncha, 0, ncha);
+    hmet->GetXaxis()->SetTitle("Channel");
+    hmet->GetYaxis()->SetTitle("Mean [ADC counts]");
+    hmet->SetStats(0);
+    hmet->SetMinimum(limmeanlo);
+    hmet->SetMaximum(limmeanhi);
     hname = string(hdraw->GetName()) + "_rms";
     htitl = string(hdraw->GetTitle());
     string::size_type ipos = htitl.find("signals");
@@ -375,6 +383,14 @@ TH1* DrawResult::rms() {
   if ( hrms == nullptr ) mean();
   return hrms;
 }
+
+//**********************************************************************
+
+TH1* DrawResult::meanTruncated() {
+  if ( hmet == nullptr ) mean();
+  return hrmt;
+}
+
 //**********************************************************************
 
 TH1* DrawResult::rmsTruncated() {
@@ -394,10 +410,16 @@ TH1* DrawResult::meanNotSticky() {
     hmen = new TH1F(hname.c_str(), htitl.c_str(), ncha, 0, ncha);
     hmen->GetXaxis()->SetTitle("Channel");
     hmen->GetYaxis()->SetTitle("Mean [ADC counts]");
-    hmen->SetMinimum(-50.0);
-    hmen->SetMinimum( 50.0);
+    hmen->SetMinimum(limmeanlo);
+    hmen->SetMaximum(limmeanhi);
     hmen->SetStats(0);
-    hname = string(hdraw->GetName()) + "_rmsns";
+    ostringstream ssnsig;
+    ssnsig << truncsigma;
+    string snsig = ssnsig.str();
+    for ( unsigned int ich=0; ich<snsig.size(); ++ich ) {
+      if ( snsig[ich] == '.' ) snsig[ich] = 'p';
+    }
+    hname = string(hdraw->GetName()) + "_rmsns" + snsig;
     htitl = string(hdraw->GetTitle());
     string::size_type ipos = htitl.find("signals");
     if ( ipos != string::npos ) {
@@ -411,6 +433,12 @@ TH1* DrawResult::meanNotSticky() {
     hrmn->SetStats(0);
     hrmn->SetMinimum(0.0);
     hrmn->SetMaximum(50.0);
+    hmnt = new TH1F(hname.c_str(), htitl.c_str(), ncha, 0, ncha);
+    hmnt->GetXaxis()->SetTitle("Channel");
+    hmnt->GetYaxis()->SetTitle("Truncated RMS [ADC counts]");
+    hmnt->SetStats(0);
+    hmnt->SetMinimum(limmeanlo);
+    hmnt->SetMaximum(limmeanhi);
     hrnt = new TH1F(hname.c_str(), htitl.c_str(), ncha, 0, ncha);
     hrnt->GetXaxis()->SetTitle("Channel");
     hrnt->GetYaxis()->SetTitle("Truncated RMS [ADC counts]");
@@ -424,7 +452,9 @@ TH1* DrawResult::meanNotSticky() {
       hmen->SetBinContent(icha+1, mean);
       hrmn->SetBinContent(icha+1, rms);
       TruncatedHist th(ph, truncsigma);
+      double met = th.hist()->GetMean();
       double rmt = th.hist()->GetRMS();
+      hmnt->SetBinContent(icha+1, met);
       hrnt->SetBinContent(icha+1, rmt);
     }
   }
@@ -438,6 +468,12 @@ TH1* DrawResult::rmsNotSticky() {
   return hrmn;
 }
 
+//**********************************************************************
+
+TH1* DrawResult::meanTruncatedNotSticky() {
+  if ( hmnt == nullptr ) meanNotSticky();
+  return hmnt;
+}
 //**********************************************************************
 
 TH1* DrawResult::rmsTruncatedNotSticky() {

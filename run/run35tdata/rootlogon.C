@@ -8,5 +8,6 @@
   gROOT->ProcessLine(".X $DUNE_EXTENSIONS_ROOTSCRIPTS/rootlogon_load.C");
   gROOT->ProcessLine(".X $DUNE_EXTENSIONS_ROOTSCRIPTS/rootlogon_setup.C");
   gROOT->ProcessLine(".L drawrms.cxx+");
+  gROOT->ProcessLine(".L drawmean.cxx+");
   gROOT->ProcessLine(".L drawstuck.cxx+");
 }

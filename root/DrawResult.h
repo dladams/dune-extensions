@@ -27,6 +27,8 @@ struct DrawResult {
   int status = 0;
   int stuckthresh = 1;
   int samethresh = 3;
+  double limmeanlo = -100.0;  // Lower limit for mean histograms
+  double limmeanhi =  100.0;  // Upper limit for mean histograms
   // If true pedestal is added back when evaluating ADC modulus and struck bits.
   bool havePedestal = false;
   TH2* hdraw = nullptr;
@@ -43,12 +45,14 @@ struct DrawResult {
   std::vector<TH1*> htpwrChan;
   std::vector<TH1*> hfpwrChan;
   FFTHist* pfft = nullptr;
-  TH1* hmean = nullptr;
-  TH1* hrms = nullptr;
-  TH1* hrmt = nullptr;
+  TH1* hmean = nullptr;     // mean vs channel
+  TH1* hrms = nullptr;      // RMS vs channel
+  TH1* hmet = nullptr;      // truncated mean vs channel
+  TH1* hrmt = nullptr;      // truncated RMS vs channel
   TH1* hmen = nullptr;      // Mean w/o sticky codes
   TH1* hrmn = nullptr;      // RMS w/o sticky codes
   TH1* hrnt = nullptr;      // Truncated RMS w/o sticky codes.
+  TH1* hmnt = nullptr;      // Truncated RMS w/o sticky codes.
   std::vector<TH1*> hstuckThresh;
   std::vector<TH1*> hsameThresh;
   std::vector<double> pedestals;
@@ -119,7 +123,10 @@ struct DrawResult {
   // Fetch the RMS in each channel.
   TH1* rms();
 
-  // Fetch the 4-sigma truncated RMS in each channel.
+  // Fetch the truncated RMS in each channel.
+  TH1* meanTruncated();
+
+  // Fetch the truncated RMS in each channel.
   TH1* rmsTruncated();
 
   // Fetch the not-stuck mean signal in each channel.
@@ -128,7 +135,10 @@ struct DrawResult {
   // Fetch the 4-sigma truncated RMS in each channel.
   TH1* rmsNotSticky();
 
-  // Fetch the 4-sigma truncated RMS in each channel.
+  // Fetch the truncated NS mean in each channel.
+  TH1* meanTruncatedNotSticky();
+
+  // Fetch the truncated NS RMS in each channel.
   TH1* rmsTruncatedNotSticky();
 
   // Fetch the fraction of ticks in a contiguous group of hstuckthresh or more.
@@ -159,6 +169,8 @@ struct DrawResult {
   // Return the RMS window distribution for a channel using the window
   // configuration from the last call to rmsWindow.
   TH1* meanWindowChan(unsigned int chan);
+
+  // Write a summary
 
 };
 

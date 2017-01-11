@@ -21,9 +21,12 @@ using std::ostringstream;
 void drawstuck(DrawResult& res, int nchan =4, bool stuckonly =false,
                double limit =0.30, double limitsam =0.05) {
   double zmax = 0.50;
-  TCanvas* pcan = new TCanvas;
-  pcan->SetWindowSize(1350, 500);
-  pcan->SetCanvasSize(1350, 500);
+  static int iwin = 0;
+  ++iwin;
+  ostringstream sswinname;
+  sswinname << "mean" << iwin;
+  string swname = sswinname.str().c_str();
+  TCanvas* pcan = new TCanvas(swname.c_str(), swname.c_str(), 1350, 500);
   pcan->GetPad(0)->SetRightMargin(0.03);
   pcan->GetPad(0)->SetLeftMargin(0.05);
   pcan->SetGridx();

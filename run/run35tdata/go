@@ -56,6 +56,14 @@ if [ -n "$INNAME" ]; then
     INFILE=$DATADIR/sliced35t/lbne_r013843_sr01_20160229T180430_20160504T002939_split.root
   elif [ $INNAME = run13770 ]; then
     INFILE=$DATADIR/sliced35t/lbne_r013770_sr01_20160229T022537_20160709T055234_split.root
+  elif [ $INNAME = run13774 ]; then
+    INFILE=$DATADIR/sliced35t/lbne_r013774_sr01_20160229T024150_20160709T052725_split.root
+  elif [ $INNAME = run13786 ]; then
+    INFILE=$DATADIR/sliced35t/lbne_r013786_sr01_20160229T033933_20160709T054317_split.root
+  elif [ $INNAME = run13794 ]; then
+    INFILE=$DATADIR/sliced35t/lbne_r013794_sr01_20160229T040456_20160709T055843_split.root
+  elif [ $INNAME = run13791 ]; then
+    INFILE=$DATADIR/sliced35t/lbne_r013791_sr01_20160229T035550_20160709T053623_split.root
   elif [ $INNAME = run13844 ]; then
     INFILE=$DATADIR/sliced35t/lbne_r013844_sr01_20160229T180625_20160709T041449_split.root
   elif [ $INNAME = run13845 ]; then
