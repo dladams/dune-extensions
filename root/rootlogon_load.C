@@ -21,16 +21,12 @@
   gSystem->SetBuildDir(".aclic");
 
   gSystem->AddIncludePath("-I$BOOST_INC");
-  //gSystem->AddIncludePath("-DBOOST_NO_CWCHAR");
-  gSystem->AddIncludePath("-I$CPP0X_INC");
   gSystem->AddIncludePath("-I$CETLIB_INC");
   gSystem->AddIncludePath("-I$FHICLCPP_INC");
   gSystem->AddIncludePath("-I$CLHEP_INC");
   gSystem->AddIncludePath("-I$LARCORE_INC");
   gSystem->AddIncludePath("-I$LAREVT_INC");
   gSystem->AddIncludePath("-I$DUNETPC_INC");
-  //gSystem->AddIncludePath("-I$ART_EXTENSIONS_INC");
-  //gSystem->AddIncludePath("-I$ART_INC");
   //gSystem->AddIncludePath("-I$DUNE_EXTENSIONS_INC");
 
   gSystem->AddDynamicPath("-L$FHICLCPP_LIB -lfhiclcpp");
@@ -42,6 +38,8 @@
   libs.push_back("$LARCORE_LIB/liblarcore_Geometry");
   libs.push_back("$DUNETPC_LIB/libdune_ArtSupport");
   libs.push_back("$DUNETPC_LIB/libdune_Geometry");
+  libs.push_back("$DUNETPC_LIB/libdune_DuneServiceAccess");
+  libs.push_back("$LBNE_RAW_DATA_LIB/lbne_raw_data");
   libs.push_back("$DUNE_EXTENSIONS_LIB/libDXUtil");
   libs.push_back("$DUNE_EXTENSIONS_LIB/libDXGeometry");
   string libext = "so";
@@ -50,6 +48,7 @@
   for ( int ilib=0; ilib<libs.size(); ++ilib ) {
     string lib = libs[ilib] + "." + libext;
     string libres = gSystem->ExpandPathName(lib.c_str());
+    if ( 0 ) cout << "AddLinkedLibs: " << libres << endl;
     gSystem->AddLinkedLibs(libres.c_str());
   }
 
@@ -82,8 +81,9 @@
   //gROOT->ProcessLine(".L detlar.cxx+");
   gROOT->ProcessLine(".L drawTracks.C");
 
-  gROOT->ProcessLine(".L $DUNETPC_INC/dune/ArtSupport/aclic_ArtServiceHelper.h+");
-
+  gROOT->ProcessLine(".L $DUNETPC_INC/dune/ArtSupport/ArtServiceHelper.h+");
+  gROOT->ProcessLine(".L $DUNETPC_INC/dune/ArtSupport/ArtServicePointer.h+");
+  gROOT->ProcessLine(".L $DUNETPC_INC/dune/DuneServiceAccess/DuneServiceAccess.h+");
 
   gStyle->SetPadRightMargin(0.14);   // For 2D plots
   gStyle->SetTitleY(0.97);
@@ -96,8 +96,8 @@
 
   //root6 drawpars::set35t();
   //root6 drawpars::set10ktw();
-  //root6 ArtServiceHelper& ash = ArtServiceHelper::instance();
-  //root6 cout << "Art service helper is ash. E.g. ash.print() to list available services." << endl;
+  //ArtServiceHelper& ash = ArtServiceHelper::instance();
+  //cout << "Art service helper is ash. E.g. ash.print() to list available services." << endl;
   //root6 if ( dxopen(gApplication->InputFiles()) == 0 ) {
   //root6   cout << "Opened DXDisplay file " << gFile->GetName() << endl;
   //root6 } else {

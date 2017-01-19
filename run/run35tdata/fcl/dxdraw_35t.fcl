@@ -20,7 +20,7 @@ services: {
   message:      @local::standard_info
   FileCatalogMetadata:  @local::art_file_catalog_mc
   @table::dune35tdata_reco_services
-  RawDigitExtractService: @local::rdx_std
+  RawDigitExtractService: @local::rdx_35tdata
   RawDigitPrepService: @local::adcprep_readraw
 }
 
