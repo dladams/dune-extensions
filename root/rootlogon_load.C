@@ -39,7 +39,6 @@
   libs.push_back("$DUNETPC_LIB/libdune_ArtSupport");
   libs.push_back("$DUNETPC_LIB/libdune_Geometry");
   libs.push_back("$DUNETPC_LIB/libdune_DuneServiceAccess");
-  libs.push_back("$LBNE_RAW_DATA_LIB/lbne_raw_data");
   libs.push_back("$DUNE_EXTENSIONS_LIB/libDXUtil");
   libs.push_back("$DUNE_EXTENSIONS_LIB/libDXGeometry");
   string libext = "so";
@@ -76,6 +75,7 @@
   gROOT->ProcessLine(".L corrHist.cxx+");
   gROOT->ProcessLine(".L PFHist.cxx+");
   gROOT->ProcessLine(".L RestrictedDFT.cxx+");
+  gROOT->ProcessLine(".L ApaName.cxx+");
 
   gROOT->ProcessLine(".L ex2dhist.C");
   //gROOT->ProcessLine(".L detlar.cxx+");
@@ -83,7 +83,9 @@
 
   gROOT->ProcessLine(".L $DUNETPC_INC/dune/ArtSupport/ArtServiceHelper.h+");
   gROOT->ProcessLine(".L $DUNETPC_INC/dune/ArtSupport/ArtServicePointer.h+");
+  gROOT->ProcessLine(".L $DUNETPC_INC/dune/ArtSupport/ArtServiceProvider.h+");
   gROOT->ProcessLine(".L $DUNETPC_INC/dune/DuneServiceAccess/DuneServiceAccess.h+");
+  gROOT->ProcessLine(".L $DUNETPC_INC/dune/DuneServiceAccess/LarsoftServiceAccess.h+");
 
   gStyle->SetPadRightMargin(0.14);   // For 2D plots
   gStyle->SetTitleY(0.97);

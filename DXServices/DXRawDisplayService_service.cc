@@ -221,9 +221,10 @@ int DXRawDisplayService::process(const AdcChannelDataMap& prepdigs, const art::E
   vector<TH2*> rophists_zs;
   if ( dbg > 2 ) cout << myname << "Creating raw data histograms." << endl;
   if ( m_DoROPs ) {
+    string proclab = "Raw";
     for ( unsigned int irop=0; irop<geohelp.nrop(); ++irop ) {
       TH2* ph = hcreateRop.create("raw" + geohelp.ropName(irop), 0, geohelp.ropNChannel(irop),
-                                      "Raw signals for " + geohelp.ropName(irop));
+                                  proclab + " signals for " + geohelp.ropName(irop));
       if ( dbg > 3 ) cout << myname << "  " << ph->GetName() << endl;
       rophists_sig.push_back(ph);
       m_eventhists.push_back(ph);
