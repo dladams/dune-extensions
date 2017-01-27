@@ -1,4 +1,4 @@
-// ApaName.h
+// RopName.h
 
 //
 // David Adams
@@ -6,14 +6,14 @@
 //
 // Class to convert APA names to ROP ID's.
 
-#ifndef ApaName_H
-#define ApaName_H
+#ifndef RopName_H
+#define RopName_H
 
 #include <string>
 #include <vector>
 #include "larcoreobj/SimpleTypesAndConstants/readout_types.h"
 
-class ApaName {
+class RopName {
 
 public:
 

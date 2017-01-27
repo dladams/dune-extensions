@@ -1,37 +1,37 @@
-// ApaName.cxx
+// RopName.cxx
 
-#include "ApaName.h"
+#include "RopName.h"
 #include <sstream>
 
 using std::ostringstream;
 using std::istringstream;
 
-typedef ApaName::Index Index;
-typedef ApaName::Name Name;
-typedef ApaName::NameVector NameVector;
-typedef ApaName::ROPID ROPID;
+typedef RopName::Index Index;
+typedef RopName::Name Name;
+typedef RopName::NameVector NameVector;
+typedef RopName::ROPID ROPID;
 
 //**********************************************************************
 
-NameVector ApaName::planeNames() const {
+NameVector RopName::planeNames() const {
   return m_planeNames;
 }
 //**********************************************************************
 
-Name ApaName::planeName(Index ipla) const {
+Name RopName::planeName(Index ipla) const {
   if ( ipla >= m_planeNames.size() ) return "InvalidPlane";
   return m_planeNames[ipla];
 }
 
 //**********************************************************************
 
-Name ApaName::name(readout::ROPID ropid) const {
+Name RopName::name(readout::ROPID ropid) const {
   return name(ropid.Cryostat, ropid.TPCset, ropid.ROP);
 }
 
 //**********************************************************************
 
-Name ApaName::name(Index icry, Index iapa, Index ipla) const {
+Name RopName::name(Index icry, Index iapa, Index ipla) const {
   if ( ipla >= m_planeNames.size() ) {
     return "InvalidAPA";
   }
@@ -45,13 +45,13 @@ Name ApaName::name(Index icry, Index iapa, Index ipla) const {
 
 //**********************************************************************
 
-Name ApaName::name(Index iapa, Index ipla) const {
+Name RopName::name(Index iapa, Index ipla) const {
   return name(0, iapa, ipla);
 }
 
 //**********************************************************************
 
-ROPID ApaName::id(Name ropname) const {
+ROPID RopName::id(Name ropname) const {
   Index icry = 0;
   Index iapa = badIndex();
   Index ipla = badIndex();
@@ -80,13 +80,13 @@ ROPID ApaName::id(Name ropname) const {
 
 //**********************************************************************
 
-ROPID ApaName::id(Index icry, Index iapa, Index ipla) const {
+ROPID RopName::id(Index icry, Index iapa, Index ipla) const {
   return ROPID(icry, iapa, ipla);
 }
 
 //**********************************************************************
 
-ROPID ApaName::id(Index iapa, Index ipla) const {
+ROPID RopName::id(Index iapa, Index ipla) const {
   return ROPID(0, iapa, ipla);
 }
 
