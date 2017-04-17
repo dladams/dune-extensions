@@ -16,6 +16,7 @@
 
 #MESSAGE( STATUS "DXGeometry PACKAGE: " ${PACKAGE} )
 #MESSAGE( STATUS "DXGeometry src_files: " ${src_files} )
+MESSAGE( STATUS "DXGeometry libs: " ${CETLIB} ${CETLIB_EXCEPT} )
 
 art_make(BASENAME_ONLY
          LIB_LIBRARIES
@@ -33,10 +34,11 @@ art_make(BASENAME_ONLY
            ${ART_PERSISTENCY_COMMON}
            ${ART_PERSISTENCY_PROVENANCE}
            ${ART_UTILITIES}
-           ${CANVAS_UTILITIES}
+           ${CANVAS}
            ${MF_MESSAGELOGGER}
            ${MF_UTILITIES}
            ${CETLIB}
+           ${CETLIB_EXCEPT}
            ${ROOT_EVE_LIB_LIST}
            ${ROOT_BASIC_LIB_LIST}
            ${Boost_SYSTEM_LIBRARY}

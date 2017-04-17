@@ -10,8 +10,7 @@ art_make(BASENAME_ONLY
          LIB_LIBRARIES
            DXUtil
            DXGeometry
-           canvas_Persistency_Common
-           canvas_Persistency_Provenance
+           canvas
            nusimdata_SimulationBase
          MODULE_LIBRARIES
            DXPerf
