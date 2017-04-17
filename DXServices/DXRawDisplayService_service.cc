@@ -557,7 +557,7 @@ summarize2dHist(TH2* ph, string prefix,
 
 void DXRawDisplayService::removeEventHists() const {
   const string myname = "DXRawDisplayService::removeEventHists: ";
-  bool dbg = m_LogLevel;
+  int dbg = m_LogLevel;
   if ( dbg >= 3 ) cout << myname << "Deleting events hists, count = " << m_eventhists.size() << endl;
   for ( TH1* ph : m_eventhists ) {
     if ( dbg >= 4 ) cout << myname << "Removing " << ph->GetName() << endl;
