@@ -11,7 +11,7 @@
 // and TDC tick. They also hold hits indexed by channel and segments.
 //
 // For dune, one channel may be mapped to one or two TPCs.  TpcSignalMap has a
-// flag usetpc and if it is true, signals are reccorded separately for each TPC.
+// flag usetpc and if it is true, signals are recorded separately for each TPC.
 
 #include <string>
 #include <vector>

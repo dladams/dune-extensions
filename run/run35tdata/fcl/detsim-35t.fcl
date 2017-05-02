@@ -2,3 +2,8 @@
 
 #include "standard_detsim_dune35t.fcl"
 
+services.NuRandomService.policy: "preDefinedSeed"
+services.NuRandomService.StuckBitAdcDistortionService:       444444
+services.NuRandomService.ExponentialChannelNoiseService:     555555
+services.NuRandomService.ProvidedPedestalAdditionService:    666666
+services.NuRandomService.simcounter.rand:                    777777

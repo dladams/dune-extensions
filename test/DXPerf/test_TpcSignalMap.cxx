@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
 
   cout << myname << line << endl;
   cout << myname << "Create and check geometry:" << endl;
-  GeoHelper gh("dune35t4apa_v5", true);
+  GeoHelper gh("dune35t4apa_v6", true);
   if ( dbg ) gh.print();
   assert(gh.geometry() != nullptr);
 

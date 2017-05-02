@@ -1,3 +1,7 @@
 # g4-35t.fcl
 
 #include "standard_g4_dune35t.fcl"
+
+services.NuRandomService.policy: "preDefinedSeed"
+services.NuRandomService.largeant.GEANT:       222222
+services.NuRandomService.largeant.propagation: 333333
