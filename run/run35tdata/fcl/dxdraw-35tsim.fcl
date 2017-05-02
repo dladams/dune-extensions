@@ -1,0 +1,64 @@
+# dxdsplit.fcl
+
+# David Adams
+# January 2016
+
+# Use DXDisplay to create raw data histograms.
+
+#include "services_dune.fcl"
+#include "detsimmodules_dune.fcl"
+#include "clusteralgorithms.fcl"
+#include "dxdisplay_module.fcl"
+#include "SSPToOffline.fcl"
+#include "SplitterInput.fcl"
+
+process_name: dxrun
+
+services: {
+  TimeTracker:       {}
+  RandomNumberGenerator: {} 
+  message:      @local::standard_info
+  FileCatalogMetadata:  @local::art_file_catalog_mc
+  @table::dune35tdata_reco_services
+  RawDigitExtractService: @local::rdx_std
+  RawDigitPrepService: @local::adcprep_readraw
+}
+
+physics: {
+  stream1:  [ out1 ]
+  analyzers: {
+    DXDisplay: @local::dxdisplay_default
+  }
+  analysis: [ DXDisplay ]
+  end_paths: [ output, analysis ]
+  end_paths: [ stream1, analysis ]
+}
+
+outputs: {
+  out1: {
+    dataTier: "analysis"
+    module_type: RootOutput
+    fileName:    "out.root" 
+  }
+}
+
+physics.analyzers.DXDisplay.DoEventTree: true
+physics.analyzers.DXDisplay.DoTrigger:  false
+physics.analyzers.DXDisplay.DoRawDigit: true
+physics.analyzers.DXDisplay.ExternalTriggerLabel: "SplitterInput:TRIGGER"
+physics.analyzers.DXDisplay.RawDigitLabel: "daq"
+physics.analyzers.DXDisplay.TdcTickMax: 15000
+physics.analyzers.DXDisplay.DebugLevel: 2
+
+services.RawDigitAnalysisService: @local::tools.rda_online
+services.RawDigitAnalysisService.LogLevel:           2
+services.RawDigitAnalysisService.DoMean:          true
+services.RawDigitAnalysisService.DoAllOnline:     true
+services.RawDigitAnalysisService.DoAll:           true
+services.RawDigitAnalysisService.DoAllFlag:       true
+services.RawDigitAnalysisService.DoROPs:          true
+services.RawDigitAnalysisService.DoZSROPs:       false
+services.RawDigitAnalysisService.NchanMeanRms:     100
+services.RawDigitAnalysisService.TdcTickMax:      5200
+services.RawDigitAnalysisService.BadChannelFlag:     0 # 1=skip bad channels
+services.RawDigitAnalysisService.SkipStuckBits:  false
